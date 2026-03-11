@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    const mongoURL = process.env.MONGODB_URL || 'mongodb+srv://rajputboyofficial50188_db_user:tOo39iaGRPGRokMa@cluster0.z1zwewn.mongodb.net/?appName=Cluster0';
+    // Forcing the new production URL to bypass potentially stale environment variables on Vercel
+    const mongoURL = 'mongodb+srv://rajputboyofficial50188_db_user:tOo39iaGRPGRokMa@cluster0.z1zwewn.mongodb.net/ems?retryWrites=true&w=majority&appName=Cluster0';
     
     await mongoose.connect(mongoURL);
 

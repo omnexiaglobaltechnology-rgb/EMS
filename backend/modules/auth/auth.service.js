@@ -9,7 +9,7 @@ const { getISTTime } = require('../../utils/time');
 const VERIFICATION_TOKEN_TTL_MINUTES = Number(process.env.EMAIL_VERIFICATION_TOKEN_TTL_MINUTES || 30);
 
 const toPublicUser = (user) => ({
-	id: user.id,
+	id: user.id || user._id?.toString(),
 	email: user.email,
 	name: user.name,
 	role: user.role || 'intern',
@@ -93,6 +93,7 @@ const login = async (payload, ipAddress, userAgent) => {
 	const SECRET_KEY = '321852';
 
 	const user = await User.findOne({ email });
+
 	if (!user) throw new Error('Invalid email or password');
 
 	if (password !== SECRET_KEY) {
@@ -129,7 +130,7 @@ const login = async (payload, ipAddress, userAgent) => {
 const adminCreateUser = async (payload) => {
 	const { email, password, name, role } = validateRegisterInput({
 		...payload,
-		confirmPassword: payload.password // Bypass confirmation for admin creation
+		confirmPassword: payload.password
 	});
 
 	const existingUser = await User.findOne({ email });
@@ -143,7 +144,7 @@ const adminCreateUser = async (payload) => {
 		role,
 		password: hashedPassword,
 		authProvider: 'local',
-		isEmailVerified: true // Admin created users are verified by default
+		isEmailVerified: true
 	});
 
 	return {

@@ -12,29 +12,29 @@ import { Eye, EyeOff, ArrowRight } from "lucide-react";
  * Manages user credentials, role-based redirection, and developer-friendly quick login paths.
  */
 const Login = () => {
-  const quickLoginUsers = [
-    { role: "intern", email: "intern@owms.com", name: "Intern User" },
-    { role: "team_lead", email: "teamlead@owms.com", name: "Team Lead User" },
-    {
-      role: "team_lead_intern",
-      email: "tlintern@owms.com",
-      name: "Team Lead Intern User",
-    },
-    { role: "manager", email: "manager@owms.com", name: "Manager User" },
-    {
-      role: "manager_intern",
-      email: "manager_intern@owms.com",
-      name: "Manager Intern User",
-    },
-    { role: "cto", email: "cto@owms.com", name: "CTO User" },
-    { role: "cfo", email: "cfo@owms.com", name: "CFO User" },
-    { role: "coo", email: "coo@owms.com", name: "COO User" },
-    { role: "ceo", email: "ceo@owms.com", name: "CEO User" },
-  ];
+  // const quickLoginUsers = [
+  //   { role: "intern", email: "intern@owms.com", name: "Intern User" },
+  //   { role: "team_lead", email: "teamlead@owms.com", name: "Team Lead User" },
+  //   {
+  //     role: "team_lead_intern",
+  //     email: "tlintern@owms.com",
+  //     name: "Team Lead Intern User",
+  //   },
+  //   { role: "manager", email: "manager@owms.com", name: "Manager User" },
+  //   {
+  //     role: "manager_intern",
+  //     email: "manager_intern@owms.com",
+  //     name: "Manager Intern User",
+  //   },
+  //   { role: "cto", email: "cto@owms.com", name: "CTO User" },
+  //   { role: "cfo", email: "cfo@owms.com", name: "CFO User" },
+  //   { role: "coo", email: "coo@owms.com", name: "COO User" },
+  //   { role: "ceo", email: "ceo@owms.com", name: "CEO User" },
+  // ];
 
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("intern@owms.com");
-  const [password, setPassword] = useState("password123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -64,64 +64,11 @@ const Login = () => {
   };
 
   /**
-   * Bypasses manual entry for predefined testing accounts.
-   * Automatically registers the user if account doesn't exist in developer mode.
-   *
-   * @param {string} userEmail - Pre-configured test email
+   * Bypasses manual entry for predefined testing accounts (Disabled).
    */
-  const handleQuickLogin = async (userEmail) => {
-    const quickUser = quickLoginUsers.find((user) => user.email === userEmail);
-    if (!quickUser) {
-      setError("Quick login user not found.");
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    setEmail(userEmail);
-    setPassword("password123");
-
-    try {
-      let response;
-
-      try {
-        response = await authApi.login({
-          email: quickUser.email,
-          password: "password123",
-        });
-      } catch {
-        const registerResponse = await authApi.register({
-          email: quickUser.email,
-          password: "password123",
-          confirmPassword: "password123",
-          role: quickUser.role,
-          name: quickUser.name,
-        });
-
-        if (registerResponse?.requiresEmailVerification) {
-          if (!registerResponse.verificationToken) {
-            throw new Error(
-              "Email verification is required. Ask an admin for your verification link.",
-            );
-          }
-
-          await authApi.verifyEmail({ token: registerResponse.verificationToken });
-        }
-
-        response = await authApi.login({
-          email: quickUser.email,
-          password: "password123",
-        });
-      }
-
-      dispatch(login(response));
-      navigate(`/${response.user.role}/dashboard`);
-    } catch (err) {
-      setError(err.message || "Login failed. Please check your credentials.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const handleQuickLogin = async (userEmail) => {
+  //   ...
+  // };
 
   /**
    * Provides formatted display labels for specific technical role keys.
@@ -203,7 +150,8 @@ const Login = () => {
           </button>
         </form>
 
-        <div className="grid grid-cols-2 gap-3 mt-4">
+        {/* Quick login disabled */}
+        {/* <div className="grid grid-cols-2 gap-3 mt-4">
           {quickLoginUsers.map((u) => (
             <button
               key={u.email}
@@ -215,7 +163,7 @@ const Login = () => {
               Login as {formatRoleLabel(u.role)}
             </button>
           ))}
-        </div>
+        </div> */}
       </div>
     </div>
   );

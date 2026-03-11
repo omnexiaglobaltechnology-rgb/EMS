@@ -12,13 +12,13 @@ import { Eye, EyeOff, ArrowRight } from "lucide-react";
  * Manages user credentials, role-based redirection, and developer-friendly quick login paths.
  */
 const Login = () => {
-  const quickLoginUsers = [
-    { role: "admin", email: "admin@owms.com", name: "Admin User" },
-  ];
+  // const quickLoginUsers = [
+  //   { role: "admin", email: "admin@owms.com", name: "Admin User" },
+  // ];
 
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("admin@owms.com");
-  const [password, setPassword] = useState("password123");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -48,53 +48,11 @@ const Login = () => {
   };
 
   /**
-   * Bypasses manual entry for predefined testing accounts.
-   * Automatically registers the user if account doesn't exist in developer mode.
-   *
-   * @param {string} userEmail - Pre-configured test email
+   * Bypasses manual entry for predefined testing accounts (Disabled).
    */
-  const handleQuickLogin = async (userEmail) => {
-    const quickUser = quickLoginUsers.find((user) => user.email === userEmail);
-    if (!quickUser) {
-      setError("Quick login user not found.");
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-    setEmail(userEmail);
-    setPassword("password123");
-
-    try {
-      let response;
-
-      try {
-        response = await authApi.login({
-          email: quickUser.email,
-          password: "password123",
-        });
-      } catch {
-        await authApi.register({
-          email: quickUser.email,
-          password: "password123",
-          role: quickUser.role,
-          name: quickUser.name,
-        });
-
-        response = await authApi.login({
-          email: quickUser.email,
-          password: "password123",
-        });
-      }
-
-      dispatch(login(response));
-      navigate(`/${response.user.role}/dashboard`);
-    } catch (err) {
-      setError(err.message || "Login failed. Please check your credentials.");
-    } finally {
-      setLoading(false);
-    }
-  };
+  // const handleQuickLogin = async (userEmail) => {
+  //   ...
+  // };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
@@ -156,7 +114,8 @@ const Login = () => {
           </button>
         </form>
 
-        <div className="mt-4">
+        {/* Quick login disabled */}
+        {/* <div className="mt-4">
           {quickLoginUsers.map((u) => (
             <button
               key={u.email}
@@ -168,7 +127,7 @@ const Login = () => {
               Login as Admin
             </button>
           ))}
-        </div>
+        </div> */}
       </div>
     </div>
   );

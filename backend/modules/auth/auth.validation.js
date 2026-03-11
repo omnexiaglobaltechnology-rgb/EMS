@@ -67,9 +67,10 @@ const validateRegisterInput = ({ email, password, confirmPassword, name, role })
 };
 
 const validateLoginInput = ({ email, password }) => {
+	if (!password) throw new Error('Password is required');
 	return {
 		email: validateEmail(email),
-		password: validatePassword(password)
+		password: String(password).trim()
 	};
 };
 

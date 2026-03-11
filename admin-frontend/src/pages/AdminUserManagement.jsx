@@ -2,18 +2,20 @@ import { useEffect, useState } from "react";
 
 import UserModal from "../components/UserModal";
 
-import { MoreVertical, Plus, AlertCircle, Loader } from "lucide-react";
-import { tasksApi, submissionsApi } from "../utils/api";
+import { MoreVertical, Plus, AlertCircle, Loader, Key } from "lucide-react";
+import { usersApi } from "../utils/api";
+
+const RESTRICTED_ROLES = ["cto", "cfo", "coo", "ceo"];
 
 /**
  * Comprehensive user management interface for the Admin panel.
- * Displays a list of unique system users derived from tasks and submissions,
- * offering capabilities to add, edit, or delete user records.
  */
 const AdminUserManagement = () => {
   const [users, setUsers] = useState([]);
   const [showAdd, setShowAdd] = useState(false);
   const [editUser, setEditUser] = useState(null);
+  const [showPasswordModal, setShowPasswordModal] = useState(null); // stores user id
+  const [newPassword, setNewPassword] = useState("");
   const [openMenuId, setOpenMenuId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -23,63 +25,14 @@ const AdminUserManagement = () => {
   }, []);
 
   /**
-   * Retrieves tasks and submissions to dynamically extract unique user entities.
-   * Maps user IDs to descriptive role strings and constructs the users table.
+   * Retrieves users directly from the database API.
    */
   const fetchUsers = async () => {
     try {
       setLoading(true);
       setError(null);
-
-      const allTasks = await tasksApi.getAll();
-      let allSubmissions = [];
-
-      for (const task of allTasks) {
-        try {
-          const submissions = await submissionsApi.getByTask(task.id);
-          allSubmissions.push(...submissions);
-        } catch (err) {
-          console.warn(`Could not fetch submissions for task ${task.id}`);
-        }
-      }
-
-      // Extract unique users from tasks and submissions
-      const userMap = new Map();
-
-      allTasks.forEach((task) => {
-        if (task.createdById) {
-          userMap.set(task.createdById, {
-            id: task.createdById,
-            name: task.createdById.replace(/-/g, " ").toUpperCase(),
-            email: `${task.createdById}@company.com`,
-            role: determineRole(task.createdById),
-            status: "active",
-          });
-        }
-        if (task.assignedToId) {
-          userMap.set(task.assignedToId, {
-            id: task.assignedToId,
-            name: task.assignedToId.replace(/-/g, " ").toUpperCase(),
-            email: `${task.assignedToId}@company.com`,
-            role: determineRole(task.assignedToId),
-            status: "active",
-          });
-        }
-      });
-
-      allSubmissions.forEach((sub) => {
-        if (sub.submittedById) {
-          userMap.set(sub.submittedById, {
-            id: sub.submittedById,
-            name: sub.submittedById.replace(/-/g, " ").toUpperCase(),
-            email: `${sub.submittedById}@company.com`,
-            role: determineRole(sub.submittedById),
-            status: "active",
-          });
-        }
-      });
-
-      setUsers(Array.from(userMap.values()));
+      const data = await usersApi.getAll();
+      setUsers(data);
     } catch (err) {
       console.error("Error fetching users:", err);
       setError("Failed to load users");
@@ -89,49 +42,50 @@ const AdminUserManagement = () => {
   };
 
   /**
-   * Infers a structured user role from their ID string.
-   *
-   * @param {string} userId - The string identifier to parse
-   * @returns {string} The formatted role constant (e.g., "TEAM_LEAD", "INTERN")
+   * Creates a new user in the database.
    */
-  const determineRole = (userId) => {
-    if (userId.includes("intern")) return "INTERN";
-    if (userId.includes("tl")) return "TEAM_LEAD";
-    if (userId.includes("manager")) return "MANAGER";
-    if (userId.includes("ceo")) return "CEO";
-    if (userId.includes("cfo")) return "CFO";
-    if (userId.includes("cto")) return "CTO";
-    if (userId.includes("coo")) return "COO";
-    if (userId.includes("admin")) return "ADMIN";
-    return "USER";
+  const addUser = async (userData) => {
+    try {
+      setError(null);
+      await usersApi.create(userData);
+      await fetchUsers();
+      setShowAdd(false);
+    } catch (err) {
+      setError(err.message || "Failed to add user");
+    }
   };
 
   /**
-   * Appends a newly created user to local state.
-   *
-   * @param {object} user - The basic user structure returned by the creation modal
+   * Deletes a user from the system.
    */
-  const addUser = (user) => {
-    setUsers([...users, { ...user, id: Date.now() }]);
+  const deleteUser = async (id) => {
+    try {
+      setError(null);
+      await usersApi.delete(id);
+      setUsers(users.filter((u) => u.id !== id));
+      setOpenMenuId(null);
+    } catch (err) {
+      setError(err.message || "Failed to delete user");
+    }
   };
 
   /**
-   * Replaces an existing user record with updated details.
-   *
-   * @param {object} updated - The updated user structure
+   * Updates a user's password.
    */
-  const updateUser = (updated) => {
-    setUsers(users.map((u) => (u.id === updated.id ? updated : u)));
-  };
-
-  /**
-   * Removes a user from the system array based on their ID.
-   *
-   * @param {string|number} id - The ID of the user to remove
-   */
-  const deleteUser = (id) => {
-    setUsers(users.filter((u) => u.id !== id));
-    setOpenMenuId(null);
+  const handleChangePassword = async () => {
+    if (!newPassword || newPassword.length < 6) {
+      setError("Password must be at least 6 characters long");
+      return;
+    }
+    try {
+      setError(null);
+      await usersApi.updatePassword(showPasswordModal, newPassword);
+      setShowPasswordModal(null);
+      setNewPassword("");
+      setOpenMenuId(null);
+    } catch (err) {
+      setError(err.message || "Failed to update password");
+    }
   };
 
   if (loading) {
@@ -139,7 +93,7 @@ const AdminUserManagement = () => {
       <div className="flex items-center justify-center py-12">
         <div className="text-center">
           <Loader className="mx-auto mb-2 h-8 w-8 animate-spin text-gray-400" />
-          <p className="text-gray-500">Loading users...</p>
+          <p className="text-gray-500 text-sm">Loading users...</p>
         </div>
       </div>
     );
@@ -151,12 +105,12 @@ const AdminUserManagement = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold">User Management</h1>
-          <p className="text-slate-500">Manage system users</p>
+          <p className="text-slate-500">Manage system users and credentials</p>
         </div>
 
         <button
           onClick={() => setShowAdd(true)}
-          className="flex items-center gap-2 rounded bg-slate-900 px-4 py-2 text-white"
+          className="flex items-center gap-2 rounded bg-slate-900 px-4 py-2 text-white text-sm font-medium hover:bg-slate-800"
         >
           <Plus size={16} />
           Add User
@@ -172,72 +126,72 @@ const AdminUserManagement = () => {
       )}
 
       {/* Table */}
-      <div className="rounded-xl border border-gray-300 bg-white">
-        <table className="w-full text-sm rounded-xl">
-          <thead className="text-left text-slate-500 overflow-hidden">
+      <div className="rounded-xl border border-gray-300 bg-white overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="text-left text-slate-500 bg-slate-50 border-b border-gray-300">
             <tr>
-              <th className="p-4">User</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Status</th>
-              <th className="pr-6 text-right">Actions</th>
+              <th className="p-4 font-semibold">User</th>
+              <th className="font-semibold">Email</th>
+              <th className="font-semibold">Role</th>
+              <th className="pr-6 text-right font-semibold">Actions</th>
             </tr>
           </thead>
 
           <tbody>
-            {users.map((u) => (
-              <tr key={u.id} className="border-t border-gray-300">
-                <td className="p-4 font-medium">{u.name}</td>
-                <td>{u.email}</td>
-                <td>
-                  <span className="rounded-full border border-gray-300 bg- bg-slate-200 px-3 py-1 text-xs font-medium">
-                    {u.role}
-                  </span>
-                </td>
-                <td>
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-medium ${
-                      u.status === "active"
-                        ? "bg-green-100 text-green-600"
-                        : "bg-slate-100 text-slate-500"
-                    }`}
-                  >
-                    {u.status}
-                  </span>
-                </td>
+            {users.map((u) => {
+              const isRestricted = RESTRICTED_ROLES.includes(u.role?.toLowerCase());
+              return (
+                <tr key={u.id} className="border-t border-gray-300 hover:bg-slate-50">
+                  <td className="p-4 font-medium">{u.name || "N/A"}</td>
+                  <td>{u.email}</td>
+                  <td>
+                    <span className="rounded-full border border-gray-300 bg-slate-100 px-3 py-1 text-xs font-semibold capitalize">
+                      {u.role?.replace(/_/g, " ")}
+                    </span>
+                  </td>
 
-                {/* Actions Dropdown */}
-                <td className="pr-6 text-right relative">
-                  <button
-                    onClick={() =>
-                      setOpenMenuId(openMenuId === u.id ? null : u.id)
-                    }
-                  >
-                    <MoreVertical size={18} />
-                  </button>
+                  {/* Actions Dropdown */}
+                  <td className="pr-6 text-right relative">
+                    <button
+                      onClick={() =>
+                        setOpenMenuId(openMenuId === u.id ? null : u.id)
+                      }
+                      className="p-1 hover:bg-gray-100 rounded-full"
+                    >
+                      <MoreVertical size={18} />
+                    </button>
 
-                  {openMenuId === u.id && (
-                    <div className="absolute right-6 mt-2 w-32 rounded-lg border border-gray-300 bg-white z-20 shadow">
-                      <button
-                        onClick={() => {
-                          setEditUser(u);
-                          setOpenMenuId(null);
-                        }}
-                        className="block w-full px-4 py-2 text-left text-sm hover:bg-slate-50"
-                      >
-                        Edit
-                      </button>
-                      <button
-                        onClick={() => deleteUser(u.id)}
-                        className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-slate-50"
-                      >
-                        Delete
-                      </button>
-                    </div>
-                  )}
-                </td>
-              </tr>
-            ))}
+                    {openMenuId === u.id && (
+                      <div className="absolute right-6 mt-1 w-48 rounded-lg border border-gray-300 bg-white z-20 shadow-lg py-1">
+                        {!isRestricted ? (
+                          <>
+                            <button
+                              onClick={() => {
+                                setShowPasswordModal(u.id);
+                                setOpenMenuId(null);
+                              }}
+                              className="flex items-center gap-2 w-full px-4 py-2 text-left text-sm hover:bg-slate-50"
+                            >
+                              <Key size={14} /> Change Password
+                            </button>
+                            <button
+                              onClick={() => deleteUser(u.id)}
+                              className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-slate-50"
+                            >
+                              Delete User
+                            </button>
+                          </>
+                        ) : (
+                          <div className="px-4 py-2 text-xs text-slate-400 italic">
+                            High-level role protected
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -245,11 +199,11 @@ const AdminUserManagement = () => {
       {/* Modals */}
       {showAdd && (
         <UserModal
-          title="Add User"
+          title="Add System User"
           user={{
             name: "",
             email: "",
-            role: "INTERN",
+            role: "intern",
             status: "active",
           }}
           onClose={() => setShowAdd(false)}
@@ -257,13 +211,43 @@ const AdminUserManagement = () => {
         />
       )}
 
-      {editUser && (
-        <UserModal
-          title="Edit User"
-          user={editUser}
-          onClose={() => setEditUser(null)}
-          onSave={updateUser}
-        />
+      {/* Password Change Modal */}
+      {showPasswordModal && (
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
+          <div className="w-full max-w-sm rounded-xl bg-white p-6 space-y-4">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <Key size={18} /> Reset Password
+            </h2>
+            <div className="space-y-1">
+              <label className="text-sm font-medium">New Password</label>
+              <input
+                type="password"
+                className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Enter new password"
+                autoFocus
+              />
+            </div>
+            <div className="flex justify-end gap-3 pt-4 text-sm font-medium">
+              <button
+                onClick={() => {
+                  setShowPasswordModal(null);
+                  setNewPassword("");
+                }}
+                className="rounded border border-gray-300 px-4 py-2 hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleChangePassword}
+                className="rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
+              >
+                Update Password
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

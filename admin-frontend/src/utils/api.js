@@ -140,6 +140,35 @@ export const authApi = {
     }),
 };
 
+// User management API calls
+export const usersApi = {
+  // Get all users
+  getAll: () =>
+    apiFetch("/auth/users", {
+      method: "GET",
+    }),
+
+  // Create a user (Admin only)
+  create: (userData) =>
+    apiFetch("/auth/admin/users", {
+      method: "POST",
+      body: userData,
+    }),
+
+  // Update a user's password (Admin only)
+  updatePassword: (id, password) =>
+    apiFetch(`/auth/admin/users/${id}/password`, {
+      method: "PATCH",
+      body: { password },
+    }),
+
+  // Delete a user (Admin only)
+  delete: (id) =>
+    apiFetch(`/auth/admin/users/${id}`, {
+      method: "DELETE",
+    }),
+};
+
 // Submissions API calls
 export const submissionsApi = {
   // Create a new submission (with file upload)

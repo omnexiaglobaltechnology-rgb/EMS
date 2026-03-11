@@ -25,18 +25,6 @@ const buildClearCookieOptions = () => {
 	return clearCookieOptions;
 };
 
-exports.register = async (req, res) => {
-	try {
-		const result = await authService.register(req.body);
-		if (result.token) {
-			res.cookie(AUTH_COOKIE_NAME, result.token, buildAuthCookieOptions());
-		}
-		return res.status(201).json(result);
-	} catch (error) {
-		return res.status(400).json({ error: error.message });
-	}
-};
-
 exports.login = async (req, res) => {
 	try {
 		const ipAddress = req.ip || req.connection.remoteAddress;
@@ -51,9 +39,30 @@ exports.login = async (req, res) => {
 	}
 };
 
-exports.verifyEmail = async (req, res) => {
+exports.adminCreateUser = async (req, res) => {
 	try {
-		const result = await authService.verifyEmail(req.body);
+		const result = await authService.adminCreateUser(req.body);
+		return res.status(201).json(result);
+	} catch (error) {
+		return res.status(400).json({ error: error.message });
+	}
+};
+
+exports.adminUpdatePassword = async (req, res) => {
+	try {
+		const { id } = req.params;
+		const { password } = req.body;
+		const result = await authService.adminUpdatePassword(id, password);
+		return res.status(200).json(result);
+	} catch (error) {
+		return res.status(400).json({ error: error.message });
+	}
+};
+
+exports.adminDeleteUser = async (req, res) => {
+	try {
+		const { id } = req.params;
+		const result = await authService.adminDeleteUser(id);
 		return res.status(200).json(result);
 	} catch (error) {
 		return res.status(400).json({ error: error.message });

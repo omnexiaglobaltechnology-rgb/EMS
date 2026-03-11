@@ -1,0 +1,38 @@
+{
+  "name": "owms-backend",
+  "version": "1.0.0",
+  "description": "Organization Work Management System Backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "vercel dev --listen 5000",
+    "build": "prisma generate",
+    "prisma:generate": "prisma generate",
+    "migrate:dev": "prisma migrate dev",
+    "migrate:deploy": "prisma migrate deploy",
+    "seed": "node prisma/seed.js",
+    "test": "jest --runInBand"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
+  "author": "Sanjay",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^29.6.1",
+    "supertest": "^6.3.3"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^7.1.0",
+    "mongoose": "^8.0.6",
+    "multer": "1.4.4",
+    "nodemon": "^3.1.14"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  }
+}

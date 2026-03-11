@@ -1,0 +1,8 @@
+/* Custom layout for fixed sidebar and topbar */
+.main-content {
+    position: relative;
+    background: #f8fafc;
+    min-height: 100vh;
+    overflow-x: auto;
+}
+@import "tailwindcss";

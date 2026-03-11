@@ -5,7 +5,14 @@ const connectDB = async () => {
     // Forcing the new production URL to bypass potentially stale environment variables on Vercel
     const mongoURL = 'mongodb+srv://rajputboyofficial50188_db_user:tOo39iaGRPGRokMa@cluster0.z1zwewn.mongodb.net/ems?retryWrites=true&w=majority&appName=Cluster0';
     
-    await mongoose.connect(mongoURL);
+    console.log('Attempting to connect to MongoDB...');
+    // Masked logging for security
+    console.log(`Connection string: ${mongoURL.replace(/:([^@]+)@/, ':****@')}`);
+
+    await mongoose.connect(mongoURL, {
+      serverSelectionTimeoutMS: 10000,
+      bufferCommands: false, // Disable buffering to see the real error immediately
+    });
 
     console.log('MongoDB connected successfully');
     

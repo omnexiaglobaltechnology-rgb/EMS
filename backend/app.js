@@ -4,7 +4,12 @@ const app = express();
 
 // CORS middleware with dynamic origin and proper headers
 app.use((req, res, next) => {
-  const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174'];
+  const allowedOrigins = [
+    'http://localhost:5173',
+    'http://localhost:5174',
+    'https://ems-frontend-eight-lilac.vercel.app',
+    'https://ems-adminpanal.vercel.app'
+  ];
   const origin = req.headers.origin;
   
   if (allowedOrigins.includes(origin)) {

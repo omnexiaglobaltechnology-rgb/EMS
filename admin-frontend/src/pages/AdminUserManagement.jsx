@@ -5,7 +5,7 @@ import UserModal from "../components/UserModal";
 import { MoreVertical, Plus, AlertCircle, Loader, Key } from "lucide-react";
 import { usersApi } from "../utils/api";
 
-const RESTRICTED_ROLES = ["cto", "cfo", "coo", "ceo"];
+// Restricted roles logic removed as per user request to allow full management of all accounts.
 
 /**
  * Comprehensive user management interface for the Admin panel.
@@ -125,8 +125,7 @@ const AdminUserManagement = () => {
         </div>
       )}
 
-      {/* Table */}
-      <div className="rounded-xl border border-gray-300 bg-white overflow-hidden">
+      <div className="rounded-xl border border-gray-300 bg-white">
         <table className="w-full text-sm">
           <thead className="text-left text-slate-500 bg-slate-50 border-b border-gray-300">
             <tr>
@@ -139,7 +138,6 @@ const AdminUserManagement = () => {
 
           <tbody>
             {users.map((u) => {
-              const isRestricted = RESTRICTED_ROLES.includes(u.role?.toLowerCase());
               return (
                 <tr key={u.id} className="border-t border-gray-300 hover:bg-slate-50">
                   <td className="p-4 font-medium">{u.name || "N/A"}</td>
@@ -163,29 +161,21 @@ const AdminUserManagement = () => {
 
                     {openMenuId === u.id && (
                       <div className="absolute right-6 mt-1 w-48 rounded-lg border border-gray-300 bg-white z-20 shadow-lg py-1">
-                        {!isRestricted ? (
-                          <>
-                            <button
-                              onClick={() => {
-                                setShowPasswordModal(u.id);
-                                setOpenMenuId(null);
-                              }}
-                              className="flex items-center gap-2 w-full px-4 py-2 text-left text-sm hover:bg-slate-50"
-                            >
-                              <Key size={14} /> Change Password
-                            </button>
-                            <button
-                              onClick={() => deleteUser(u.id)}
-                              className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-slate-50"
-                            >
-                              Delete User
-                            </button>
-                          </>
-                        ) : (
-                          <div className="px-4 py-2 text-xs text-slate-400 italic">
-                            High-level role protected
-                          </div>
-                        )}
+                        <button
+                          onClick={() => {
+                            setShowPasswordModal(u.id);
+                            setOpenMenuId(null);
+                          }}
+                          className="flex items-center gap-2 w-full px-4 py-2 text-left text-sm hover:bg-slate-50"
+                        >
+                          <Key size={14} /> Change Password
+                        </button>
+                        <button
+                          onClick={() => deleteUser(u.id)}
+                          className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-slate-50"
+                        >
+                          Delete User
+                        </button>
                       </div>
                     )}
                   </td>

@@ -6,58 +6,55 @@ const timeLogSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
-    index: true
+    index: true,
   },
   userName: {
     type: String,
-    required: true
+    required: true,
   },
   userRole: {
     type: String,
-    required: true
+    required: true,
   },
   loginTimeIST: {
     type: String,
-    required: true
+    required: true,
   },
   logoutTimeIST: {
     type: String,
-    default: null
+    default: null,
   },
   duration: {
     type: Number, // in milliseconds
-    default: 0
+    default: 0,
   },
   isActive: {
     type: Boolean,
-    default: true
+    default: true,
   },
   ipAddress: {
-    type: String
+    type: String,
   },
   userAgent: {
-    type: String
+    type: String,
   },
   createdAtIST: {
     type: String,
-    required: true
-  }
+    required: true,
+  },
 });
 
 // Calculate duration when logout time is set
-timeLogSchema.pre('save', function(next) {
-  // When logging out, calculate duration based on IST timestamps
+timeLogSchema.pre('save', function (next) {
   if (this.logoutTimeIST && this.loginTimeIST && !this.duration) {
     const loginDate = new Date(this.loginTimeIST);
     const logoutDate = new Date(this.logoutTimeIST);
     this.duration = logoutDate - loginDate;
     this.isActive = false;
   }
-
   next();
 });
 
-// Index for querying user sessions
 timeLogSchema.index({ userId: 1, loginTimeIST: -1 });
 timeLogSchema.index({ isActive: 1 });
 timeLogSchema.index({ userRole: 1 });

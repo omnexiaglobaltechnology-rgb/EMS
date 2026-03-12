@@ -6,51 +6,62 @@ const userSchema = new mongoose.Schema({
     required: true,
     unique: true,
     lowercase: true,
-    trim: true
+    trim: true,
   },
   name: {
-    type: String
+    type: String,
   },
   role: {
     type: String,
     default: 'intern',
-    enum: ['intern', 'team_lead', 'team_lead_intern', 'manager', 'manager_intern', 'admin', 'cto', 'cfo', 'coo', 'ceo']
+    enum: [
+      'intern',
+      'team_lead',
+      'team_lead_intern',
+      'manager',
+      'manager_intern',
+      'admin',
+      'cto',
+      'cfo',
+      'coo',
+      'ceo',
+    ],
   },
   password: {
-    type: String
+    type: String,
   },
   authProvider: {
     type: String,
     enum: ['local'],
-    default: 'local'
+    default: 'local',
   },
   isEmailVerified: {
     type: Boolean,
-    default: false
+    default: false,
   },
   emailVerificationTokenHash: {
     type: String,
-    default: null
+    default: null,
   },
   emailVerificationExpiresAt: {
     type: Date,
-    default: null
+    default: null,
   },
   departmentId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Department'
+    ref: 'Department',
   },
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   updatedAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
-userSchema.pre('save', function(next) {
+userSchema.pre('save', function (next) {
   this.updatedAt = Date.now();
   next();
 });

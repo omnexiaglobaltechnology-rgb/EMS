@@ -1,6 +1,6 @@
-const request = require('supertest');
-
 jest.mock('../models/User', () => {
+  const bcrypt = require('bcryptjs');
+
   const users = [];
 
   const toUserDocument = (data) => {
@@ -16,14 +16,12 @@ jest.mock('../models/User', () => {
       password: data.password,
       authProvider: data.authProvider || 'local',
       isEmailVerified: Boolean(data.isEmailVerified),
-      emailVerificationTokenHash: data.emailVerificationTokenHash || null,
-      emailVerificationExpiresAt: data.emailVerificationExpiresAt || null,
       createdAt: data.createdAt || now,
       updatedAt: data.updatedAt || now,
       async save() {
         this.updatedAt = new Date();
         return this;
-      }
+      },
     };
   };
 
@@ -31,18 +29,6 @@ jest.mock('../models/User', () => {
     if (query.email) {
       return users.find((user) => user.email === query.email) || null;
     }
-
-    if (query.emailVerificationTokenHash) {
-      const minDate = query.emailVerificationExpiresAt?.$gt;
-      return (
-        users.find((user) => {
-          const isTokenMatch = user.emailVerificationTokenHash === query.emailVerificationTokenHash;
-          const isNotExpired = !minDate || (user.emailVerificationExpiresAt && user.emailVerificationExpiresAt > minDate);
-          return isTokenMatch && isNotExpired;
-        }) || null
-      );
-    }
-
     return null;
   });
 
@@ -56,19 +42,38 @@ jest.mock('../models/User', () => {
     return users.find((user) => user.id === id || user._id === id) || null;
   });
 
+  const findByIdAndDelete = jest.fn(async (id) => {
+    const idx = users.findIndex((u) => u.id === id || u._id === id);
+    if (idx >= 0) return users.splice(idx, 1)[0];
+    return null;
+  });
+
   return {
     findOne,
     create,
     findById,
+    findByIdAndDelete,
     __reset: () => {
       users.length = 0;
       findOne.mockClear();
       create.mockClear();
       findById.mockClear();
-    }
+      findByIdAndDelete.mockClear();
+    },
+    __seedUser: async (data) => {
+      const hashedPassword = await bcrypt.hash(data.password || 'password123', 10);
+      const user = toUserDocument({ ...data, password: hashedPassword, isEmailVerified: true });
+      users.push(user);
+      return user;
+    },
   };
 });
 
+jest.mock('../models/TimeLog', () => ({
+  create: jest.fn(async (data) => ({ _id: 'tl1', ...data })),
+}));
+
+const request = require('supertest');
 const User = require('../models/User');
 const app = require('../app');
 
@@ -77,79 +82,66 @@ describe('Auth API', () => {
     User.__reset();
   });
 
-  test('rejects non-owms email domain during registration', async () => {
+  test('rejects login with invalid credentials', async () => {
     const res = await request(app)
-      .post('/api/auth/register')
-      .send({
-        email: 'user@gmail.com',
-        password: 'password123',
-        confirmPassword: 'password123',
-        role: 'intern',
-        name: 'Test User'
-      });
+      .post('/api/auth/login')
+      .send({ email: 'nobody@owms.com', password: 'password123' });
 
-    expect(res.status).toBe(400);
+    expect(res.status).toBe(401);
+    expect(res.body.error).toBeTruthy();
+  });
+
+  test('rejects login with non-owms email domain', async () => {
+    const res = await request(app)
+      .post('/api/auth/login')
+      .send({ email: 'user@gmail.com', password: 'password123' });
+
+    expect(res.status).toBe(401);
     expect(res.body.error).toMatch(/@owms\.com/i);
   });
 
-  test('rejects registration when password and confirm password do not match', async () => {
-    const res = await request(app)
-      .post('/api/auth/register')
-      .send({
-        email: 'intern@owms.com',
-        password: 'password123',
-        confirmPassword: 'password321',
-        role: 'intern',
-        name: 'Test User'
-      });
-
-    expect(res.status).toBe(400);
-    expect(res.body.error).toMatch(/do not match/i);
-  });
-
-  test('blocks login before verification and allows login after verify-email', async () => {
-    const registerRes = await request(app)
-      .post('/api/auth/register')
-      .send({
-        email: 'intern@owms.com',
-        password: 'password123',
-        confirmPassword: 'password123',
-        role: 'intern',
-        name: 'Intern User'
-      });
-
-    expect(registerRes.status).toBe(201);
-    expect(registerRes.body.requiresEmailVerification).toBe(true);
-    expect(registerRes.body.verificationToken).toBeTruthy();
-
-    const preVerifyLoginRes = await request(app)
-      .post('/api/auth/login')
-      .send({ email: 'intern@owms.com', password: 'password123' });
-
-    expect(preVerifyLoginRes.status).toBe(401);
-    expect(preVerifyLoginRes.body.error).toMatch(/not verified/i);
-
-    const verifyRes = await request(app)
-      .post('/api/auth/verify-email')
-      .send({ token: registerRes.body.verificationToken });
-
-    expect(verifyRes.status).toBe(200);
-    expect(verifyRes.body.user.isEmailVerified).toBe(true);
+  test('allows login with valid credentials and returns token', async () => {
+    await User.__seedUser({
+      email: 'intern@owms.com',
+      name: 'Intern User',
+      role: 'intern',
+      password: 'password123',
+    });
 
     const loginRes = await request(app)
       .post('/api/auth/login')
       .send({ email: 'intern@owms.com', password: 'password123' });
 
     expect(loginRes.status).toBe(200);
+    expect(loginRes.body.token).toBeTruthy();
     expect(loginRes.body.user.email).toBe('intern@owms.com');
-    expect(loginRes.headers['set-cookie']).toBeDefined();
-    expect(loginRes.headers['set-cookie'].join(';')).toMatch(/owms_auth_token=/);
+    expect(loginRes.body.user.role).toBe('intern');
+  });
+
+  test('GET /api/auth/me returns user info from token', async () => {
+    await User.__seedUser({
+      email: 'intern@owms.com',
+      name: 'Intern User',
+      role: 'intern',
+      password: 'password123',
+    });
+
+    const loginRes = await request(app)
+      .post('/api/auth/login')
+      .send({ email: 'intern@owms.com', password: 'password123' });
+
+    expect(loginRes.status).toBe(200);
 
     const meRes = await request(app)
       .get('/api/auth/me')
-      .set('Cookie', loginRes.headers['set-cookie']);
+      .set('Authorization', `Bearer ${loginRes.body.token}`);
 
     expect(meRes.status).toBe(200);
     expect(meRes.body.email).toBe('intern@owms.com');
+  });
+
+  test('GET /api/auth/me rejects unauthenticated request', async () => {
+    const res = await request(app).get('/api/auth/me');
+    expect(res.status).toBe(401);
   });
 });

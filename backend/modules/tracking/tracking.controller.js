@@ -1,75 +1,66 @@
 const trackingService = require('./tracking.service');
-const { formatISTDate, getISTTime } = require('../../utils/time');
+const { getISTTime } = require('../../utils/time');
 
 // ==================== TIME TRACKING ENDPOINTS ====================
 
-/**
- * Record logout and end current session
- */
 const logout = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const session = await trackingService.recordLogout(userId);
-    
+
     res.json({
       message: 'Logout recorded successfully',
       session: {
         loginTimeIST: session.loginTimeIST,
         logoutTimeIST: session.logoutTimeIST,
         duration: session.duration,
-        durationHours: (session.duration / (1000 * 60 * 60)).toFixed(2)
-      }
+        durationHours: (session.duration / (1000 * 60 * 60)).toFixed(2),
+      },
     });
   } catch (error) {
     next(error);
   }
 };
 
-/**
- * Get user's time logs
- */
 const getTimeLogs = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const { startDate, endDate, limit } = req.query;
-    
+
     const result = await trackingService.getTimeLogs(userId, {
       startDate,
       endDate,
-      limit: parseInt(limit)
+      limit: parseInt(limit),
     });
-    
+
     res.json({
       ...result,
-      totalDurationHours: (result.totalDuration / (1000 * 60 * 60)).toFixed(2)
+      totalDurationHours: (result.totalDuration / (1000 * 60 * 60)).toFixed(2),
     });
   } catch (error) {
     next(error);
   }
 };
 
-/**
- * Get active session
- */
 const getActiveSession = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const session = await trackingService.getActiveSession(userId);
-    
+
     if (!session) {
       return res.json({ activeSession: null, isActive: false });
     }
-    
+
     const loginDate = new Date(session.loginTimeIST);
     const currentDuration = getISTTime() - loginDate;
-    
+
     res.json({
       activeSession: {
         ...session.toObject(),
         currentDuration,
-        currentDurationHours: (currentDuration / (1000 * 60 * 60)).toFixed(2)
+        currentDurationHours: (currentDuration / (1000 * 60 * 60)).toFixed(2),
       },
-      isActive: true
+      isActive: true,
     });
   } catch (error) {
     next(error);
@@ -78,73 +69,64 @@ const getActiveSession = async (req, res, next) => {
 
 // ==================== PAGE ACTIVITY ENDPOINTS ====================
 
-/**
- * Log page visit
- */
 const logPageVisit = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const { pagePath, pageTitle, duration } = req.body;
-    
+
     if (!pagePath) {
       return res.status(400).json({ error: 'pagePath is required' });
     }
-    
+
     const activity = await trackingService.logPageVisit(
       userId,
       pagePath,
       pageTitle,
       duration
     );
-    
+
     res.json({ message: 'Page visit logged', activity });
   } catch (error) {
     next(error);
   }
 };
 
-/**
- * Get page activity logs
- */
 const getPageActivity = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const { activityType, startDate, endDate, limit } = req.query;
-    
+
     const activities = await trackingService.getPageActivity(userId, {
       activityType,
       startDate,
       endDate,
-      limit: parseInt(limit)
+      limit: parseInt(limit),
     });
-    
+
     res.json({ activities, count: activities.length });
   } catch (error) {
     next(error);
   }
 };
 
-/**
- * Bulk log activities (for batch updates from frontend)
- */
 const bulkLogActivities = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const { activities } = req.body;
-    
+
     if (!Array.isArray(activities) || activities.length === 0) {
       return res.status(400).json({ error: 'activities array is required' });
     }
-    
+
     const results = [];
     for (const activity of activities) {
       const logged = await trackingService.logPageActivity(userId, activity);
       results.push(logged);
     }
-    
-    res.json({ 
+
+    res.json({
       message: `${results.length} activities logged`,
-      activities: results 
+      activities: results,
     });
   } catch (error) {
     next(error);
@@ -153,20 +135,21 @@ const bulkLogActivities = async (req, res, next) => {
 
 // ==================== IDLE & FOCUS ENDPOINTS ====================
 
-/**
- * Log idle detection
- */
 const logIdle = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const { status, duration } = req.body;
-    
+
     if (status === 'start') {
       const activity = await trackingService.logIdleStart(userId);
       res.json({ message: 'Idle start logged', activity });
     } else if (status === 'end') {
       const activity = await trackingService.logIdleEnd(userId, duration || 0);
-      res.json({ message: 'Idle end logged', activity, idleDuration: duration });
+      res.json({
+        message: 'Idle end logged',
+        activity,
+        idleDuration: duration,
+      });
     } else {
       res.status(400).json({ error: 'status must be "start" or "end"' });
     }
@@ -175,14 +158,11 @@ const logIdle = async (req, res, next) => {
   }
 };
 
-/**
- * Log focus loss/gain
- */
 const logFocus = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const { status, pagePath } = req.body;
-    
+
     if (status === 'loss') {
       const activity = await trackingService.logFocusLoss(userId, pagePath);
       res.json({ message: 'Focus loss logged', activity });
@@ -199,54 +179,48 @@ const logFocus = async (req, res, next) => {
 
 // ==================== PRODUCTIVITY ENDPOINTS ====================
 
-/**
- * Calculate productivity score for a specific date
- */
 const calculateProductivity = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const { date } = req.query;
-    
+
     const targetDate = date ? new Date(date) : new Date();
-    const score = await trackingService.calculateProductivityScore(userId, targetDate);
-    
-    res.json({ 
+    const score = await trackingService.calculateProductivityScore(
+      userId,
+      targetDate
+    );
+
+    res.json({
       message: 'Productivity score calculated',
-      score 
+      score,
     });
   } catch (error) {
     next(error);
   }
 };
 
-/**
- * Get productivity analytics
- */
 const getProductivityAnalytics = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const { startDate, endDate, limit } = req.query;
-    
+
     const analytics = await trackingService.getProductivityAnalytics(userId, {
       startDate,
       endDate,
-      limit: parseInt(limit)
+      limit: parseInt(limit),
     });
-    
+
     res.json(analytics);
   } catch (error) {
     next(error);
   }
 };
 
-/**
- * Get real-time productivity data
- */
 const getRealTimeProductivity = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const data = await trackingService.getRealTimeProductivity(userId);
-    
+
     res.json(data);
   } catch (error) {
     next(error);
@@ -258,18 +232,18 @@ module.exports = {
   logout,
   getTimeLogs,
   getActiveSession,
-  
+
   // Page activity
   logPageVisit,
   getPageActivity,
   bulkLogActivities,
-  
+
   // Idle & Focus
   logIdle,
   logFocus,
-  
+
   // Productivity
   calculateProductivity,
   getProductivityAnalytics,
-  getRealTimeProductivity
+  getRealTimeProductivity,
 };

@@ -3,25 +3,25 @@ const mongoose = require('mongoose');
 const departmentSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true
+    required: true,
   },
   userId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true,
-    unique: true
+    unique: true,
   },
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   updatedAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
-departmentSchema.pre('save', function(next) {
+departmentSchema.pre('save', function (next) {
   this.updatedAt = Date.now();
   next();
 });

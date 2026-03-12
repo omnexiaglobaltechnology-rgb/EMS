@@ -1,9 +1,9 @@
 /**
- * Time utility functions for Indian Standard Time (IST)
+ * Time utility functions for Indian Standard Time (IST).
  *
- * MongoDB Date values are always stored in UTC. To make IST explicit and visible,
- * we keep Date fields as UTC (correct for arithmetic/querying) and also store
- * explicit `...IST` string fields where needed.
+ * MongoDB Date values are always stored in UTC. To make IST explicit and
+ * visible, we keep Date fields as UTC (correct for arithmetic / querying)
+ * and also store explicit `...IST` string fields where needed.
  */
 
 const IST_OFFSET_MINUTES = 330;
@@ -11,9 +11,7 @@ const IST_OFFSET_MS = IST_OFFSET_MINUTES * 60 * 1000;
 
 const pad = (n, len = 2) => String(n).padStart(len, '0');
 
-/**
- * Current timestamp (UTC Date object)
- */
+/** Current timestamp (UTC Date object). */
 const getISTTime = () => new Date();
 
 /**
@@ -35,9 +33,7 @@ const toISTISOString = (dateInput = new Date()) => {
   return `${yyyy}-${mm}-${dd}T${hh}:${mi}:${ss}.${ms}+05:30`;
 };
 
-/**
- * Friendly IST representation for UI responses.
- */
+/** Friendly IST representation for UI responses. */
 const formatISTDate = (dateInput) => {
   if (!dateInput) return null;
   const date = new Date(dateInput);
@@ -49,46 +45,34 @@ const formatISTDate = (dateInput) => {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
-    hour12: false
+    hour12: false,
   });
 };
 
-/**
- * Start of IST day as UTC Date (for MongoDB range queries).
- */
+/** Start of IST day as UTC Date (for MongoDB range queries). */
 const getISTStartOfDay = (dateInput = new Date()) => {
   const date = new Date(dateInput);
   const shifted = new Date(date.getTime() + IST_OFFSET_MS);
-
   return new Date(
     Date.UTC(
       shifted.getUTCFullYear(),
       shifted.getUTCMonth(),
       shifted.getUTCDate(),
-      0,
-      0,
-      0,
-      0
+      0, 0, 0, 0
     ) - IST_OFFSET_MS
   );
 };
 
-/**
- * End of IST day as UTC Date (for MongoDB range queries).
- */
+/** End of IST day as UTC Date (for MongoDB range queries). */
 const getISTEndOfDay = (dateInput = new Date()) => {
   const date = new Date(dateInput);
   const shifted = new Date(date.getTime() + IST_OFFSET_MS);
-
   return new Date(
     Date.UTC(
       shifted.getUTCFullYear(),
       shifted.getUTCMonth(),
       shifted.getUTCDate(),
-      23,
-      59,
-      59,
-      999
+      23, 59, 59, 999
     ) - IST_OFFSET_MS
   );
 };
@@ -111,5 +95,5 @@ module.exports = {
   getISTStartOfDay,
   getISTEndOfDay,
   getISTOffset,
-  isToday
+  isToday,
 };

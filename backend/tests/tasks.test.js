@@ -2,18 +2,28 @@ jest.mock('../models/Task', () => ({
   create: jest.fn(async (data) => ({ _id: 't1', ...data })),
   find: jest.fn().mockReturnValue({
     populate: jest.fn().mockReturnValue({
-      lean: jest.fn().mockResolvedValue([{ _id: 't1', title: 'Test Task' }])
-    })
+      populate: jest.fn().mockReturnValue({
+        lean: jest.fn().mockResolvedValue([
+          { _id: 't1', title: 'Test Task', assignedToId: { _id: 'u1', name: 'A', email: 'a@owms.com' }, assignedById: { _id: 'u2', name: 'B', email: 'b@owms.com' } },
+        ]),
+      }),
+    }),
   }),
   findById: jest.fn().mockReturnValue({
     populate: jest.fn().mockReturnThis(),
-    lean: jest.fn().mockResolvedValue({ _id: 't1', versionNo: 1, title: 'Test Task', description: 'd', dueDate: new Date() })
+    lean: jest.fn().mockResolvedValue({
+      _id: 't1',
+      versionNo: 1,
+      title: 'Test Task',
+      description: 'd',
+      dueDate: new Date(),
+    }),
   }),
-  findByIdAndUpdate: jest.fn(async (id, data) => ({ _id: id, ...data }))
+  findByIdAndUpdate: jest.fn(async (id, data) => ({ _id: id, ...data })),
 }));
 
 jest.mock('../models/TaskVersion', () => ({
-  create: jest.fn(async () => ({ _id: 'v1' }))
+  create: jest.fn(async () => ({ _id: 'v1' })),
 }));
 
 const request = require('supertest');
@@ -21,7 +31,11 @@ const app = require('../app');
 const { signAccessToken } = require('../utils/jwt');
 
 const authHeader = () =>
-  `Bearer ${signAccessToken({ id: 'u2', email: 'lead@owms.com', role: 'team_lead' })}`;
+  `Bearer ${signAccessToken({
+    id: 'u2',
+    email: 'lead@owms.com',
+    role: 'team_lead',
+  })}`;
 
 describe('Tasks API', () => {
   test('POST /api/tasks creates a task', async () => {
@@ -31,7 +45,7 @@ describe('Tasks API', () => {
       departmentId: 'dep1',
       assignedToId: 'u1',
       priority: 'low',
-      dueDate: new Date().toISOString()
+      dueDate: new Date().toISOString(),
     };
     const res = await request(app)
       .post('/api/tasks')
@@ -58,4 +72,3 @@ describe('Tasks API', () => {
     expect(res.body.title).toBe('Updated Title');
   });
 });
-

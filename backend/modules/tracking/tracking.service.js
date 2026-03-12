@@ -7,7 +7,7 @@ const {
   getISTTime,
   getISTStartOfDay,
   getISTEndOfDay,
-  toISTISOString
+  toISTISOString,
 } = require('../../utils/time');
 
 const toSafeLimit = (value, fallback = 100, max = 500) => {
@@ -22,7 +22,7 @@ const calculateScoreValue = ({
   totalFocusTime,
   focusLossCount,
   tasksCompleted,
-  submissionsCount
+  submissionsCount,
 }) => {
   const totalTime = totalActiveTime + totalIdleTime;
   if (totalTime <= 0) return 0;
@@ -32,12 +32,11 @@ const calculateScoreValue = ({
   const idlePenalty = totalIdleTime / totalTime;
   const focusLossPenalty = Math.min(focusLossCount / 50, 0.3);
 
-  const baseScore = (
+  const baseScore =
     activeTimeRatio * 40 +
     focusTimeRatio * 30 +
     (1 - idlePenalty) * 20 +
-    (1 - focusLossPenalty) * 10
-  );
+    (1 - focusLossPenalty) * 10;
 
   const taskBonus = Math.min(tasksCompleted * 2, 10);
   const submissionBonus = Math.min(submissionsCount * 3, 10);
@@ -61,12 +60,14 @@ const recordLogin = async (userId, ipAddress, userAgent) => {
     ipAddress,
     userAgent,
     isActive: true,
-    createdAtIST: toISTISOString(loginAt)
+    createdAtIST: toISTISOString(loginAt),
   });
 };
 
 const recordLogout = async (userId) => {
-  const activeSession = await TimeLog.findOne({ userId, isActive: true }).sort({ loginTimeIST: -1 });
+  const activeSession = await TimeLog.findOne({ userId, isActive: true }).sort({
+    loginTimeIST: -1,
+  });
 
   if (!activeSession) {
     throw new Error('No active session found');
@@ -83,7 +84,9 @@ const recordLogout = async (userId) => {
 };
 
 const getActiveSession = async (userId) => {
-  return TimeLog.findOne({ userId, isActive: true }).sort({ loginTimeIST: -1 });
+  return TimeLog.findOne({ userId, isActive: true }).sort({
+    loginTimeIST: -1,
+  });
 };
 
 const getTimeLogs = async (userId, filters = {}) => {
@@ -105,19 +108,23 @@ const getTimeLogs = async (userId, filters = {}) => {
     .sort({ loginTimeIST: -1 })
     .limit(toSafeLimit(filters.limit));
 
-  const totalDuration = logs.reduce((sum, log) => sum + (log.duration || 0), 0);
+  const totalDuration = logs.reduce(
+    (sum, log) => sum + (log.duration || 0),
+    0
+  );
 
   return {
     logs,
     totalDuration,
-    totalSessions: logs.length
+    totalSessions: logs.length,
   };
 };
 
 // ==================== PAGE ACTIVITY TRACKING ====================
 
 const logPageActivity = async (userId, activityData) => {
-  const { activityType, pagePath, pageTitle, duration, metadata } = activityData;
+  const { activityType, pagePath, pageTitle, duration, metadata } =
+    activityData;
 
   const activeSession = await getActiveSession(userId);
   const activityAt = getISTTime();
@@ -131,7 +138,7 @@ const logPageActivity = async (userId, activityData) => {
     duration: duration || 0,
     metadata: metadata || {},
     timestamp: activityAt,
-    timestampIST: toISTISOString(activityAt)
+    timestampIST: toISTISOString(activityAt),
   });
 };
 
@@ -140,7 +147,7 @@ const logPageVisit = async (userId, pagePath, pageTitle, duration = 0) => {
     activityType: 'page_visit',
     pagePath,
     pageTitle,
-    duration
+    duration,
   });
 };
 
@@ -165,7 +172,7 @@ const getPageActivity = async (userId, filters = {}) => {
 const logIdleStart = async (userId) => {
   return logPageActivity(userId, {
     activityType: 'idle_start',
-    metadata: { note: 'User became idle' }
+    metadata: { note: 'User became idle' },
   });
 };
 
@@ -173,7 +180,7 @@ const logIdleEnd = async (userId, idleDuration) => {
   return logPageActivity(userId, {
     activityType: 'idle_end',
     duration: idleDuration,
-    metadata: { note: 'User became active again' }
+    metadata: { note: 'User became active again' },
   });
 };
 
@@ -181,7 +188,7 @@ const logFocusLoss = async (userId, pagePath) => {
   return logPageActivity(userId, {
     activityType: 'focus_loss',
     pagePath,
-    metadata: { note: 'User lost focus (tab/window switch)' }
+    metadata: { note: 'User lost focus (tab/window switch)' },
   });
 };
 
@@ -189,7 +196,7 @@ const logFocusGain = async (userId, pagePath) => {
   return logPageActivity(userId, {
     activityType: 'focus_gain',
     pagePath,
-    metadata: { note: 'User gained focus back' }
+    metadata: { note: 'User gained focus back' },
   });
 };
 
@@ -202,7 +209,7 @@ const calculateProductivityScore = async (userId, date = null) => {
 
   const activities = await ActivityLog.find({
     userId,
-    timestamp: { $gte: startOfDay, $lte: endOfDay }
+    timestamp: { $gte: startOfDay, $lte: endOfDay },
   });
 
   let totalIdleTime = 0;
@@ -211,7 +218,8 @@ const calculateProductivityScore = async (userId, date = null) => {
   let focusLossCount = 0;
 
   activities.forEach((activity) => {
-    if (activity.activityType === 'idle_end') totalIdleTime += activity.duration || 0;
+    if (activity.activityType === 'idle_end')
+      totalIdleTime += activity.duration || 0;
     if (activity.activityType === 'page_visit') {
       pageVisits += 1;
       totalFocusTime += activity.duration || 0;
@@ -221,10 +229,10 @@ const calculateProductivityScore = async (userId, date = null) => {
 
   const timeLogs = await TimeLog.find({
     userId,
-    loginTimeIST: { 
-      $gte: toISTISOString(startOfDay), 
-      $lte: toISTISOString(endOfDay) 
-    }
+    loginTimeIST: {
+      $gte: toISTISOString(startOfDay),
+      $lte: toISTISOString(endOfDay),
+    },
   });
 
   const now = getISTTime();
@@ -244,12 +252,12 @@ const calculateProductivityScore = async (userId, date = null) => {
   const tasksCompleted = await Task.countDocuments({
     assignedTo: userId,
     status: 'completed',
-    updatedAt: { $gte: startOfDay, $lte: endOfDay }
+    updatedAt: { $gte: startOfDay, $lte: endOfDay },
   });
 
   const submissionsCount = await Submission.countDocuments({
     userId,
-    createdAt: { $gte: startOfDay, $lte: endOfDay }
+    createdAt: { $gte: startOfDay, $lte: endOfDay },
   });
 
   const productivityScore = calculateScoreValue({
@@ -258,7 +266,7 @@ const calculateProductivityScore = async (userId, date = null) => {
     totalFocusTime,
     focusLossCount,
     tasksCompleted,
-    submissionsCount
+    submissionsCount,
   });
 
   const payload = {
@@ -272,7 +280,7 @@ const calculateProductivityScore = async (userId, date = null) => {
     tasksCompleted,
     submissionsCount,
     productivityScore,
-    updatedAt: now
+    updatedAt: now,
   };
 
   return ProductivityScore.findOneAndUpdate(
@@ -296,11 +304,17 @@ const getProductivityAnalytics = async (userId, filters = {}) => {
     .limit(toSafeLimit(filters.limit, 30));
 
   const avgScore = scores.length
-    ? scores.reduce((sum, score) => sum + (score.productivityScore || 0), 0) / scores.length
+    ? scores.reduce(
+        (sum, score) => sum + (score.productivityScore || 0),
+        0
+      ) / scores.length
     : 0;
 
   const avgActiveTime = scores.length
-    ? scores.reduce((sum, score) => sum + (score.totalActiveTime || 0), 0) / scores.length
+    ? scores.reduce(
+        (sum, score) => sum + (score.totalActiveTime || 0),
+        0
+      ) / scores.length
     : 0;
 
   return {
@@ -308,15 +322,18 @@ const getProductivityAnalytics = async (userId, filters = {}) => {
     analytics: {
       averageProductivityScore: Math.round(avgScore),
       averageActiveTime: Math.round(avgActiveTime),
-      totalDays: scores.length
-    }
+      totalDays: scores.length,
+    },
   };
 };
 
 const getRealTimeProductivity = async (userId) => {
   const todayStart = getISTStartOfDay();
 
-  let todayScore = await ProductivityScore.findOne({ userId, date: todayStart });
+  let todayScore = await ProductivityScore.findOne({
+    userId,
+    date: todayStart,
+  });
   if (!todayScore) {
     todayScore = await calculateProductivityScore(userId);
   }
@@ -326,7 +343,7 @@ const getRealTimeProductivity = async (userId) => {
 
   const recentActivities = await ActivityLog.find({
     userId,
-    timestamp: { $gte: oneHourAgo }
+    timestamp: { $gte: oneHourAgo },
   })
     .sort({ timestamp: -1 })
     .limit(20);
@@ -335,7 +352,7 @@ const getRealTimeProductivity = async (userId) => {
     todayScore,
     activeSession,
     recentActivities,
-    isActive: Boolean(activeSession)
+    isActive: Boolean(activeSession),
   };
 };
 
@@ -353,5 +370,5 @@ module.exports = {
   logFocusGain,
   calculateProductivityScore,
   getProductivityAnalytics,
-  getRealTimeProductivity
+  getRealTimeProductivity,
 };

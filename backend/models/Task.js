@@ -3,54 +3,54 @@ const mongoose = require('mongoose');
 const taskSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: true
+    required: true,
   },
   description: {
     type: String,
-    required: true
+    required: true,
   },
   departmentId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Department',
-    required: false,   // Optional — not all users have a department assigned
-    default: null
+    required: false,
+    default: null,
   },
   assignedToId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
   },
   assignedById: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
   },
   dueDate: {
     type: Date,
-    required: true
+    required: true,
   },
   priority: {
     type: String,
     default: 'medium',
-    enum: ['low', 'medium', 'high']
+    enum: ['low', 'medium', 'high'],
   },
   status: {
     type: String,
     default: 'pending',
-    enum: ['pending', 'in_progress', 'completed', 'rejected']
+    enum: ['pending', 'in_progress', 'completed', 'rejected'],
   },
   versionNo: {
     type: Number,
-    default: 1
+    default: 1,
   },
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   updatedAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
 taskSchema.pre('save', function (next) {

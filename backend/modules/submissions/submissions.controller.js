@@ -3,10 +3,17 @@ const submissionsService = require('./submissions.service');
 exports.create = async (req, res) => {
   try {
     console.log('[create] Starting submission creation...');
-    console.log('[create] Body:', { taskId: req.body?.taskId, submittedById: req.user?.id });
-    console.log('[create] File:', req.file ? { filename: req.file.filename, mimetype: req.file.mimetype } : 'NO FILE');
-    
-    // Validate required fields
+    console.log('[create] Body:', {
+      taskId: req.body?.taskId,
+      submittedById: req.user?.id,
+    });
+    console.log(
+      '[create] File:',
+      req.file
+        ? { filename: req.file.filename, mimetype: req.file.mimetype }
+        : 'NO FILE'
+    );
+
     if (!req.body.taskId) {
       console.log('[create] Error: taskId missing');
       return res.status(400).json({ error: 'taskId is required' });
@@ -21,10 +28,13 @@ exports.create = async (req, res) => {
       submittedById: req.user.id,
       externalLink: req.body.externalLink,
       comment: req.body.comment,
-      file: req.file
+      file: req.file,
     };
 
-    console.log('[create] Calling service with data:', { taskId: data.taskId, submittedById: data.submittedById });
+    console.log('[create] Calling service with data:', {
+      taskId: data.taskId,
+      submittedById: data.submittedById,
+    });
     const submission = await submissionsService.createSubmission(data);
     console.log('[create] Submission created:', submission?.id);
     res.status(201).json(submission);
@@ -37,12 +47,15 @@ exports.create = async (req, res) => {
 
 exports.getByTask = async (req, res) => {
   try {
-    console.log('[getByTask] Fetching submissions for task:', req.params.taskId);
+    console.log(
+      '[getByTask] Fetching submissions for task:',
+      req.params.taskId
+    );
     const subs = await submissionsService.getByTask(req.params.taskId);
     console.log('[getByTask] Found submissions:', subs?.length || 0);
     res.json(subs);
   } catch (err) {
-    console.error("GET BY TASK ERROR:", err.message);
+    console.error('GET BY TASK ERROR:', err.message);
     res.status(400).json({ error: err.message });
   }
 };
@@ -59,7 +72,10 @@ exports.getSubmissionById = async (req, res) => {
 exports.getSubmissionHistory = async (req, res) => {
   try {
     const { taskId, submittedById } = req.params;
-    const history = await submissionsService.getSubmissionHistory(taskId, submittedById);
+    const history = await submissionsService.getSubmissionHistory(
+      taskId,
+      submittedById
+    );
     res.json(history);
   } catch (err) {
     res.status(400).json({ error: err.message });
@@ -70,9 +86,11 @@ exports.review = async (req, res) => {
   try {
     console.log('[review] Starting review process...');
     console.log('[review] Submission ID:', req.params.id);
-    console.log('[review] Review data:', { reviewerId: req.user?.id, status: req.body?.status });
-    
-    // Validate required fields
+    console.log('[review] Review data:', {
+      reviewerId: req.user?.id,
+      status: req.body?.status,
+    });
+
     if (!req.params.id) {
       console.log('[review] Error: submission ID missing');
       return res.status(400).json({ error: 'Submission ID is required' });
@@ -83,15 +101,17 @@ exports.review = async (req, res) => {
     }
     if (!req.user?.id) {
       console.log('[review] Error: reviewerId missing');
-      return res.status(400).json({ error: 'Authenticated reviewer is required' });
+      return res
+        .status(400)
+        .json({ error: 'Authenticated reviewer is required' });
     }
 
     const updated = await submissionsService.reviewSubmission(req.params.id, {
       reviewerId: req.user.id,
       status: req.body.status,
-      reviewComment: req.body.reviewComment || ''
+      reviewComment: req.body.reviewComment || '',
     });
-    
+
     console.log('[review] Submission reviewed successfully:', updated?.id);
     res.json(updated);
   } catch (err) {

@@ -4,49 +4,49 @@ const submissionSchema = new mongoose.Schema({
   taskId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Task',
-    required: true
+    required: true,
   },
   submittedById: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
   },
   versionNo: {
     type: Number,
-    required: true
+    required: true,
   },
   fileUrl: {
-    type: String
+    type: String,
   },
   externalLink: {
-    type: String
+    type: String,
   },
   comment: {
-    type: String
+    type: String,
   },
   status: {
     type: String,
     default: 'pending',
-    enum: ['pending', 'approved', 'rejected']
+    enum: ['pending', 'approved', 'rejected'],
   },
   reviewedById: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User'
+    ref: 'User',
   },
   reviewComment: {
-    type: String
+    type: String,
   },
   createdAt: {
     type: Date,
-    default: Date.now
+    default: Date.now,
   },
   updatedAt: {
     type: Date,
-    default: Date.now
-  }
+    default: Date.now,
+  },
 });
 
-submissionSchema.pre('save', function(next) {
+submissionSchema.pre('save', function (next) {
   this.updatedAt = Date.now();
   next();
 });

@@ -13,12 +13,26 @@ router.post('/logout', authController.logout);
 router.get('/me', authenticate, authController.me);
 
 // Admin-only user management
-router.post('/admin/users', authenticate, authorizeRoles('admin'), authController.adminCreateUser);
-router.patch('/admin/users/:id/password', authenticate, authorizeRoles('admin'), authController.adminUpdatePassword);
-router.delete('/admin/users/:id', authenticate, authorizeRoles('admin'), authController.adminDeleteUser);
+router.post(
+  '/admin/users',
+  authenticate,
+  authorizeRoles('admin'),
+  authController.adminCreateUser
+);
+router.patch(
+  '/admin/users/:id/password',
+  authenticate,
+  authorizeRoles('admin'),
+  authController.adminUpdatePassword
+);
+router.delete(
+  '/admin/users/:id',
+  authenticate,
+  authorizeRoles('admin'),
+  authController.adminDeleteUser
+);
 
 // Get users (for list displays)
 router.get('/users', authenticate, usersController.getUsers);
 
 module.exports = router;
-

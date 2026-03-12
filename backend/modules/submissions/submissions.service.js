@@ -10,11 +10,20 @@ const isValidUrl = (url) => {
   }
 };
 
-exports.createSubmission = async ({ taskId, submittedById, externalLink, comment, file }) => {
+exports.createSubmission = async ({
+  taskId,
+  submittedById,
+  externalLink,
+  comment,
+  file,
+}) => {
   console.log('[createSubmission] Starting with:', { taskId, submittedById });
-  
+
   const task = await Task.findById(taskId);
-  console.log('[createSubmission] Task found:', task ? `${task._id} - ${task.title}` : 'NOT FOUND');
+  console.log(
+    '[createSubmission] Task found:',
+    task ? `${task._id} - ${task.title}` : 'NOT FOUND'
+  );
   if (!task) throw new Error('Task not found');
 
   if (externalLink && !isValidUrl(externalLink)) {
@@ -31,14 +40,17 @@ exports.createSubmission = async ({ taskId, submittedById, externalLink, comment
     versionNo: task.versionNo,
     fileUrl,
     externalLink,
-    comment
+    comment,
   });
 
   const populated = await Submission.findById(submission._id)
     .populate('submittedById')
     .populate('taskId');
 
-  console.log('[createSubmission] Submission created:', { id: submission._id, taskId: submission.taskId });
+  console.log('[createSubmission] Submission created:', {
+    id: submission._id,
+    taskId: submission.taskId,
+  });
   return populated;
 };
 
@@ -58,10 +70,7 @@ exports.getByTask = async (taskId) => {
 };
 
 exports.getSubmissionHistory = async (taskId, submittedById) => {
-  return Submission.find({
-    taskId,
-    submittedById
-  })
+  return Submission.find({ taskId, submittedById })
     .populate('submittedById')
     .populate('reviewedById')
     .populate('taskId')
@@ -76,8 +85,8 @@ exports.getSubmissionById = async (id) => {
     .populate({
       path: 'taskId',
       populate: {
-        path: 'assignedToId assignedById'
-      }
+        path: 'assignedToId assignedById',
+      },
     })
     .lean();
 
@@ -90,21 +99,26 @@ exports.getSubmissionById = async (id) => {
 
 exports.reviewSubmission = async (id, { reviewerId, status, reviewComment }) => {
   console.log('[reviewSubmission] Starting with:', { id, reviewerId, status });
-  
+
   const valid = ['approved', 'rejected', 'pending'];
   if (!valid.includes(status)) {
     console.log('[reviewSubmission] Invalid status:', status);
-    throw new Error(`Invalid status: ${status}. Must be one of: ${valid.join(', ')}`);
+    throw new Error(
+      `Invalid status: ${status}. Must be one of: ${valid.join(', ')}`
+    );
   }
 
   const submission = await Submission.findById(id);
-
   if (!submission) {
     console.log('[reviewSubmission] Submission not found:', id);
     throw new Error('Submission not found');
   }
 
-  console.log('[reviewSubmission] Updating submission:', { id, oldStatus: submission.status, newStatus: status });
+  console.log('[reviewSubmission] Updating submission:', {
+    id,
+    oldStatus: submission.status,
+    newStatus: status,
+  });
 
   const updated = await Submission.findByIdAndUpdate(
     id,
@@ -112,7 +126,7 @@ exports.reviewSubmission = async (id, { reviewerId, status, reviewComment }) => 
       reviewedById: reviewerId,
       status,
       reviewComment: reviewComment || null,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     },
     { new: true }
   )
@@ -120,16 +134,15 @@ exports.reviewSubmission = async (id, { reviewerId, status, reviewComment }) => 
     .populate('reviewedById')
     .populate('taskId');
 
-  console.log('[reviewSubmission] Successfully updated submission:', updated?._id);
+  console.log(
+    '[reviewSubmission] Successfully updated submission:',
+    updated?._id
+  );
   return updated;
 };
 
 exports.deleteSubmission = async (id) => {
   const submission = await Submission.findById(id);
-
-  if (!submission) {
-    throw new Error('Submission not found');
-  }
-
+  if (!submission) throw new Error('Submission not found');
   return Submission.findByIdAndDelete(id);
 };

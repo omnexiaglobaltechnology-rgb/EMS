@@ -1,4 +1,4 @@
-console.log("Task routes loaded");
+console.log('Task routes loaded');
 
 const express = require('express');
 const router = express.Router();
@@ -13,7 +13,15 @@ router.get('/', authorizePermission('task.read'), taskController.getTasks);
 router.get('/:id', authorizePermission('task.read'), taskController.getTaskById);
 router.patch('/:id', authorizePermission('task.update'), taskController.updateTask);
 router.delete('/:id', authorizePermission('task.delete'), taskController.deleteTask);
-router.get('/:id/versions', authorizePermission('task.read'), taskController.getTaskVersions);
-router.patch('/:id/assign', authorizePermission('task.assign'), taskController.assignTask);
+router.get(
+  '/:id/versions',
+  authorizePermission('task.read'),
+  taskController.getTaskVersions
+);
+router.patch(
+  '/:id/assign',
+  authorizePermission('task.assign'),
+  taskController.assignTask
+);
 
 module.exports = router;

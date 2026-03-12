@@ -11,9 +11,9 @@ import Button from "../../components/ceo/Button";
 const data = [
   {
     id: 1,
-    name: "Sarah Chen",
-    role: "CTO (Department Head)",
-    avatar: "https://i.pravatar.cc/100?img=1",
+    name: "Dr. Alice Vogel",
+    role: "CTO (Technical Head)",
+    avatar: "https://i.pravatar.cc/100?img=47",
     managers: 4,
     leads: 15,
     children: [

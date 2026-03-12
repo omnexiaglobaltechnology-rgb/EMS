@@ -1,6 +1,12 @@
 const express = require('express');
 const path = require('path');
+const { connectDB } = require('./config/db');
 const app = express();
+
+// Connect to database (works in both local and serverless/Vercel environments)
+connectDB().catch((err) => {
+  console.error('[app.js] Database connection failed:', err.message);
+});
 
 // CORS middleware with dynamic origin and proper headers
 app.use((req, res, next) => {

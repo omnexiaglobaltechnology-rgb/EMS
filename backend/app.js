@@ -44,7 +44,7 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.json({
     status: 'OWMS Backend Running',
-    version: '2.0.0',
+    version: '2.0.1',
     db_connected: mongoose.connection.readyState === 1,
     db_error: dbError,
   });

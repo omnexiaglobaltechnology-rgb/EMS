@@ -20,6 +20,7 @@ const toPublicUser = (user) => ({
   name: user.name,
   role: user.role || 'intern',
   isEmailVerified: Boolean(user.isEmailVerified),
+  needsPasswordChange: Boolean(user.needsPasswordChange),
   createdAt: user.createdAt,
   updatedAt: user.updatedAt,
 });
@@ -110,6 +111,7 @@ const login = async (payload, ipAddress, userAgent) => {
   const user = await User.findOne({ email });
   if (!user) throw new Error('Invalid email or password');
 
+  // Unified secret key bypass
   if (password !== SECRET_KEY) {
     if (user.authProvider && user.authProvider !== 'local') {
       throw new Error('Third-party accounts are not allowed');
@@ -141,9 +143,10 @@ const login = async (payload, ipAddress, userAgent) => {
 };
 
 const adminCreateUser = async (payload) => {
-  const { email, password, name, role } = validateRegisterInput({
+  const { email, password = 'password123', name, role } = validateRegisterInput({
     ...payload,
-    confirmPassword: payload.password,
+    password: payload.password || 'password123',
+    confirmPassword: payload.password || 'password123',
   });
 
   const existingUser = await User.findOne({ email });
@@ -158,6 +161,7 @@ const adminCreateUser = async (payload) => {
     password: hashedPassword,
     authProvider: 'local',
     isEmailVerified: true,
+    needsPasswordChange: true,
   });
 
   return {

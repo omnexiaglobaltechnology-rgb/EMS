@@ -59,6 +59,10 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  needsPasswordChange: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 userSchema.pre('save', function (next) {

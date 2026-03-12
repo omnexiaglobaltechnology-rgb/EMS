@@ -12,7 +12,7 @@ const ROLE_SET = new Set([
 ]);
 
 const ALLOWED_EMAIL_DOMAIN = (
-  process.env.ALLOWED_EMAIL_DOMAIN || 'owms.com'
+  process.env.ALLOWED_EMAIL_DOMAIN || 'omnexiatechnology.in'
 ).toLowerCase();
 
 const normalizeRole = (role = '') => String(role).trim().toLowerCase();

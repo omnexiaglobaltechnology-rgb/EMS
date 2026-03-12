@@ -88,7 +88,7 @@ exports.me = async (req, res) => {
 exports.setupAdmin = async (req, res) => {
   try {
     const result = await authService.adminCreateUser({
-      email: 'admin@owms.com',
+      email: 'admin@omnexiatechnology.in',
       password: 'admin123',
       name: 'System Admin',
       role: 'admin',

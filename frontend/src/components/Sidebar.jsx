@@ -101,7 +101,7 @@ const Sidebar = ({ isOpen, onClose }) => {
             className="w-full mt-4 flex items-center gap-3 px-3 py-2 text-sm font-semibold text-emerald-400 bg-emerald-400/10 hover:bg-emerald-400/20 rounded-lg transition-all border border-emerald-400/30"
           >
             <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-            Install App (WebAPK)
+            Install App
           </button>
         )}
       </div>

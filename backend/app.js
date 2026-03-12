@@ -1,6 +1,6 @@
 const express = require('express');
 const path = require('path');
-const { connectDB } = require('./config/db');
+const { connectDB, mongoose } = require('./config/db');
 const app = express();
 
 // Store the DB connection promise so middleware can await it
@@ -35,9 +35,13 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
-// Health check route (no DB needed)
+// Health check route with versioning and DB status (no DB wait)
 app.get('/', (req, res) => {
-	res.send('OWMS Backend Running');
+	res.json({
+    status: 'OWMS Backend Running',
+    version: '1.0.3-db-timeout-fix',
+    db_connected: mongoose.connection.readyState === 1
+  });
 });
 
 // Middleware: wait for DB to be connected before handling API requests

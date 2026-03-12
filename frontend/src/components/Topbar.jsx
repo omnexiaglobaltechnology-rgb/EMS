@@ -8,7 +8,7 @@ import {
   markNotificationAsRead,
 } from "../utils/inAppNotifications";
 import { useTheme } from "../context/ThemeContext";
-import { Menu, Moon, Sun, BellIcon } from "lucide-react";
+import { Menu, Moon, Sun } from "lucide-react";
 
 const getMeetingsRoute = (role) => {
   if (!role) return null;

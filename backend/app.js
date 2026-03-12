@@ -53,10 +53,14 @@ app.get('/', (req, res) => {
 // Middleware: wait for DB to be connected before handling API requests
 app.use(async (req, res, next) => {
   try {
-    await dbReady;
+    await connectDB();
     next();
   } catch (err) {
-    res.status(503).json({ error: 'Database is not available' });
+    console.error('[app.js] DB Connection Error in Middleware:', err.message);
+    res.status(503).json({
+      error: 'Database is not available',
+      details: err.message,
+    });
   }
 });
 

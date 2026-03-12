@@ -3,6 +3,7 @@ const ActivityLog = require('../../models/ActivityLog');
 const ProductivityScore = require('../../models/ProductivityScore');
 const Submission = require('../../models/Submission');
 const Task = require('../../models/Task');
+const User = require('../../models/User'); // Ensure User model is registered
 const {
   getISTTime,
   getISTStartOfDay,
@@ -47,7 +48,6 @@ const calculateScoreValue = ({
 // ==================== TIME TRACKING ====================
 
 const recordLogin = async (userId, ipAddress, userAgent) => {
-  const User = require('../../models/User');
   const user = await User.findById(userId);
   if (!user) throw new Error('User not found');
 

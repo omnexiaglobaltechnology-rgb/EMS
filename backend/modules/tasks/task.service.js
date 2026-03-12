@@ -1,10 +1,9 @@
 const Task = require('../../models/Task');
 const TaskVersion = require('../../models/TaskVersion');
+const User = require('../../models/User'); // Ensure User model is registered for populate
 
 // CREATE TASK
 exports.createTask = async (data) => {
-  const User = require('../../models/User');
-
   if (!data.title) throw new Error('Title is required');
   if (!data.description) throw new Error('Description is required');
   if (!data.assignedToId) throw new Error('Assigned To ID is required');
@@ -69,8 +68,8 @@ exports.getTasks = async () => {
       departmentId: t.departmentId ? t.departmentId.toString() : null,
     }));
   } catch (error) {
-    console.error('Error fetching tasks:', error);
-    throw new Error('Failed to fetch tasks');
+    console.error('[task.service] Error fetching tasks:', error);
+    throw error; // Re-throw the original error to get more detail in the controller
   }
 };
 

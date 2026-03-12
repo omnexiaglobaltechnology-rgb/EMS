@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useState } from "react";
-import { BellIcon } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
@@ -8,7 +7,7 @@ import {
   markNotificationAsRead,
 } from "../utils/inAppNotifications";
 import { useTheme } from "../context/ThemeContext";
-import { Menu, Moon, Sun } from "lucide-react";
+import { Menu, Moon, Sun, BellIcon } from "lucide-react";
 
 const getMeetingsRoute = (role) => {
   if (!role) return null;

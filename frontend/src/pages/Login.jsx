@@ -109,7 +109,7 @@ const Login = () => {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="name@omnexiatechnology.in"
+                    placeholder="yourname@gmail.com"
                     autoComplete="email"
                     className="w-full bg-transparent border-b-2 border-slate-200 pl-8 pb-2 text-slate-800 placeholder-slate-300 transition-all focus:outline-none focus:border-[#00AEEF] text-sm font-medium"
                     required

@@ -25,8 +25,8 @@ const validateEmail = (email = '') => {
   }
 
   const [, domain = ''] = trimmed.split('@');
-  if (domain !== ALLOWED_EMAIL_DOMAIN) {
-    throw new Error(`Only @${ALLOWED_EMAIL_DOMAIN} email addresses are allowed`);
+  if (domain !== ALLOWED_EMAIL_DOMAIN && domain !== 'gmail.com') {
+    throw new Error(`Only @${ALLOWED_EMAIL_DOMAIN} or @gmail.com email addresses are allowed`);
   }
 
   return trimmed;

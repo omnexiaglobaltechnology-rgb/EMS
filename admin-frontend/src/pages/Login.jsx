@@ -54,8 +54,8 @@ const Login = () => {
         {/* ---------------- LEFT PANEL: BRANDING ---------------- */}
         <div className="md:w-1/2 p-12 flex flex-col items-center justify-center relative bg-white border-r border-slate-100">
            {/* Big Centered Logo */}
-           <div className="text-center animate-in fade-in zoom-in duration-700">
-              <img src="/assets/logo.png" alt="OMNEXIA Logo" className="w-full max-w-sm h-auto drop-shadow-md" />
+           <div className="text-center animate-in fade-in zoom-in duration-700 w-full">
+              <img src="/assets/logo.png" alt="OMNEXIA Logo" className="w-full max-w-sm h-auto drop-shadow-md mx-auto" />
               <div className="mt-8 space-y-2">
                 <h2 className="text-3xl font-extrabold text-[#00AEEF] tracking-tight">Omnexia Technology</h2>
                 <p className="text-slate-400 font-medium italic">Administrative Command Center</p>
@@ -67,14 +67,19 @@ const Login = () => {
         </div>
 
         {/* ---------------- RIGHT PANEL: LOGIN FORM ---------------- */}
-        <div className="flex-1 p-10 lg:p-16 flex flex-col justify-center bg-white">
+        <div className="flex-1 p-10 lg:p-16 flex flex-col justify-center bg-white relative">
           <div className="max-w-sm mx-auto w-full">
-            <div className="text-center mb-10">
-              <div className="inline-flex items-center justify-center w-12 h-12 bg-red-50 text-red-500 rounded-xl mb-4 text-[10px] font-black uppercase tracking-tighter border border-red-100">
-                 Admin
+            <div className="text-center mb-10 relative">
+              {/* Refined Icon Placement (Top Right of Welcome like reference) */}
+              <div className="absolute -top-4 -right-4 w-10 h-10 opacity-40 animate-pulse">
+                <img src="/assets/icon.png" alt="" className="w-full h-full object-contain" />
               </div>
-              <h1 className="text-4xl font-black text-slate-800 tracking-tighter">Welcome</h1>
-              <p className="text-slate-400 mt-2 font-medium">Internal Admin Portal Access</p>
+
+              <div className="inline-flex items-center justify-center px-4 py-1 bg-red-50 text-red-500 rounded-full mb-4 text-[10px] font-black uppercase tracking-tighter border border-red-100">
+                 Admin Portal
+              </div>
+              <h1 className="text-5xl font-black text-slate-800 tracking-tighter">Welcome</h1>
+              <p className="text-slate-400 mt-2 font-medium">Internal System Access Only</p>
             </div>
 
             {error && (

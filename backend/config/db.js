@@ -4,7 +4,7 @@ const connectDB = async () => {
   try {
     const mongoURL =
       process.env.MONGODB_URL ||
-      'mongodb+srv://rajputboyofficial50188_db_user:tOo39iaGRPGRokMa@cluster0.z1zwewn.mongodb.net/ems?retryWrites=true&w=majority&appName=Cluster0';
+      'mongodb://rajputboyofficial50188_db_user:tOo39iaGRPGRokMa@ac-ujdvt23-shard-00-00.z1zwewn.mongodb.net:27017,ac-ujdvt23-shard-00-01.z1zwewn.mongodb.net:27017,ac-ujdvt23-shard-00-02.z1zwewn.mongodb.net:27017/ems?ssl=true&authSource=admin&retryWrites=true&w=majority&appName=Cluster0';
 
     console.log('Attempting to connect to MongoDB...');
 

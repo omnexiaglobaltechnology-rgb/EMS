@@ -11,6 +11,12 @@ import {
   Loader,
 } from "lucide-react";
 import { tasksApi } from "../../utils/api";
+import { useTheme } from "../../context/ThemeContext";
+
+const MOTIVATIONAL_QUOTES = [
+  { text: "Efficiency is doing things right; effectiveness is doing the right things.", author: "Peter Drucker" },
+  { text: "Quality is not an act, it is a habit.", author: "Aristotle" },
+];
 
 /**
  * Primary overview interface for the COO.
@@ -26,6 +32,8 @@ const CooDashboard = () => {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { theme } = useTheme();
+  const [quote] = useState(() => MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -52,9 +60,9 @@ const CooDashboard = () => {
 
       setStats({
         efficiency: `${efficiency}%`,
-        managers: 22,
-        logistics: 46,
-        slaCompliance: Math.min(99, efficiency + 10).toFixed(1) + "%",
+        managers: "Active Nodes",
+        logistics: "Tracking...",
+        slaCompliance: "Compliance Hub",
       });
 
       const generatedActivities = [
@@ -108,26 +116,26 @@ const CooDashboard = () => {
     {
       label: "Operational Efficiency",
       value: stats.efficiency,
-      icon: <Activity size={20} className="text-emerald-600" />,
-      bgColor: "bg-emerald-100",
+      icon: <Activity size={20} className="text-emerald-500" />,
+      themeColor: "text-emerald-500",
     },
     {
-      label: "Total Ops Managers",
+      label: "Resource Allocation",
       value: stats.managers,
-      icon: <Users2 size={20} className="text-blue-600" />,
-      bgColor: "bg-blue-100",
+      icon: <Users2 size={20} className="text-blue-500" />,
+      themeColor: "text-blue-500",
     },
     {
-      label: "Active Logistics Units",
+      label: "Supply Logistics",
       value: stats.logistics,
-      icon: <Truck size={20} className="text-amber-600" />,
-      bgColor: "bg-amber-100",
+      icon: <Truck size={20} className="text-amber-500" />,
+      themeColor: "text-amber-500",
     },
     {
-      label: "SLA Compliance",
+      label: "Service Compliance",
       value: stats.slaCompliance,
-      icon: <ClipboardCheck size={20} className="text-indigo-600" />,
-      bgColor: "bg-indigo-100",
+      icon: <ClipboardCheck size={20} className="text-indigo-500" />,
+      themeColor: "text-indigo-500",
     },
   ];
   return (
@@ -155,24 +163,22 @@ const CooDashboard = () => {
         {dashboardStats.map((s) => (
           <div
             key={s.label}
-            className="rounded-xl border border-gray-300 bg-white p-5 shadow-sm hover:shadow-md transition-shadow"
+            className={`rounded-xl border p-5 shadow-sm transition-all ${
+              theme === "dark" ? "bg-[#1E293B] border-slate-700" : "bg-white border-gray-200"
+            }`}
           >
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-slate-500">{s.label}</p>
-                <p className="mt-2 text-3xl text-slate-900 font-bold">
+                <p className={`mt-2 text-2xl font-bold ${theme === "dark" ? "text-white" : "text-slate-900"}`}>
                   {s.value}
                 </p>
               </div>
               <div
-                className={`flex h-12 w-12 items-center justify-center rounded-xl ${s.bgColor}`}
+                className={`flex h-12 w-12 items-center justify-center rounded-xl bg-slate-500/10`}
               >
                 {s.icon}
               </div>
-            </div>
-            <div className="mt-4 flex items-center text-xs font-medium text-emerald-600">
-              <TrendingUp size={14} className="mr-1" />
-              <span>+2.4% from last month</span>
             </div>
           </div>
         ))}
@@ -180,34 +186,24 @@ const CooDashboard = () => {
 
       {/* Department Activity Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 rounded-xl border border-gray-300 bg-white p-6 shadow-sm">
+        <div className={`lg:col-span-2 rounded-xl border p-6 shadow-sm ${
+          theme === "dark" ? "bg-[#1E293B] border-slate-700" : "bg-white border-gray-200"
+        }`}>
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-semibold text-slate-800">
-              Operations Strategy Progress
-            </h2>
-            <span className="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded uppercase">
-              Q1 Focus
-            </span>
+            <h2 className="text-lg font-semibold">Operations Strategy Progress</h2>
           </div>
 
           <div className="space-y-6">
             {activities.map((a) => (
               <div key={a.title}>
                 <div className="mb-2 flex justify-between text-sm">
-                  <div className="flex flex-col">
-                    <span className="font-semibold text-slate-700">
-                      {a.title}
-                    </span>
-                    <span className="text-xs text-slate-400">{a.status}</span>
-                  </div>
-                  <span className="font-bold text-slate-600">
-                    {Math.round(a.progress)}%
-                  </span>
+                  <span className={theme === "dark" ? "text-slate-300" : "text-slate-700"}>{a.title}</span>
+                  <span className="text-slate-500 font-medium">{a.progress}%</span>
                 </div>
 
-                <div className="h-2.5 w-full rounded-full bg-slate-100">
+                <div className={`h-2.5 w-full rounded-full ${theme === "dark" ? "bg-slate-700" : "bg-slate-100"}`}>
                   <div
-                    className="h-2.5 rounded-full bg-indigo-600 transition-all duration-1000 ease-out shadow-[0_0_8px_rgba(79,70,229,0.4)]"
+                    className="h-2.5 rounded-full bg-indigo-600 transition-all duration-1000 ease-out"
                     style={{ width: `${a.progress}%` }}
                   />
                 </div>
@@ -216,35 +212,11 @@ const CooDashboard = () => {
           </div>
         </div>
 
-        {/* Operations Alerts Section */}
-        <div className="rounded-xl border border-red-200 bg-red-50/30 p-6 shadow-sm">
-          <div className="flex items-center gap-2 mb-4 text-red-700">
-            <ShieldAlert size={20} />
-            <h2 className="font-bold text-lg">Critical Escalations</h2>
-          </div>
-          <div className="space-y-4">
-            <div className="p-3 bg-white border border-red-100 rounded-lg shadow-sm">
-              <p className="text-xs font-bold text-red-600 uppercase">
-                Logistics
-              </p>
-              <p className="text-sm font-medium text-slate-800">
-                Delayed shipment in Sector 7 affecting SLA.
-              </p>
-              <p className="text-[10px] text-slate-400 mt-1">24 mins ago</p>
-            </div>
-            <div className="p-3 bg-white border border-red-100 rounded-lg shadow-sm opacity-80">
-              <p className="text-xs font-bold text-amber-600 uppercase">
-                Facility
-              </p>
-              <p className="text-sm font-medium text-slate-800">
-                Maintenance scheduled for Main Hub.
-              </p>
-              <p className="text-[10px] text-slate-400 mt-1">2 hours ago</p>
-            </div>
-            <button className="w-full py-2 text-sm font-semibold text-red-700 border border-red-200 rounded-lg hover:bg-red-100 transition-colors">
-              View All Incidents
-            </button>
-          </div>
+        {/* Motivational Section */}
+        <div className="rounded-xl bg-gradient-to-br from-indigo-700 to-indigo-900 p-6 text-white shadow-lg shadow-indigo-700/20 flex flex-col justify-center">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-indigo-300 mb-4">Operational Excellence</h2>
+            <p className="text-xl font-medium leading-relaxed italic mb-4">"{quote.text}"</p>
+            <p className="text-sm font-semibold text-indigo-300">— {quote.author}</p>
         </div>
       </div>
     </div>

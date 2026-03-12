@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { AlertCircle, Loader } from "lucide-react";
 import { tasksApi, submissionsApi } from "../../utils/api";
+import { useTheme } from "../../context/ThemeContext";
+
+const MOTIVATIONAL_QUOTES = [
+  { text: "Do not save what is left after spending, but spend what is left after saving.", author: "Warren Buffett" },
+  { text: "Beware of little expenses; a small leak will sink a great ship.", author: "Benjamin Franklin" },
+];
 
 /**
  * Central landing dashboard for the CFO, presenting key financial KPIs.
@@ -16,6 +22,8 @@ const CfoDashboard = () => {
   const [activities, setActivities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { theme } = useTheme();
+  const [quote] = useState(() => MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)]);
 
   useEffect(() => {
     fetchDashboardData();
@@ -52,10 +60,10 @@ const CfoDashboard = () => {
       const profit = (revenue - expenses).toFixed(1);
 
       setStats({
-        revenue: `$${revenue}M`,
-        expenses: `$${expenses}M`,
-        profit: `$${profit}M`,
-        runway: "14 Months",
+        revenue: "Audit Pending...",
+        expenses: "Reviewing Accounts",
+        profit: "EBITDA Insight",
+        runway: "Analyzing Burn Rate",
       });
 
       // Generate activities
@@ -110,12 +118,14 @@ const CfoDashboard = () => {
         {statsArray.map((s) => (
           <div
             key={s.label}
-            className="rounded-xl border border-gray-300 bg-white p-5 shadow-sm"
+            className={`rounded-xl border p-5 shadow-sm transition-all ${
+              theme === "dark" ? "bg-[#1E293B] border-slate-700" : "bg-white border-gray-200"
+            }`}
           >
             <div className="flex items-center justify-between">
-              <p className="text-sm text-slate-500">{s.label}</p>
+              <p className="text-sm text-slate-500 font-medium">{s.label}</p>
             </div>
-            <p className="mt-3 text-2xl text-[#2B7FFF] font-semibold">
+            <p className="mt-3 text-2xl text-emerald-500 font-bold tracking-tight">
               {s.value}
             </p>
           </div>
@@ -123,27 +133,36 @@ const CfoDashboard = () => {
       </div>
 
       {/* Organization Activity Overview */}
-      <div className="rounded-xl border border-gray-300 bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-4">
-          Organization Activity Overview
-        </h2>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className={`lg:col-span-2 rounded-xl border p-6 shadow-sm ${
+          theme === "dark" ? "bg-[#1E293B] border-slate-700" : "bg-white border-gray-200"
+        }`}>
+          <h2 className="text-lg font-semibold mb-6">Organization Activity Overview</h2>
 
-        <div className="space-y-4">
-          {activities.map((a) => (
-            <div key={a.title}>
-              <div className="mb-1 flex justify-between text-sm">
-                <span className="text-slate-700">{a.title}</span>
-                <span className="text-slate-500">{a.progress}%</span>
-              </div>
+          <div className="space-y-5">
+            {activities.map((a) => (
+              <div key={a.title}>
+                <div className="mb-2 flex justify-between text-sm">
+                  <span className={theme === "dark" ? "text-slate-300" : "text-slate-700"}>{a.title}</span>
+                  <span className="text-slate-500 font-medium">{a.progress}%</span>
+                </div>
 
-              <div className="h-2 w-full rounded-full bg-slate-200">
-                <div
-                  className="h-2 rounded-full bg-blue-500 transition-all"
-                  style={{ width: `${a.progress}%` }}
-                />
+                <div className={`h-2.5 w-full rounded-full ${theme === "dark" ? "bg-slate-700" : "bg-slate-100"}`}>
+                  <div
+                    className="h-2.5 rounded-full bg-emerald-500 transition-all duration-700"
+                    style={{ width: `${a.progress}%` }}
+                  />
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+        </div>
+
+        {/* Motivational Sidebar */}
+        <div className="rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 p-6 text-white shadow-lg shadow-emerald-500/20 flex flex-col justify-center">
+            <h2 className="text-xs font-bold uppercase tracking-widest text-emerald-200 mb-4">Financial Strategy</h2>
+            <p className="text-xl font-medium leading-relaxed italic mb-4">"{quote.text}"</p>
+            <p className="text-sm font-semibold text-emerald-200">— {quote.author}</p>
         </div>
       </div>
     </div>

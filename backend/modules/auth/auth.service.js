@@ -174,13 +174,6 @@ const adminUpdatePassword = async (userId, newPassword) => {
   const user = await User.findById(userId);
   if (!user) throw new Error('User not found');
 
-  const restrictedRoles = ['cto', 'cfo', 'coo', 'ceo'];
-  if (restrictedRoles.includes(user.role)) {
-    throw new Error(
-      `Administrators are not permitted to modify passwords for the ${user.role.toUpperCase()} role.`
-    );
-  }
-
   if (!newPassword || newPassword.length < 6) {
     throw new Error('Password must be at least 6 characters long');
   }
@@ -194,13 +187,6 @@ const adminUpdatePassword = async (userId, newPassword) => {
 const adminDeleteUser = async (userId) => {
   const user = await User.findById(userId);
   if (!user) throw new Error('User not found');
-
-  const restrictedRoles = ['cto', 'cfo', 'coo', 'ceo'];
-  if (restrictedRoles.includes(user.role)) {
-    throw new Error(
-      `Administrators are not permitted to delete users with the ${user.role.toUpperCase()} role.`
-    );
-  }
 
   await User.findByIdAndDelete(userId);
   return { message: 'User deleted successfully' };

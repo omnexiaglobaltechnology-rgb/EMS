@@ -2,6 +2,7 @@ import Sidebar from "../components/Sidebar";
 import Topbar from "../components/Topbar";
 import { Outlet } from "react-router-dom";
 import useActivityTracking from "../hooks/useActivityTracking";
+import { useTheme } from "../context/ThemeContext";
 
 // Fixed dimensions used to offset the main content area
 const SIDEBAR_WIDTH = 256; // 64 * 4 (w-64)
@@ -14,9 +15,10 @@ const TOPBAR_HEIGHT = 56; // 14 * 4 (h-14)
  */
 const DashboardLayout = () => {
   useActivityTracking();
+  const { theme } = useTheme();
 
   return (
-    <div>
+    <div className={theme === "dark" ? "bg-[#0F172A] text-white" : "bg-slate-50 text-slate-900"}>
       {/* Global Navigation Components */}
       <Sidebar />
       <Topbar />

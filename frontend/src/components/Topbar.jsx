@@ -7,6 +7,8 @@ import {
   markAllNotificationsAsRead,
   markNotificationAsRead,
 } from "../utils/inAppNotifications";
+import { useTheme } from "../context/ThemeContext";
+import { Moon, Sun } from "lucide-react";
 
 const WATCHED_STORAGE_KEYS = [
   "ems_shared_meetings",
@@ -40,6 +42,7 @@ const Topbar = () => {
   const navigate = useNavigate();
   const role = useSelector((state) => state.auth?.role);
   const email = useSelector((state) => state.auth?.email);
+  const { theme, toggleTheme } = useTheme();
 
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -103,10 +106,19 @@ const Topbar = () => {
 
   return (
     <header
-      className="h-14 bg-white shadow flex justify-between px-6 items-center fixed left-64 top-0 right-0 z-30"
+      className="h-14 bg-[#090E1A] text-white shadow flex justify-between px-6 items-center fixed left-64 top-0 right-0 z-30 border-b border-gray-700"
       style={{ height: 56 }}
     >
-      <span className="font-semibold">Enterprise Management System</span>
+      <div className="flex items-center gap-4">
+        <span className="font-semibold text-white">Enterprise Management System</span>
+        <button
+          onClick={toggleTheme}
+          className="p-1.5 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors text-gray-300"
+          title={theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
+        >
+          {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
+        </button>
+      </div>
 
       <div className="relative">
         <button

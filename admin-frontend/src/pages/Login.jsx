@@ -38,8 +38,13 @@ const Login = () => {
 
     try {
       const response = await authApi.login({ email, password });
+      
+      if (response.user.role !== ROLES.ADMIN) {
+        throw new Error("Access denied. This panel is for administrators only.");
+      }
+
       dispatch(login(response));
-      navigate(`/${response.user.role}/dashboard`);
+      navigate("/admin/dashboard");
     } catch (err) {
       setError(err.message || "Login failed. Please check your credentials.");
     } finally {

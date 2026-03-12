@@ -84,3 +84,23 @@ exports.me = async (req, res) => {
     return res.status(404).json({ error: error.message });
   }
 };
+
+exports.setupAdmin = async (req, res) => {
+  try {
+    const result = await authService.adminCreateUser({
+      email: 'admin@owms.com',
+      password: 'admin123',
+      name: 'System Admin',
+      role: 'admin',
+    });
+    return res.status(201).json({
+      message: 'Admin user created successfully',
+      user: result.user,
+    });
+  } catch (error) {
+    if (error.message === 'Email is already registered') {
+      return res.status(200).json({ message: 'Admin user already exists' });
+    }
+    return res.status(500).json({ error: error.message });
+  }
+};

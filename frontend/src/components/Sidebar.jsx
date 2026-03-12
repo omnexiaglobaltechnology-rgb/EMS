@@ -58,9 +58,9 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   return (
     <aside
-      className={`fixed top-0 left-0 z-40 h-screen transition-transform md:translate-x-0 ${
+      className={`fixed top-0 left-0 z-50 h-full w-64 bg-[#090E1A] text-white flex flex-col shadow-2xl transition-transform duration-300 ease-in-out md:translate-x-0 ${
         isOpen ? "translate-x-0" : "-translate-x-full"
-      } w-64 bg-[#090E1A] text-white flex flex-col shadow-lg`}
+      }`}
     >
       {/* ---------------- USER INFO SECTION ---------------- */}
       <div className="flex items-center gap-3 px-4 py-6 mb-2 text-left text-white border-b border-gray-300/30">

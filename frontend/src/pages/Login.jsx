@@ -56,22 +56,22 @@ const Login = () => {
       <div className="absolute bottom-10 right-10 w-48 h-48 bg-white/20 rounded-full blur-3xl"></div>
 
       {/* Main Card Container */}
-      <div className="w-full max-w-5xl bg-white rounded-[2rem] overflow-hidden shadow-2xl flex flex-col md:flex-row min-h-[600px] relative z-10 transition-all duration-500 hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)]">
+      <div className="w-full max-w-5xl bg-white rounded-3xl md:rounded-[2rem] overflow-hidden shadow-2xl flex flex-col md:flex-row md:min-h-[600px] relative z-10 transition-all duration-500 hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)]">
         
         {/* ---------------- LEFT PANEL: BRANDING ---------------- */}
         <div className="md:w-1/2 p-12 flex flex-col items-center justify-center relative bg-white border-r border-slate-100">
            {/* Big Centered Logo */}
            <div className="text-center animate-in fade-in zoom-in duration-700 w-full">
-              <img src="/assets/logo.png" alt="OMNEXIA Logo" className="w-full max-w-sm h-auto drop-shadow-md mx-auto" />
-              
-              <div className="mt-12 space-y-4 px-6">
-                <p className="text-xl lg:text-2xl font-light text-slate-500 leading-relaxed italic">
-                  "{quote.text}"
-                </p>
-                <p className="text-sm font-bold text-[#00AEEF] tracking-widest uppercase">
-                  — {quote.author}
-                </p>
-              </div>
+               <img src="/assets/logo.png" alt="OMNEXIA Logo" className="w-full max-w-[240px] md:max-w-sm h-auto drop-shadow-md mx-auto" />
+               
+               <div className="mt-8 md:mt-12 space-y-4 px-4 md:px-6">
+                 <p className="text-lg md:text-xl lg:text-2xl font-light text-slate-500 leading-relaxed italic">
+                   "{quote.text}"
+                 </p>
+                 <p className="text-xs md:text-sm font-bold text-[#00AEEF] tracking-widest uppercase">
+                   — {quote.author}
+                 </p>
+               </div>
            </div>
 
            {/* Mobile-only divider */}
@@ -81,13 +81,8 @@ const Login = () => {
         {/* ---------------- RIGHT PANEL: LOGIN FORM ---------------- */}
         <div className="flex-1 p-10 lg:p-16 flex flex-col justify-center bg-white relative">
           <div className="max-w-sm mx-auto w-full">
-            <div className="text-center mb-10 relative">
-              {/* Refined Icon Placement (Top Right of Welcome like reference) */}
-              <div className="absolute -top-4 -right-4 w-10 h-10 opacity-40 animate-pulse">
-                <img src="/assets/icon.png" alt="" className="w-full h-full object-contain" />
-              </div>
-
-              <h1 className="text-5xl font-black text-[#00AEEF] tracking-tighter">Welcome</h1>
+            <div className="text-center mb-8 md:mb-10">
+              <h1 className="text-4xl md:text-5xl font-black text-[#00AEEF] tracking-tighter">Welcome</h1>
               <p className="text-slate-400 mt-2 font-medium">Organization Login Portal</p>
             </div>
 

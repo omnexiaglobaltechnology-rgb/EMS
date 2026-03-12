@@ -98,7 +98,7 @@ const Topbar = ({ onToggleSidebar }) => {
   };
 
   return (
-    <header className="h-14 bg-[#090E1A] text-white shadow flex justify-between px-4 md:px-6 items-center fixed left-0 md:left-64 top-0 right-0 z-30 border-b border-gray-700">
+    <header className="h-14 bg-[#090E1A] text-white shadow-md flex justify-between px-4 md:px-6 items-center fixed left-0 md:left-64 top-0 right-0 z-40 border-b border-gray-800">
       <div className="flex items-center gap-3 md:gap-4">
         <button
           onClick={onToggleSidebar}

@@ -8,9 +8,9 @@ import { trackingApi } from "../utils/api";
 
 /**
  * Sidebar component that adapts the navigational menu based on the user's role.
- * Links are dynamically drawn from the MENU configuration matching the active role.
+ * Responsive version: hidden on mobile by default, slide-in when isOpen is true.
  */
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onClose }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
@@ -19,20 +19,18 @@ const Sidebar = () => {
     (state) => state.auth,
   );
 
-  // If role is undefined/null, do not render the sidebar (e.g. before login is complete)
+  // If role is undefined/null, do not render the sidebar
   if (!role) return null;
 
   const handleLogout = async () => {
     try {
       await authApi.logout();
-      // Log the logout event for tracking
       try {
         await trackingApi.logLogout();
       } catch (error) {
         console.warn("[tracking] logout event failed:", error.message);
       }
     } catch (error) {
-      // Clear client auth state even if the server cookie is already invalid.
       console.error("Failed to clear auth cookie:", error);
     } finally {
       dispatch(logout());
@@ -40,10 +38,29 @@ const Sidebar = () => {
     }
   };
 
+  const [installPrompt, setInstallPrompt] = useState(null);
+
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  const handleInstall = async () => {
+    if (!installPrompt) return;
+    installPrompt.prompt();
+    const { outcome } = await installPrompt.userChoice;
+    if (outcome === "accepted") setInstallPrompt(null);
+  };
+
   return (
     <aside
-      className="w-64 bg-[#090E1A] text-white min-h-screen flex flex-col fixed left-0 top-0 h-screen z-40 shadow-lg"
-      style={{ width: 256 }}
+      className={`fixed top-0 left-0 z-40 h-screen transition-transform md:translate-x-0 ${
+        isOpen ? "translate-x-0" : "-translate-x-full"
+      } w-64 bg-[#090E1A] text-white flex flex-col shadow-lg`}
     >
       {/* ---------------- USER INFO SECTION ---------------- */}
       <div className="flex items-center gap-3 px-4 py-6 mb-2 text-left text-white border-b border-gray-300/30">
@@ -51,14 +68,9 @@ const Sidebar = () => {
           {name?.substring(0, 2) || "UN"}
         </div>
         <div className="leading-tight overflow-hidden">
-          {/* User's Name */}
-          <p className="text-sm font-semibold truncate">
-            {name || "User Name"}
-          </p>
-
-          {/* Position / Department Name */}
+          <p className="text-sm font-semibold truncate">{name || "User Name"}</p>
           <p className="text-xs text-slate-300 capitalize truncate">
-            {position || role} / {department_name || "Department"}
+            {position || role} / {department_name || "Dept"}
           </p>
         </div>
       </div>
@@ -69,6 +81,7 @@ const Sidebar = () => {
           <NavLink
             key={item}
             to={`/${role}/${item}`}
+            onClick={() => { if(window.innerWidth < 768) onClose(); }}
             className={({ isActive }) =>
               `block px-3 ps-5 py-2 my-2 font-semibold rounded-lg capitalize transition-colors duration-150 ${
                 isActive ? "bg-[#10192D] text-blue-500" : "hover:bg-[#10192D]"
@@ -79,6 +92,17 @@ const Sidebar = () => {
             {item.replace("-", " ")}
           </NavLink>
         ))}
+
+        {/* ---------------- PWA INSTALL BUTTON ---------------- */}
+        {installPrompt && (
+          <button
+            onClick={handleInstall}
+            className="w-full mt-4 flex items-center gap-3 px-3 py-2 text-sm font-semibold text-emerald-400 bg-emerald-400/10 hover:bg-emerald-400/20 rounded-lg transition-all border border-emerald-400/30"
+          >
+            <div className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+            Install App (WebAPK)
+          </button>
+        )}
       </div>
 
       {/* ---------------- LOGOUT BUTTON ---------------- */}

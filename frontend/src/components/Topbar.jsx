@@ -8,14 +8,7 @@ import {
   markNotificationAsRead,
 } from "../utils/inAppNotifications";
 import { useTheme } from "../context/ThemeContext";
-import { Moon, Sun } from "lucide-react";
-
-const WATCHED_STORAGE_KEYS = [
-  "ems_shared_meetings",
-  "ems_shared_announcements",
-  "ems_shared_tech_support_messages",
-  "ems_notification_reads_v1",
-];
+import { Menu, Moon, Sun, BellIcon } from "lucide-react";
 
 const getMeetingsRoute = (role) => {
   if (!role) return null;
@@ -38,7 +31,7 @@ const formatTimestamp = (timestamp) => {
   return new Date(timestamp).toLocaleString();
 };
 
-const Topbar = () => {
+const Topbar = ({ onToggleSidebar }) => {
   const navigate = useNavigate();
   const role = useSelector((state) => state.auth?.role);
   const email = useSelector((state) => state.auth?.email);
@@ -105,12 +98,17 @@ const Topbar = () => {
   };
 
   return (
-    <header
-      className="h-14 bg-[#090E1A] text-white shadow flex justify-between px-6 items-center fixed left-64 top-0 right-0 z-30 border-b border-gray-700"
-      style={{ height: 56 }}
-    >
-      <div className="flex items-center gap-4">
-        <span className="font-semibold text-white">Enterprise Management System</span>
+    <header className="h-14 bg-[#090E1A] text-white shadow flex justify-between px-4 md:px-6 items-center fixed left-0 md:left-64 top-0 right-0 z-30 border-b border-gray-700">
+      <div className="flex items-center gap-3 md:gap-4">
+        <button
+          onClick={onToggleSidebar}
+          className="p-1.5 hover:bg-gray-800 rounded-lg md:hidden text-gray-300"
+        >
+          <Menu size={20} />
+        </button>
+        <span className="font-semibold text-white text-sm md:text-base truncate max-w-[150px] md:max-w-none">
+          OMNEXIA EMS
+        </span>
         <button
           onClick={toggleTheme}
           className="p-1.5 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors text-gray-300"
@@ -123,21 +121,21 @@ const Topbar = () => {
       <div className="relative">
         <button
           onClick={() => setIsOpen((prev) => !prev)}
-          className="relative text-gray-600 cursor-pointer border border-gray-400 rounded-sm p-1"
+          className="relative text-gray-400 hover:text-white cursor-pointer p-1"
           title="Notifications"
         >
-          <BellIcon />
+          <BellIcon size={20} />
           {unreadCount > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] rounded-full min-w-5 h-5 px-1 flex items-center justify-center font-semibold">
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] rounded-full min-w-4 h-4 flex items-center justify-center font-bold">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
         </button>
 
         {isOpen && (
-          <div className="absolute right-0 mt-2 w-96 rounded-lg border border-gray-200 bg-white shadow-xl z-50 overflow-hidden">
+          <div className="absolute right-0 mt-2 w-80 md:w-96 rounded-lg border border-gray-200 bg-white shadow-xl z-50 overflow-hidden">
             <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-              <p className="font-semibold">Notifications</p>
+              <p className="font-semibold text-slate-900">Notifications</p>
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAllRead}

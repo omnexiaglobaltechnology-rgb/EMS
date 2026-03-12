@@ -59,7 +59,7 @@ const Login = () => {
       <div className="w-full max-w-5xl bg-white rounded-3xl md:rounded-[2rem] overflow-hidden shadow-2xl flex flex-col md:flex-row md:min-h-[600px] relative z-10 transition-all duration-500 hover:shadow-[0_20px_60px_-15px_rgba(0,0,0,0.3)]">
         
         {/* ---------------- LEFT PANEL: BRANDING ---------------- */}
-        <div className="md:w-1/2 p-12 flex flex-col items-center justify-center relative bg-white border-r border-slate-100">
+        <div className="md:w-1/2 p-6 md:p-12 flex flex-col items-center justify-center relative bg-white border-b md:border-b-0 md:border-r border-slate-100 flex-shrink-0">
            {/* Big Centered Logo */}
            <div className="text-center animate-in fade-in zoom-in duration-700 w-full">
                <img src="/assets/logo.png" alt="OMNEXIA Logo" className="w-full max-w-[240px] md:max-w-sm h-auto drop-shadow-md mx-auto" />
@@ -79,7 +79,7 @@ const Login = () => {
         </div>
 
         {/* ---------------- RIGHT PANEL: LOGIN FORM ---------------- */}
-        <div className="flex-1 p-10 lg:p-16 flex flex-col justify-center bg-white relative">
+        <div className="flex-1 p-6 md:p-10 lg:p-16 flex flex-col justify-center bg-white relative">
           <div className="max-w-sm mx-auto w-full">
             <div className="text-center mb-8 md:mb-10">
               <h1 className="text-4xl md:text-5xl font-black text-[#00AEEF] tracking-tighter">Welcome</h1>
@@ -173,7 +173,7 @@ const Login = () => {
       </div>
       
       {/* Footer Info */}
-      <div className="absolute bottom-6 left-6 text-white/60 text-xs font-bold tracking-widest uppercase">
+      <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 text-white/60 text-[10px] md:text-xs font-bold tracking-widest uppercase">
          © 2024 Omnexia Technology
       </div>
     </div>

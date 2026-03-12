@@ -3,12 +3,12 @@ const path = require('path');
 const { connectDB } = require('./config/db');
 const app = express();
 
-// Connect to database (works in both local and serverless/Vercel environments)
-connectDB().catch((err) => {
+// Store the DB connection promise so middleware can await it
+const dbReady = connectDB().catch((err) => {
   console.error('[app.js] Database connection failed:', err.message);
 });
 
-// CORS middleware with dynamic origin and proper headers
+// CORS middleware FIRST (handles OPTIONS preflight without waiting for DB)
 app.use((req, res, next) => {
   const allowedOrigins = [
     'http://localhost:5173',
@@ -35,6 +35,21 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 
+// Health check route (no DB needed)
+app.get('/', (req, res) => {
+	res.send('OWMS Backend Running');
+});
+
+// Middleware: wait for DB to be connected before handling API requests
+app.use(async (req, res, next) => {
+  try {
+    await dbReady;
+    next();
+  } catch (err) {
+    res.status(503).json({ error: 'Database is not available' });
+  }
+});
+
 // Request logging middleware
 app.use((req, res, next) => {
   const now = new Date().toISOString();
@@ -45,7 +60,7 @@ app.use((req, res, next) => {
 // expose uploads with proper headers for downloads
 app.use('/uploads', (req, res, next) => {
   console.log(`[uploads] Serving file: ${req.path}`);
-  res.header('Content-Disposition', 'inline'); // Change to 'attachment' if you want to force download
+  res.header('Content-Disposition', 'inline');
   res.header('Cache-Control', 'public, max-age=3600');
   express.static(path.join(__dirname, 'uploads'))(req, res, next);
 });
@@ -68,10 +83,6 @@ app.use((err, req, res, next) => {
     error: err.message, 
     stack: process.env.NODE_ENV === 'development' ? err.stack : undefined 
   });
-});
-
-app.get('/', (req, res) => {
-	res.send('OWMS Backend Running');
 });
 
 module.exports = app;

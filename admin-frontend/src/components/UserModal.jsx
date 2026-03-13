@@ -76,15 +76,18 @@ const UserModal = ({ title, user, onClose, onSave }) => {
           filterRole = form.userType === "intern" ? "team_lead_intern" : "team_lead";
         } else if (["team_lead", "team_lead_intern"].includes(form.role)) {
           filterRole = form.userType === "intern" ? "manager_intern" : "manager";
-        } else if (["manager", "manager_intern"].includes(form.role)) {
-          // Managers report to CTO/CFO/COO or CEO
-          filterRole = ""; // Admin can select any higher role
+        } else if (["cto", "cfo", "coo", "manager", "manager_intern"].includes(form.role)) {
+          // Managers and CXOs report to CEO
+          filterRole = "ceo";
         }
 
-        const data = await usersApi.getAll({
-          departmentId: form.departmentId,
-          role: filterRole,
-        });
+        const query = { role: filterRole };
+        // Only filter by department if not looking for CEO (who is global)
+        if (filterRole !== "ceo" && form.departmentId) {
+          query.departmentId = form.departmentId;
+        }
+
+        const data = await usersApi.getAll(query);
         setReportsToOptions(data);
       } catch (err) {
         console.error("Failed to fetch supervisors:", err);
@@ -96,7 +99,8 @@ const UserModal = ({ title, user, onClose, onSave }) => {
   }, [form.role, form.departmentId, form.userType]);
 
   const handleSubmit = () => {
-    if (!form.name || !form.email || !form.username) return;
+    // Username is now optional
+    if (!form.name || !form.email) return;
     if (isNewUser && !form.password) return;
     onSave(form);
     onClose();
@@ -195,12 +199,12 @@ const UserModal = ({ title, user, onClose, onSave }) => {
               Department {loadingDepts && "(Loading...)"}
             </label>
             <select
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 disabled:bg-slate-50 disabled:text-slate-500"
               value={form.departmentId}
               onChange={(e) => setForm({ ...form, departmentId: e.target.value })}
-              disabled={loadingDepts}
+              disabled={loadingDepts || form.role === 'ceo'}
             >
-              <option value="">Select Department</option>
+              <option value="">{form.role === 'ceo' ? "No Department Assigned" : "Select Department"}</option>
               {departments.map((d) => (
                 <option key={d.id || d._id} value={d.id || d._id}>
                   {d.name}
@@ -215,12 +219,12 @@ const UserModal = ({ title, user, onClose, onSave }) => {
               Reports To {loadingReportsTo && "(Loading...)"}
             </label>
             <select
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 disabled:bg-slate-50 disabled:text-slate-500"
               value={form.reportsTo}
               onChange={(e) => setForm({ ...form, reportsTo: e.target.value })}
-              disabled={loadingReportsTo || !form.departmentId}
+              disabled={loadingReportsTo || form.role === 'ceo' || (!form.departmentId && !['cto', 'cfo', 'coo', 'manager', 'manager_intern'].includes(form.role))}
             >
-              <option value="">Select Supervisor (Optional)</option>
+              <option value="">{form.role === 'ceo' ? "Top Level (CEO)" : "Select Supervisor (Optional)"}</option>
               {reportsToOptions.map((u) => (
                 <option key={u.id || u._id} value={u.id || u._id}>
                   {u.name} ({u.role.replace(/_/g, " ")})

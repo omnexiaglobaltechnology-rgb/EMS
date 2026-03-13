@@ -10,7 +10,7 @@ exports.getUsers = async (req, res) => {
     const filter = {};
 
     if (role) filter.role = role;
-    if (departmentId) filter.departmentId = departmentId;
+    if (departmentId && role !== 'ceo') filter.departmentId = departmentId;
     if (reportsTo) filter.reportsTo = reportsTo;
     if (userType) filter.userType = userType;
     if (search) {
@@ -46,5 +46,54 @@ exports.getUsers = async (req, res) => {
   } catch (error) {
     console.error('[getUsers] ERROR:', error.message);
     return res.status(500).json({ error: 'Failed to fetch users' });
+  }
+};
+
+exports.setupAdmin = async (req, res) => {
+  try {
+    console.log('[setupAdmin] Starting bootstrap process...');
+    
+    // Create Admin
+    const adminResult = await authService.adminCreateUser({
+      email: 'admin@omnexiatechnology.in',
+      password: 'admin123',
+      name: 'System Admin',
+      role: 'admin',
+    }).catch(err => {
+      if (err.message === 'Email is already registered') return { message: 'Admin already exists' };
+      throw err;
+    });
+
+    // Create CEO
+    const ceoResult = await authService.adminCreateUser({
+      email: 'ceo@omnexiatechnology.in',
+      password: 'ceo123',
+      name: 'Company CEO',
+      role: 'ceo',
+      username: 'CEO001'
+    }).catch(err => {
+      if (err.message === 'Email is already registered') return { message: 'CEO already exists' };
+      throw err;
+    });
+
+    console.log('[setupAdmin] Results:', { admin: adminResult.message, ceo: ceoResult.message });
+    
+    return res.status(201).json({
+      success: true,
+      message: 'System bootstrap completed',
+      results: {
+        admin: adminResult.message,
+        ceo: ceoResult.message
+      },
+      setup_time: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.error('[setupAdmin] Error during bootstrap:', error.message);
+    return res.status(500).json({
+      success: false,
+      error: error.message,
+      hint: 'Check your database connection and environment variables.',
+      full_error: process.env.NODE_ENV !== 'production' ? error.stack : undefined
+    });
   }
 };

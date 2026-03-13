@@ -111,8 +111,15 @@ const adminCreateUser = async (payload) => {
   // Add hierarchy fields if provided
   if (payload.username) userData.username = payload.username;
   if (payload.userType) userData.userType = payload.userType;
-  if (payload.departmentId) userData.departmentId = payload.departmentId;
-  if (payload.reportsTo) userData.reportsTo = payload.reportsTo;
+
+  // CEO logic: No department and no supervisor
+  if (role === 'ceo') {
+    userData.departmentId = null;
+    userData.reportsTo = null;
+  } else {
+    if (payload.departmentId) userData.departmentId = payload.departmentId;
+    if (payload.reportsTo) userData.reportsTo = payload.reportsTo;
+  }
 
   const user = await User.create(userData);
 

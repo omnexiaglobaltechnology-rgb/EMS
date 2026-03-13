@@ -241,7 +241,7 @@ const autoCreateTeamRoom = async (teamLeadId, managerId, departmentId) => {
 /**
  * Handle admin-created chat rooms with email-based participants.
  */
-const createAdminRoom = async (payload, creatorId) => {
+const adminCreateRoom = async (payload, creatorId) => {
   const { name, type, departmentId, emails = [] } = payload;
 
   // Resolve emails to user IDs
@@ -271,5 +271,5 @@ module.exports = {
   getAnnouncements,
   renameRoom,
   autoCreateTeamRoom,
-  createAdminRoom,
+  adminCreateRoom,
 };

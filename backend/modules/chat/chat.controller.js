@@ -71,9 +71,9 @@ const renameRoom = async (req, res, next) => {
   }
 };
 
-const createAdminRoom = async (req, res, next) => {
+const adminCreateRoom = async (req, res, next) => {
   try {
-    const room = await chatService.createAdminRoom(req.body, req.user.id);
+    const room = await chatService.adminCreateRoom(req.body, req.user.id);
     res.status(201).json(room);
   } catch (err) {
     next(err);
@@ -96,6 +96,6 @@ module.exports = {
   sendAnnouncement,
   getAnnouncements,
   renameRoom,
-  createAdminRoom,
+  adminCreateRoom,
   autoCreateTeamRoom,
 };

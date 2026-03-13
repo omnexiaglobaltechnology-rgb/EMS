@@ -20,9 +20,11 @@ const AdminMeetingPermissions = () => {
     { id: "cto", label: "CTO" },
     { id: "cfo", label: "CFO" },
     { id: "coo", label: "COO" },
-    { id: "manager", label: "Department Managers" },
+    { id: "manager", label: "Managers" },
+    { id: "manager_intern", label: "Manager Interns" },
     { id: "team_lead", label: "Team Leads" },
-    { id: "intern", label: "Employees / Interns" }
+    { id: "team_lead_intern", label: "TL Interns" },
+    { id: "intern", label: "Interns / Employees" }
   ];
 
   useEffect(() => {

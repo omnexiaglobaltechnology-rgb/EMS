@@ -2,8 +2,9 @@ import { useEffect, useState } from "react";
 import { 
   Plus, Calendar, Users, X, Search, Clock, 
   ChevronRight, CheckCircle2, AlertCircle, Trash2, 
-  MapPin, Loader2, ChevronDown, Filter
+  MapPin, Loader2, ChevronDown, Filter, Link, Copy, Check, Video
 } from "lucide-react";
+import { useSelector } from "react-redux";
 import { meetingsApi, departmentsApi } from "../utils/api";
 
 /**
@@ -11,6 +12,8 @@ import { meetingsApi, departmentsApi } from "../utils/api";
  * Handles scheduling, invitee management, and hierarchical user selection.
  */
 const MeetingManagement = () => {
+  const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
   const [meetings, setMeetings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -34,11 +37,17 @@ const MeetingManagement = () => {
   const [depts, setDepts] = useState([]);
   const [selectedDept, setSelectedDept] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
+  const [copiedId, setCopiedId] = useState(null);
+
+  const isRestrictedRole = ['team_lead', 'team_lead_intern', 'manager', 'manager_intern'].includes(user?.role);
 
   useEffect(() => {
     fetchMeetings();
     fetchDepts();
-  }, []);
+    if (isRestrictedRole && user?.departmentId) {
+      setSelectedDept(user.departmentId);
+    }
+  }, [user]);
 
   const fetchMeetings = async () => {
     setLoading(true);
@@ -146,6 +155,13 @@ const MeetingManagement = () => {
     }
   };
 
+  const handleCopyLink = (m) => {
+    const link = m.link || m.id || m._id;
+    navigator.clipboard.writeText(link);
+    setCopiedId(m.id || m._id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
   return (
     <div className="p-6 space-y-8 bg-slate-50/50 min-h-screen">
       {/* Header */}
@@ -240,6 +256,22 @@ const MeetingManagement = () => {
                     {m.description}
                   </p>
                 )}
+
+                {m.link && (
+                  <div className="mt-4 p-2 bg-slate-50 rounded-lg border border-slate-100 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <Link size={12} className="text-indigo-500 shrink-0" />
+                      <span className="text-[10px] font-mono text-slate-600 truncate">{m.link}</span>
+                    </div>
+                    <button 
+                      onClick={() => handleCopyLink(m)}
+                      className="p-1 hover:bg-white rounded border border-transparent hover:border-slate-200 transition-all"
+                      title="Copy Link"
+                    >
+                      {copiedId === (m.id || m._id) ? <Check size={12} className="text-emerald-500" /> : <Copy size={12} className="text-slate-400" />}
+                    </button>
+                  </div>
+                )}
               </div>
 
               <div className="mt-6 flex items-center justify-between gap-3">
@@ -255,8 +287,17 @@ const MeetingManagement = () => {
                     </div>
                   )}
                 </div>
-                {/* Join button would link to VC like Jitsi/Google Meet if integrated, for now just placeholder */}
-                <button className="flex-1 bg-white border border-slate-200 text-indigo-600 font-bold px-4 py-2 rounded-xl text-sm hover:bg-slate-50 transition-all flex items-center justify-center gap-2 shadow-sm">
+                <button 
+                  onClick={() => {
+                    const rolePath = user.role === 'ceo' ? 'ceo-meeting-rooms' : 
+                                   user.role === 'manager' ? 'meeting-room' :
+                                   user.role === 'team_lead' ? 'tl-meeting-room' :
+                                   user.role === 'intern' ? 'intern-meeting-room' : 'meeting-room';
+                    navigate(`/${user.role}/${rolePath}/${m.id || m._id}`);
+                  }}
+                  className="flex-1 bg-indigo-600 border border-indigo-600 text-white font-bold px-4 py-2 rounded-xl text-sm hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 shadow-md"
+                >
+                  <Video size={14} />
                   Join Room
                   <ChevronRight size={14} />
                 </button>
@@ -382,7 +423,9 @@ const MeetingManagement = () => {
                       >
                         <option value="">All Depts</option>
                         {depts.map(d => (
-                          <option key={d.id || d._id} value={d.id || d._id}>{d.name}</option>
+                          <option key={d.id || d._id} value={d.id || d._id} disabled={isRestrictedRole && d.id !== user?.departmentId && d._id !== user?.departmentId}>
+                            {d.name} {isRestrictedRole && (d.id === user?.departmentId || d._id === user?.departmentId) ? "(Your Dept)" : ""}
+                          </option>
                         ))}
                       </select>
                     </div>

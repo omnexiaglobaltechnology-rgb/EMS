@@ -67,7 +67,7 @@ const updateInvitees = async (req, res, next) => {
 
 const searchInvitees = async (req, res, next) => {
   try {
-    const users = await meetingService.searchInvitees({
+    const users = await meetingService.searchInvitees(req.user, {
       departmentId: req.query.departmentId,
       role: req.query.role,
       reportsTo: req.query.reportsTo,

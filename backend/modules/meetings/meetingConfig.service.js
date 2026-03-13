@@ -4,8 +4,8 @@ const getOrCreateConfig = async () => {
   let config = await MeetingConfig.findOne();
   if (!config) {
     config = await MeetingConfig.create({
-      allowedRoles: ["CEO", "CTO", "CFO", "COO", "manager", "team_lead"],
-      canInviteAcrossDepartments: ["CEO", "CTO", "CFO", "COO"]
+      allowedRoles: ["ceo", "cto", "cfo", "coo", "manager", "team_lead"],
+      canInviteAcrossDepartments: ["ceo", "cto", "cfo", "coo"]
     });
   }
   return config;

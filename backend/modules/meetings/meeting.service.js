@@ -6,6 +6,15 @@ const CEO_ROLE = 'ceo';
 const C_LEVEL_ROLES = ['cto', 'cfo', 'coo'];
 
 /**
+ * Generate a unique 10-character meeting code (abc-defg-hij)
+ */
+const generateMeetingCode = () => {
+  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  const getPart = (len) => Array.from({ length: len }, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
+  return `${getPart(3)}-${getPart(4)}-${getPart(3)}`;
+};
+
+/**
  * Create a new meeting with invitee list.
  */
 const createMeeting = async (creatorId, data) => {
@@ -33,6 +42,10 @@ const createMeeting = async (creatorId, data) => {
     throw new Error('You do not have permission to schedule meetings');
   }
 
+  if (!link && platform === 'EMS Meet') {
+    data.link = generateMeetingCode();
+  }
+
   const meeting = await Meeting.create({
     title,
     description: description || '',
@@ -40,7 +53,7 @@ const createMeeting = async (creatorId, data) => {
     time,
     duration: duration || '30 min',
     platform: platform || 'EMS Meet',
-    link: link || '',
+    link: data.link || '',
     topic: topic || '',
     creatorId,
     departmentId: departmentId || null,
@@ -100,8 +113,11 @@ const getMeetings = async (user) => {
 /**
  * Get a single meeting by ID.
  */
-const getMeetingById = async (id) => {
-  const meeting = await Meeting.findById(id)
+const getMeetingById = async (idOrCode) => {
+  const isObjectId = /^[0-9a-fA-F]{24}$/.test(idOrCode);
+  const query = isObjectId ? { _id: idOrCode } : { link: idOrCode };
+
+  const meeting = await Meeting.findOne(query)
     .populate('creatorId', 'name email username role')
     .populate('departmentId', 'name type')
     .populate('invitees', 'name email username role');
@@ -187,11 +203,26 @@ const updateInvitees = async (id, invitees, userId) => {
 /**
  * Search users for meeting invitations.
  * Supports filtering by department, role, and search text (username/name).
+ * Enforces department restrictions for TLs and Managers.
  */
-const searchInvitees = async (filters = {}) => {
+const searchInvitees = async (requestingUser, filters = {}) => {
   const query = {};
 
-  if (filters.departmentId) query.departmentId = filters.departmentId;
+  // Hierarchy/Permission enforcement
+  if (['team_lead', 'team_lead_intern', 'manager', 'manager_intern'].includes(requestingUser.role)) {
+    const meetingConfigService = require('./meetingConfig.service');
+    const canInviteAcross = await meetingConfigService.checkInvitePermission(requestingUser.role);
+    
+    if (!canInviteAcross) {
+      // Restrict to user's own department
+      query.departmentId = requestingUser.departmentId || filters.departmentId;
+    } else if (filters.departmentId) {
+      query.departmentId = filters.departmentId;
+    }
+  } else if (filters.departmentId) {
+    query.departmentId = filters.departmentId;
+  }
+
   if (filters.role) query.role = filters.role;
   if (filters.reportsTo) query.reportsTo = filters.reportsTo;
   if (filters.search) {

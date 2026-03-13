@@ -1,17 +1,9 @@
 import { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
-  Mic,
-  MicOff,
-  Video,
-  VideoOff,
-  MessageSquare,
-  ScreenShare,
-  UserPlus,
-  Link,
-  Flag,
-  PhoneOff,
+  MapPin, Loader2, ChevronDown, Filter, Link, Copy, Check, Video, PhoneOff, UserPlus, MessageSquare, ScreenShare, Mic, MicOff, VideoOff
 } from "lucide-react";
+import { meetingsApi } from "../../utils/api";
 
 /**
  * Multi-user meeting room interface for interns.
@@ -21,6 +13,7 @@ const InternMeetingRoom = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
+  const [meeting, setMeeting] = useState(null);
   const [micOn, setMicOn] = useState(true);
   const [cameraOn, setCameraOn] = useState(true);
   const [recording, setRecording] = useState(false);
@@ -204,13 +197,19 @@ const InternMeetingRoom = () => {
     setChatInput("");
   };
 
-  // Get camera + mic stream
+  // Get camera + mic stream and fetch meeting
   useEffect(() => {
-    const getMedia = async () => {
+    const init = async () => {
       await requestMedia({ video: true, audio: true });
+      try {
+        const data = await meetingsApi.getById(id);
+        setMeeting(data);
+      } catch (err) {
+        console.error("Failed to fetch meeting details", err);
+      }
     };
 
-    getMedia();
+    init();
 
     return () => {
       if (
@@ -282,9 +281,17 @@ const InternMeetingRoom = () => {
   return (
     <div className="h-screen bg-gray-900 text-white flex flex-col">
       {/* Header */}
-      <div className="p-4 flex justify-between items-center bg-gray-800">
-        <h2 className="font-semibold">Meeting ID: {id}</h2>
-        <span className="text-sm text-green-400">Live</span>
+      <div className="p-4 flex justify-between items-center bg-gray-800 border-b border-gray-700">
+        <div className="flex flex-col">
+          <h2 className="font-bold text-lg text-white">{meeting?.title || "Loading Meeting..."}</h2>
+          <span className="text-xs text-slate-400">ID: {id}</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 px-3 py-1 bg-green-500/10 border border-green-500/20 rounded-full">
+            <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
+            <span className="text-[10px] font-bold text-green-400 uppercase tracking-wider">Live</span>
+          </div>
+        </div>
       </div>
 
       {/* Video Area */}

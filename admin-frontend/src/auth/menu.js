@@ -4,7 +4,7 @@
  * @constant {Object}
  */
 const MENU = {
-  admin: ["dashboard", "users", "settings"],
+  admin: ["dashboard", "users", "departments", "meeting-permissions", "settings"],
 };
 
 export { MENU };

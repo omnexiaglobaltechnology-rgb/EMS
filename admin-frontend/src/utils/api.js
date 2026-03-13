@@ -150,4 +150,35 @@ export const meetingsApi = {
   updateConfig: (data) => apiFetch("/meetings/config", { method: "PATCH", body: data }),
 };
 
+export const trackingApi = {
+  getTimeLogs: () => apiFetch("/tracking/time", { method: "GET" }),
+  logLogout: () => apiFetch("/tracking/time/logout", { method: "POST" }),
+  logPageActivity: (payload, extraOptions = {}) =>
+    apiFetch("/tracking/page-activity", { method: "POST", body: payload, ...extraOptions }),
+  logIdleStart: () => apiFetch("/tracking/idle", { method: "POST", body: { status: "start" } }),
+  logIdleEnd: (duration) => apiFetch("/tracking/idle", { method: "POST", body: { status: "end", duration } }),
+  logFocusLoss: (pagePath) => apiFetch("/tracking/focus", { method: "POST", body: { status: "loss", pagePath } }),
+  logFocusGain: (pagePath) => apiFetch("/tracking/focus", { method: "POST", body: { status: "gain", pagePath } }),
+  getPageActivity: () => apiFetch("/tracking/page-activity", { method: "GET" }),
+};
+
+// Chat API calls
+export const chatApi = {
+  getRooms: () => apiFetch("/chat/rooms", { method: "GET" }),
+  getMessages: (id, params = {}) => {
+    const query = new URLSearchParams();
+    if (params.page) query.set("page", params.page);
+    if (params.limit) query.set("limit", params.limit);
+    const qs = query.toString();
+    return apiFetch(`/chat/rooms/${id}/messages${qs ? `?${qs}` : ""}`, { method: "GET" });
+  },
+  sendMessage: (roomId, formData) =>
+    apiFetch(`/chat/rooms/${roomId}/messages`, { method: "POST", body: formData, isFormData: true }),
+  renameRoom: (roomId, name) =>
+    apiFetch(`/chat/rooms/${roomId}/rename`, { method: "PATCH", body: { name } }),
+  getAnnouncements: () => apiFetch("/chat/announcements", { method: "GET" }),
+  sendAnnouncement: (formData) =>
+    apiFetch("/chat/announcements", { method: "POST", body: formData, isFormData: true }),
+};
+
 export default apiFetch;

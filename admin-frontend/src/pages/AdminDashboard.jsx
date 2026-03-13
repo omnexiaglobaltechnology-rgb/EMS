@@ -62,6 +62,22 @@ const AdminDashboard = () => {
       setLoading(true);
       setError(null);
 
+      // Fetch system health from backend root
+      const API_ROOT = import.meta.env.VITE_API_URL?.replace("/api", "") || "https://ems-backend-seven-ruby.vercel.app";
+      try {
+        const healthRes = await fetch(API_ROOT);
+        if (healthRes.ok) {
+          const healthData = await healthRes.json();
+          setSystemStatus([
+            { label: "Database", status: healthData.db_connected ? "Healthy" : "Error" },
+            { label: "Backend API", status: "Healthy" },
+            { label: "Version", status: healthData.version || "Unknown" },
+          ]);
+        }
+      } catch (hErr) {
+        console.warn("Could not fetch system health:", hErr);
+      }
+
       // Fetch all tasks and submissions
       const allTasks = await tasksApi.getAll();
       let allSubmissions = [];

@@ -17,9 +17,9 @@ router.delete('/:id', meetingController.remove);
 router.patch('/:id/invitees', meetingController.updateInvitees);
 
 // Config (Admin only)
-const { authorizeRoles } = require('../../middleware/auth'); // Check path? In previous files it was ../../middleware/auth
-router.get('/config', authorizeRoles('ceo'), meetingController.getConfig);
-router.patch('/config', authorizeRoles('ceo'), meetingController.updateConfig);
+const { authorizeRoles } = require('../../middlewares/role.middleware'); 
+router.get('/config', authorizeRoles('ceo', 'admin'), meetingController.getConfig);
+router.patch('/config', authorizeRoles('ceo', 'admin'), meetingController.updateConfig);
 
 console.log('Meeting routes loaded');
 

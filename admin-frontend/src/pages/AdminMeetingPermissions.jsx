@@ -16,10 +16,10 @@ const AdminMeetingPermissions = () => {
   const [success, setSuccess] = useState(false);
 
   const roles = [
-    { id: "CEO", label: "CEO" },
-    { id: "CTO", label: "CTO" },
-    { id: "CFO", label: "CFO" },
-    { id: "COO", label: "COO" },
+    { id: "ceo", label: "CEO" },
+    { id: "cto", label: "CTO" },
+    { id: "cfo", label: "CFO" },
+    { id: "coo", label: "COO" },
     { id: "manager", label: "Department Managers" },
     { id: "team_lead", label: "Team Leads" },
     { id: "intern", label: "Employees / Interns" }

@@ -16,6 +16,7 @@ export const apiFetch = async (endpoint, options = {}) => {
 
   const config = {
     method,
+    credentials: "include",
     ...rest,
   };
 

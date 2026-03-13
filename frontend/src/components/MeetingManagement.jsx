@@ -14,7 +14,7 @@ import { meetingsApi, departmentsApi } from "../utils/api";
  */
 const MeetingManagement = () => {
   const navigate = useNavigate();
-  const { user } = useSelector((state) => state.auth);
+  const auth = useSelector((state) => state.auth);
   const [meetings, setMeetings] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -40,15 +40,15 @@ const MeetingManagement = () => {
   const [selectedRole, setSelectedRole] = useState("");
   const [copiedId, setCopiedId] = useState(null);
 
-  const isRestrictedRole = ['team_lead', 'team_lead_intern', 'manager', 'manager_intern'].includes(user?.role);
+  const isRestrictedRole = ['team_lead', 'team_lead_intern', 'manager', 'manager_intern'].includes(auth?.role);
 
   useEffect(() => {
     fetchMeetings();
     fetchDepts();
-    if (isRestrictedRole && user?.departmentId) {
-      setSelectedDept(user.departmentId);
+    if (isRestrictedRole && auth?.departmentId) {
+      setSelectedDept(auth.departmentId);
     }
-  }, [user]);
+  }, [auth]);
 
   const fetchMeetings = async () => {
     setLoading(true);
@@ -290,11 +290,11 @@ const MeetingManagement = () => {
                 </div>
                 <button 
                   onClick={() => {
-                    const rolePath = user.role === 'ceo' ? 'ceo-meeting-rooms' : 
-                                   user.role === 'manager' ? 'meeting-room' :
-                                   user.role === 'team_lead' ? 'tl-meeting-room' :
-                                   user.role === 'intern' ? 'intern-meeting-room' : 'meeting-room';
-                    navigate(`/${user.role}/${rolePath}/${m.id || m._id}`);
+                    const rolePath = auth.role === 'ceo' ? 'ceo-meeting-rooms' : 
+                                   auth.role === 'manager' ? 'meeting-room' :
+                                   auth.role === 'team_lead' ? 'tl-meeting-room' :
+                                   auth.role === 'intern' ? 'intern-meeting-room' : 'meeting-room';
+                    navigate(`/${auth.role}/${rolePath}/${m.id || m._id}`);
                   }}
                   className="flex-1 bg-indigo-600 border border-indigo-600 text-white font-bold px-4 py-2 rounded-xl text-sm hover:bg-indigo-700 transition-all flex items-center justify-center gap-2 shadow-md"
                 >

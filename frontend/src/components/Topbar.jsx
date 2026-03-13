@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
+
+const WATCHED_STORAGE_KEYS = ["auth", "ems_notifications"];
 import {
   getUserNotifications,
   markAllNotificationsAsRead,

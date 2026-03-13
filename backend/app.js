@@ -17,11 +17,21 @@ app.use((req, res, next) => {
     'http://localhost:5174',
     'https://ems-frontend-eight-lilac.vercel.app',
     'https://ems-adminpanal.vercel.app',
+    'https://ems-backend-seven-ruby.vercel.app'
   ];
   const origin = req.headers.origin;
 
-  if (allowedOrigins.includes(origin)) {
+  if (!origin) {
+    // Allow non-browser requests (like local scripts/insomnia)
+    next();
+    return;
+  }
+
+  if (allowedOrigins.includes(origin) || !origin) {
     res.header('Access-Control-Allow-Origin', origin);
+  } else {
+    // Optionally log blocked origins to debug
+    console.warn(`[CORS] Blocked origin: ${origin}`);
   }
 
   res.header(

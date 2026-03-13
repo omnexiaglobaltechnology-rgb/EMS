@@ -10,41 +10,45 @@ const dbReady = connectDB().catch((err) => {
   dbError = err.message;
 });
 
-// CORS middleware FIRST (handles OPTIONS preflight without waiting for DB)
-app.use((req, res, next) => {
-  const allowedOrigins = [
-    'http://localhost:5173',
-    'http://localhost:5174',
-    'https://ems-frontend-eight-lilac.vercel.app',
-    'https://ems-adminpanal.vercel.app',
-    'https://ems-backend-seven-ruby.vercel.app'
-  ];
-  
-  const origin = req.headers.origin;
-  
-  if (origin) {
-    const trimmedOrigin = origin.trim().replace(/\/$/, ""); // Remove trailing slash if exists
-    if (allowedOrigins.includes(trimmedOrigin)) {
-      res.header('Access-Control-Allow-Origin', origin);
-      res.header('Vary', 'Origin');
+const cors = require('cors');
+
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'https://ems-frontend-eight-lilac.vercel.app',
+  'https://ems-adminpanal.vercel.app',
+  'https://ems-backend-seven-ruby.vercel.app'
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    
+    // Check if origin matches whitelist or has trailing slash variation
+    const normalizedOrigin = origin.trim().replace(/\/$/, "");
+    if (allowedOrigins.includes(normalizedOrigin)) {
+      callback(null, true);
     } else {
-      console.warn(`[CORS] Origin not in allowed list: "${origin}"`);
+      console.warn(`[CORS] Rejected origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
     }
-  }
-
-  res.header(
-    'Access-Control-Allow-Methods',
-    'GET, POST, PUT, PATCH, DELETE, OPTIONS'
-  );
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
-  res.header('Access-Control-Allow-Credentials', 'true');
-
-  if (req.method === 'OPTIONS') {
-    return res.sendStatus(200);
-  }
-
-  next();
-});
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization', 
+    'X-Requested-With', 
+    'Accept', 
+    'Accept-Version', 
+    'Content-Length', 
+    'Content-MD5', 
+    'Date', 
+    'X-Api-Version'
+  ],
+  optionsSuccessStatus: 200 // Some legacy browsers choke on 204
+}));
 
 app.use(express.json());
 

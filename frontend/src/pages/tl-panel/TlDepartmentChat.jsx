@@ -1,4 +1,4 @@
-import ChatInterface from "../components/ChatInterface";
+import ChatInterface from "../../components/ChatInterface";
 
 const TlDepartmentChat = () => {
   return <ChatInterface type="chat" />;

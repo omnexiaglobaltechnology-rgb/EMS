@@ -1,4 +1,4 @@
-import MeetingManagement from "../components/MeetingManagement";
+import MeetingManagement from "../../components/MeetingManagement";
 
 const TlMeetings = () => {
   return <MeetingManagement />;

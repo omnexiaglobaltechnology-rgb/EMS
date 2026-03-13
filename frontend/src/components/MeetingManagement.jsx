@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { 
   Plus, Calendar, Users, X, Search, Clock, 
   ChevronRight, CheckCircle2, AlertCircle, Trash2, 

@@ -12,6 +12,7 @@ import {
   Flag,
   PhoneOff,
 } from "lucide-react";
+import { meetingsApi } from "../../utils/api";
 
 /**
  * Virtual meeting environment for managers.

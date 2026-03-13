@@ -12,6 +12,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AdminUserManagement from "./pages/AdminUserManagement";
 import AdminDepartments from "./pages/AdminDepartments";
 import AdminMeetingPermissions from "./pages/AdminMeetingPermissions";
+import AdminChatManagement from "./pages/AdminChatManagement";
 import AdminSettings from "./pages/AdminSettings";
 
 export const router = createBrowserRouter([
@@ -32,6 +33,7 @@ export const router = createBrowserRouter([
       { path: "users", element: <AdminUserManagement /> },
       { path: "departments", element: <AdminDepartments /> },
       { path: "meeting-permissions", element: <AdminMeetingPermissions /> },
+      { path: "chat-management", element: <AdminChatManagement /> },
       { path: "settings", element: <AdminSettings /> },
     ],
   },

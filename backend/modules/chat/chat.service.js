@@ -238,6 +238,31 @@ const autoCreateTeamRoom = async (teamLeadId, managerId, departmentId) => {
   return room;
 };
 
+/**
+ * Handle admin-created chat rooms with email-based participants.
+ */
+const createAdminRoom = async (payload, creatorId) => {
+  const { name, type, departmentId, emails = [] } = payload;
+
+  // Resolve emails to user IDs
+  const users = await User.find({ email: { $in: emails } }).select('_id email');
+  const participantIds = users.map((u) => u._id);
+
+  // Always include the creator if not already there
+  if (!participantIds.some(id => id.toString() === creatorId.toString())) {
+    participantIds.push(creatorId);
+  }
+
+  const room = await ChatRoom.create({
+    name,
+    type,
+    departmentId,
+    participants: participantIds,
+    createdBy: creatorId,
+  });
+
+  return room;
+};
 module.exports = {
   getRoomsForUser,
   getMessages,
@@ -246,4 +271,5 @@ module.exports = {
   getAnnouncements,
   renameRoom,
   autoCreateTeamRoom,
+  createAdminRoom,
 };

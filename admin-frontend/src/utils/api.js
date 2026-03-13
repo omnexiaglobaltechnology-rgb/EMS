@@ -179,6 +179,7 @@ export const chatApi = {
   getAnnouncements: () => apiFetch("/chat/announcements", { method: "GET" }),
   sendAnnouncement: (formData) =>
     apiFetch("/chat/announcements", { method: "POST", body: formData, isFormData: true }),
+  adminCreateRoom: (data) => apiFetch("/chat/admin/create", { method: "POST", body: data }),
 };
 
 export default apiFetch;

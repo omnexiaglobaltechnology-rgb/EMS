@@ -19,26 +19,24 @@ app.use((req, res, next) => {
     'https://ems-adminpanal.vercel.app',
     'https://ems-backend-seven-ruby.vercel.app'
   ];
+  
   const origin = req.headers.origin;
-
-  if (!origin) {
-    // Allow non-browser requests (like local scripts/insomnia)
-    next();
-    return;
-  }
-
-  if (allowedOrigins.includes(origin) || !origin) {
-    res.header('Access-Control-Allow-Origin', origin);
-  } else {
-    // Optionally log blocked origins to debug
-    console.warn(`[CORS] Blocked origin: ${origin}`);
+  
+  if (origin) {
+    const trimmedOrigin = origin.trim().replace(/\/$/, ""); // Remove trailing slash if exists
+    if (allowedOrigins.includes(trimmedOrigin)) {
+      res.header('Access-Control-Allow-Origin', origin);
+      res.header('Vary', 'Origin');
+    } else {
+      console.warn(`[CORS] Origin not in allowed list: "${origin}"`);
+    }
   }
 
   res.header(
     'Access-Control-Allow-Methods',
     'GET, POST, PUT, PATCH, DELETE, OPTIONS'
   );
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
   res.header('Access-Control-Allow-Credentials', 'true');
 
   if (req.method === 'OPTIONS') {

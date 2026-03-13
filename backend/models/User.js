@@ -61,9 +61,20 @@ const userSchema = new mongoose.Schema({
   departmentId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Department',
+    default: null,
   },
   // Hierarchy: who does this user report to?
   reportsTo: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null,
+  },
+  managerId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null,
+  },
+  teamLeadId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     default: null,
@@ -84,6 +95,8 @@ const userSchema = new mongoose.Schema({
 
 userSchema.index({ departmentId: 1 });
 userSchema.index({ reportsTo: 1 });
+userSchema.index({ managerId: 1 });
+userSchema.index({ teamLeadId: 1 });
 userSchema.index({ role: 1 });
 userSchema.index({ userType: 1 });
 

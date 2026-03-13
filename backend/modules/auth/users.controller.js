@@ -12,7 +12,14 @@ exports.getUsers = async (req, res) => {
     if (role) filter.role = role;
     if (departmentId && role !== 'ceo') filter.departmentId = departmentId;
     if (reportsTo) filter.reportsTo = reportsTo;
-    if (userType) filter.userType = userType;
+    
+    // Support searching for users with null userType or specific userType
+    if (userType) {
+      filter.$or = [
+        { userType: userType },
+        { userType: { $exists: false } } // Fallback for old users until migration is run
+      ];
+    }
     if (search) {
       filter.$or = [
         { name: { $regex: search, $options: 'i' } },
@@ -22,9 +29,11 @@ exports.getUsers = async (req, res) => {
     }
 
     const users = await User.find(filter)
-      .select('_id name email username role userType departmentId reportsTo')
+      .select('_id name email username role userType departmentId reportsTo managerId teamLeadId')
       .populate('departmentId', 'name type')
       .populate('reportsTo', 'name email username role')
+      .populate('managerId', 'name email username role')
+      .populate('teamLeadId', 'name email username role')
       .lean();
 
     const mapped = users.map((u) => ({
@@ -39,6 +48,12 @@ exports.getUsers = async (req, res) => {
         : null,
       reportsTo: u.reportsTo
         ? { id: u.reportsTo._id.toString(), name: u.reportsTo.name, role: u.reportsTo.role }
+        : null,
+      manager: u.managerId
+        ? { id: u.managerId._id.toString(), name: u.managerId.name, role: u.managerId.role }
+        : null,
+      teamLead: u.teamLeadId
+        ? { id: u.teamLeadId._id.toString(), name: u.teamLeadId.name, role: u.teamLeadId.role }
         : null,
     }));
 
@@ -101,21 +116,22 @@ exports.setupAdmin = async (req, res) => {
 exports.fixUserData = async (req, res) => {
   try {
     const result = await User.updateMany(
-      { userType: { $exists: false } },
-      [
-        {
-          $set: {
-            userType: {
-              $cond: { if: { $eq: ["$role", "intern"] }, then: "intern", else: "employee" }
-            }
-          }
+      {},
+      {
+        $set: {
+          userType: { $ifNull: ["$userType", "employee"] },
+          departmentId: { $ifNull: ["$departmentId", null] },
+          managerId: { $ifNull: ["$managerId", null] },
+          teamLeadId: { $ifNull: ["$teamLeadId", null] },
+          reportsTo: { $ifNull: ["$reportsTo", null] }
         }
-      ]
+      }
     );
 
     return res.json({
       success: true,
-      message: `Updated ${result.modifiedCount} users with missing userType`,
+      message: `Updated documents with default fields if missing`,
+      modifiedCount: result.modifiedCount
     });
   } catch (error) {
     return res.status(500).json({ error: error.message });

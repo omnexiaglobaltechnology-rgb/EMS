@@ -23,6 +23,8 @@ const toPublicUser = (user) => ({
   userType: user.userType || 'employee',
   departmentId: user.departmentId,
   reportsTo: user.reportsTo,
+  managerId: user.managerId,
+  teamLeadId: user.teamLeadId,
   isEmailVerified: Boolean(user.isEmailVerified),
   needsPasswordChange: Boolean(user.needsPasswordChange),
   createdAt: user.createdAt,
@@ -119,6 +121,8 @@ const adminCreateUser = async (payload) => {
   } else {
     if (payload.departmentId) userData.departmentId = payload.departmentId;
     if (payload.reportsTo) userData.reportsTo = payload.reportsTo;
+    if (payload.managerId) userData.managerId = payload.managerId;
+    if (payload.teamLeadId) userData.teamLeadId = payload.teamLeadId;
   }
 
   const user = await User.create(userData);

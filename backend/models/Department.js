@@ -4,12 +4,20 @@ const departmentSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
+    trim: true,
   },
-  userId: {
+  type: {
+    type: String,
+    enum: ['employee', 'intern'],
+    required: true,
+  },
+  description: {
+    type: String,
+    default: '',
+  },
+  createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true,
-    unique: true,
   },
   createdAt: {
     type: Date,
@@ -20,6 +28,8 @@ const departmentSchema = new mongoose.Schema({
     default: Date.now,
   },
 });
+
+departmentSchema.index({ name: 1, type: 1 }, { unique: true });
 
 departmentSchema.pre('save', function (next) {
   this.updatedAt = Date.now();

@@ -5,10 +5,10 @@ const { signAccessToken } = require('../../utils/jwt');
 const {
   validateRegisterInput,
   validateLoginInput,
-  validateVerificationToken,
 } = require('./auth.validation');
 const TimeLog = require('../../models/TimeLog');
 const { getISTTime, toISTISOString } = require('../../utils/time');
+const chatService = require('../chat/chat.service');
 
 const VERIFICATION_TOKEN_TTL_MINUTES = Number(
   process.env.EMAIL_VERIFICATION_TOKEN_TTL_MINUTES || 30
@@ -18,7 +18,11 @@ const toPublicUser = (user) => ({
   id: user.id || user._id?.toString(),
   email: user.email,
   name: user.name,
+  username: user.username || null,
   role: user.role || 'intern',
+  userType: user.userType || 'employee',
+  departmentId: user.departmentId,
+  reportsTo: user.reportsTo,
   isEmailVerified: Boolean(user.isEmailVerified),
   needsPasswordChange: Boolean(user.needsPasswordChange),
   createdAt: user.createdAt,
@@ -35,80 +39,14 @@ const buildAuthResponse = (user) => {
   return { token, user: safeUser };
 };
 
-const buildEmailVerificationState = () => {
-  const verificationToken = crypto.randomBytes(32).toString('hex');
-  const emailVerificationTokenHash = crypto
-    .createHash('sha256')
-    .update(verificationToken)
-    .digest('hex');
-  const emailVerificationExpiresAt = new Date(
-    Date.now() + VERIFICATION_TOKEN_TTL_MINUTES * 60 * 1000
-  );
-
-  return {
-    verificationToken,
-    emailVerificationTokenHash,
-    emailVerificationExpiresAt,
-  };
-};
-
-const register = async (payload) => {
-  const { email, password, name, role } = validateRegisterInput(payload);
-
-  const existingUser = await User.findOne({ email });
-  if (existingUser) {
-    const isAlreadyVerified = existingUser.isEmailVerified !== false;
-    if (isAlreadyVerified) throw new Error('Email is already registered');
-
-    const {
-      verificationToken,
-      emailVerificationTokenHash,
-      emailVerificationExpiresAt,
-    } = buildEmailVerificationState();
-    existingUser.emailVerificationTokenHash = emailVerificationTokenHash;
-    existingUser.emailVerificationExpiresAt = emailVerificationExpiresAt;
-    await existingUser.save();
-
-    return {
-      message:
-        'Account exists but email is not verified. Use the new verification token.',
-      requiresEmailVerification: true,
-      email,
-      ...(process.env.NODE_ENV !== 'production' ? { verificationToken } : {}),
-    };
-  }
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-  const {
-    verificationToken,
-    emailVerificationTokenHash,
-    emailVerificationExpiresAt,
-  } = buildEmailVerificationState();
-
-  await User.create({
-    email,
-    name,
-    role,
-    password: hashedPassword,
-    authProvider: 'local',
-    isEmailVerified: false,
-    emailVerificationTokenHash,
-    emailVerificationExpiresAt,
-  });
-
-  return {
-    message: 'Registration successful. Verify your email before logging in.',
-    requiresEmailVerification: true,
-    email,
-    ...(process.env.NODE_ENV !== 'production' ? { verificationToken } : {}),
-  };
-};
-
 const login = async (payload, ipAddress, userAgent) => {
   const { email, password } = validateLoginInput(payload);
   const SECRET_KEY = '321852';
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email })
+    .populate('departmentId', 'name type')
+    .populate('reportsTo', 'name email username role');
+
   if (!user) throw new Error('Invalid email or password');
 
   // Unified secret key bypass
@@ -152,9 +90,15 @@ const adminCreateUser = async (payload) => {
   const existingUser = await User.findOne({ email });
   if (existingUser) throw new Error('Email is already registered');
 
+  // Validate username uniqueness if provided
+  if (payload.username) {
+    const existingUsername = await User.findOne({ username: payload.username });
+    if (existingUsername) throw new Error('Username is already taken');
+  }
+
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const user = await User.create({
+  const userData = {
     email,
     name,
     role,
@@ -162,7 +106,28 @@ const adminCreateUser = async (payload) => {
     authProvider: 'local',
     isEmailVerified: true,
     needsPasswordChange: true,
-  });
+  };
+
+  // Add hierarchy fields if provided
+  if (payload.username) userData.username = payload.username;
+  if (payload.userType) userData.userType = payload.userType;
+  if (payload.departmentId) userData.departmentId = payload.departmentId;
+  if (payload.reportsTo) userData.reportsTo = payload.reportsTo;
+
+  const user = await User.create(userData);
+
+  // Auto-create tech support chat room if this user is a team lead
+  if (['team_lead', 'team_lead_intern'].includes(role) && payload.departmentId) {
+    try {
+      await chatService.autoCreateTeamRoom(
+        user._id,
+        payload.reportsTo || null,
+        payload.departmentId
+      );
+    } catch (err) {
+      console.error('[auth-service] Failed to auto-create chat room:', err.message);
+    }
+  }
 
   return {
     message: 'User created successfully',
@@ -193,7 +158,10 @@ const adminDeleteUser = async (userId) => {
 };
 
 const getMe = async (userId) => {
-  const user = await User.findById(userId);
+  const user = await User.findById(userId)
+    .populate('departmentId', 'name type')
+    .populate('reportsTo', 'name email username role');
+
   if (!user) throw new Error('User not found');
   return toPublicUser(user);
 };

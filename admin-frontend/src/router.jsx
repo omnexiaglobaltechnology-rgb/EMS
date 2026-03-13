@@ -10,6 +10,8 @@ import { ROLES } from "./auth/roles";
 /* Admin Pages */
 import AdminDashboard from "./pages/AdminDashboard";
 import AdminUserManagement from "./pages/AdminUserManagement";
+import AdminDepartments from "./pages/AdminDepartments";
+import AdminMeetingPermissions from "./pages/AdminMeetingPermissions";
 import AdminSettings from "./pages/AdminSettings";
 
 export const router = createBrowserRouter([
@@ -28,6 +30,8 @@ export const router = createBrowserRouter([
       { index: true, element: <Navigate to="dashboard" /> },
       { path: "dashboard", element: <AdminDashboard /> },
       { path: "users", element: <AdminUserManagement /> },
+      { path: "departments", element: <AdminDepartments /> },
+      { path: "meeting-permissions", element: <AdminMeetingPermissions /> },
       { path: "settings", element: <AdminSettings /> },
     ],
   },

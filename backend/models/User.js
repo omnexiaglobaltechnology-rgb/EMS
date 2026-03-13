@@ -11,6 +11,12 @@ const userSchema = new mongoose.Schema({
   name: {
     type: String,
   },
+  username: {
+    type: String,
+    unique: true,
+    sparse: true,
+    trim: true,
+  },
   role: {
     type: String,
     default: 'intern',
@@ -26,6 +32,11 @@ const userSchema = new mongoose.Schema({
       'coo',
       'ceo',
     ],
+  },
+  userType: {
+    type: String,
+    enum: ['employee', 'intern'],
+    default: 'employee',
   },
   password: {
     type: String,
@@ -51,6 +62,12 @@ const userSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Department',
   },
+  // Hierarchy: who does this user report to?
+  reportsTo: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    default: null,
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -64,6 +81,11 @@ const userSchema = new mongoose.Schema({
     default: false,
   },
 });
+
+userSchema.index({ departmentId: 1 });
+userSchema.index({ reportsTo: 1 });
+userSchema.index({ role: 1 });
+userSchema.index({ userType: 1 });
 
 userSchema.pre('save', function (next) {
   this.updatedAt = Date.now();

@@ -83,11 +83,17 @@ const taskRoutes = require('./modules/tasks/task.routes');
 const submissionsRoutes = require('./modules/submissions/submissions.routes');
 const authRoutes = require('./modules/auth/auth.routes');
 const trackingRoutes = require('./modules/tracking/tracking.routes');
+const departmentRoutes = require('./modules/departments/department.routes');
+const chatRoutes = require('./modules/chat/chat.routes');
+const meetingRoutes = require('./modules/meetings/meeting.routes');
 
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/submissions', submissionsRoutes);
 app.use('/api/tracking', trackingRoutes);
+app.use('/api/departments', departmentRoutes);
+app.use('/api/chat', chatRoutes);
+app.use('/api/meetings', meetingRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef } from "react";
+import { useSelector } from "react-redux";
 import {
   Search,
   Send,
@@ -18,6 +19,7 @@ import { chatApi } from "../utils/api";
  * Supports tech support rooms, announcements, and hierarchy-aware visibility.
  */
 const ChatInterface = ({ type = "chat" }) => {
+  const currentUserId = useSelector((state) => state.auth?.id);
   const [rooms, setRooms] = useState([]);
   const [activeRoom, setActiveRoom] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -249,7 +251,7 @@ const ChatInterface = ({ type = "chat" }) => {
               <div
                 key={m.id || m._id || i}
                 className={`flex flex-col ${
-                  m.senderId?._id === (JSON.parse(localStorage.getItem("auth") || "{}").user?.id) || m.senderId === (JSON.parse(localStorage.getItem("auth") || "{}").user?.id)
+                  m.senderId?._id === currentUserId || m.senderId === currentUserId
                     ? "items-end"
                     : "items-start"
                 }`}
@@ -261,7 +263,7 @@ const ChatInterface = ({ type = "chat" }) => {
                 </div>
                 
                 <div className={`group relative max-w-[80%] rounded-2xl px-4 py-3 text-sm shadow-sm transition-all ${
-                  m.senderId?._id === (JSON.parse(localStorage.getItem("auth") || "{}").user?.id) || m.senderId === (JSON.parse(localStorage.getItem("auth") || "{}").user?.id)
+                  m.senderId?._id === currentUserId || m.senderId === currentUserId
                     ? "bg-indigo-600 text-white rounded-tr-none hover:bg-indigo-700"
                     : "bg-white border border-slate-200 text-slate-800 rounded-tl-none hover:border-slate-300"
                 }`}>

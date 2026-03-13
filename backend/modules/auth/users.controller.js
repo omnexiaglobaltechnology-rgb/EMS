@@ -33,7 +33,7 @@ exports.getUsers = async (req, res) => {
       email: u.email,
       username: u.username || null,
       role: u.role,
-      userType: u.userType || 'employee',
+      userType: u.userType || (u.role === 'intern' ? 'intern' : 'employee'),
       department: u.departmentId
         ? { id: u.departmentId._id.toString(), name: u.departmentId.name, type: u.departmentId.type }
         : null,
@@ -51,6 +51,7 @@ exports.getUsers = async (req, res) => {
 
 exports.setupAdmin = async (req, res) => {
   try {
+    const authService = require('./auth.service');
     console.log('[setupAdmin] Starting bootstrap process...');
     
     // Create Admin
@@ -59,6 +60,7 @@ exports.setupAdmin = async (req, res) => {
       password: 'admin123',
       name: 'System Admin',
       role: 'admin',
+      userType: 'employee'
     }).catch(err => {
       if (err.message === 'Email is already registered') return { message: 'Admin already exists' };
       throw err;
@@ -70,7 +72,8 @@ exports.setupAdmin = async (req, res) => {
       password: 'ceo123',
       name: 'Company CEO',
       role: 'ceo',
-      username: 'CEO001'
+      username: 'CEO001',
+      userType: 'employee'
     }).catch(err => {
       if (err.message === 'Email is already registered') return { message: 'CEO already exists' };
       throw err;
@@ -84,16 +87,37 @@ exports.setupAdmin = async (req, res) => {
       results: {
         admin: adminResult.message,
         ceo: ceoResult.message
-      },
-      setup_time: new Date().toISOString(),
+      }
     });
   } catch (error) {
-    console.error('[setupAdmin] Error during bootstrap:', error.message);
-    return res.status(500).json({
-      success: false,
-      error: error.message,
-      hint: 'Check your database connection and environment variables.',
-      full_error: process.env.NODE_ENV !== 'production' ? error.stack : undefined
+    console.error('[setupAdmin] Error:', error.message);
+    return res.status(500).json({ error: error.message });
+  }
+};
+
+/**
+ * Migration/Fix: Set userType for all users who don't have it.
+ */
+exports.fixUserData = async (req, res) => {
+  try {
+    const result = await User.updateMany(
+      { userType: { $exists: false } },
+      [
+        {
+          $set: {
+            userType: {
+              $cond: { if: { $eq: ["$role", "intern"] }, then: "intern", else: "employee" }
+            }
+          }
+        }
+      ]
+    );
+
+    return res.json({
+      success: true,
+      message: `Updated ${result.modifiedCount} users with missing userType`,
     });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
   }
 };

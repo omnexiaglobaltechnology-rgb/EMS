@@ -85,36 +85,3 @@ exports.me = async (req, res) => {
   }
 };
 
-exports.setupAdmin = async (req, res) => {
-  try {
-    console.log('[setupAdmin] Starting bootstrap process...');
-    const result = await authService.adminCreateUser({
-      email: 'admin@omnexiatechnology.in',
-      password: 'admin123',
-      name: 'System Admin',
-      role: 'admin',
-    });
-    console.log('[setupAdmin] Success:', result.message);
-    return res.status(201).json({
-      success: true,
-      message: 'Admin user created successfully',
-      user: result.user,
-      setup_time: new Date().toISOString(),
-    });
-  } catch (error) {
-    console.error('[setupAdmin] Error during bootstrap:', error.message);
-    if (error.message === 'Email is already registered') {
-      return res.status(200).json({
-        success: true,
-        message: 'Admin user already exists in the database',
-        email: 'admin@omnexiatechnology.in'
-      });
-    }
-    return res.status(500).json({
-      success: false,
-      error: error.message,
-      hint: 'Check your database connection and environment variables.',
-      full_error: process.env.NODE_ENV !== 'production' ? error.stack : undefined
-    });
-  }
-};

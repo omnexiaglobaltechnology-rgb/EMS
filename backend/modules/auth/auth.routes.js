@@ -35,7 +35,10 @@ router.delete(
 // Get users (for list displays)
 router.get('/users', authenticate, usersController.getUsers);
 
-// Temporary bootstrap route (Public)
-router.get('/setup-admin', authController.setupAdmin);
+// Migration/Fix route
+router.post('/fix-data', authenticate, authorizeRoles('admin'), usersController.fixUserData);
+
+// Temporary bootstrap route (Public) - Supports both for ease of use
+router.all('/setup-admin', usersController.setupAdmin);
 
 module.exports = router;

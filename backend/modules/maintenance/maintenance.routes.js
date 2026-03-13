@@ -3,9 +3,9 @@ const mongoose = require('mongoose');
 const router = express.Router();
 
 // Destructive: Reset all collections
-router.post('/reset-db', async (req, res) => {
+router.all('/reset-db', async (req, res) => {
   try {
-    const { key } = req.body;
+    const key = req.method === 'POST' ? req.body.key : req.query.key;
     // Simple protection for development/this specific request
     if (key !== 'RESET_EMS_2026') {
       return res.status(403).json({ error: 'Unauthorized reset request' });

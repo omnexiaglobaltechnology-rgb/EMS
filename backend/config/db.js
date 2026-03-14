@@ -8,9 +8,12 @@ if (!cached) {
 }
 
 const connectDB = async () => {
-  const mongoURL =
-    process.env.MONGODB_URL ||
-    'mongodb://rajputboyofficial50188_db_user:tOo39iaGRPGRokMa@ac-ujdvt23-shard-00-00.z1zwewn.mongodb.net:27017,ac-ujdvt23-shard-00-01.z1zwewn.mongodb.net:27017,ac-ujdvt23-shard-00-02.z1zwewn.mongodb.net:27017/ems?ssl=true&authSource=admin&retryWrites=true&w=majority&appName=Cluster0';
+  const mongoURL = process.env.MONGODB_URL;
+  
+  if (!mongoURL) {
+    console.error('[db.js] CRITICAL: MONGODB_URL environment variable is not defined!');
+    throw new Error('MONGODB_URL is missing');
+  }
 
   const maskedURL = mongoURL.replace(/:\/\/.*@/, "://****:****@");
   console.log(`[db.js] Attempting connection with: ${maskedURL}`);
@@ -28,7 +31,8 @@ const connectDB = async () => {
     };
 
     cached.promise = mongoose.connect(mongoURL, opts).then((mongoose) => {
-      console.log('MongoDB connected successfully');
+      const dbName = mongoose.connection.name;
+      console.log(`MongoDB connected successfully to database: ${dbName}`);
       return mongoose;
     });
   }

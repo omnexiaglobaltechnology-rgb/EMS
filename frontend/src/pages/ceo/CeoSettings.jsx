@@ -1,19 +1,34 @@
-import { useState } from "react";
-import { User, Upload, Mail, Lock, Bell, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { User, Upload, Mail, Lock, Bell, Trash2, Save, Loader2 } from "lucide-react";
+import { useSelector } from "react-redux";
+import { authApi } from "../../utils/api";
 
 /**
  * Personal settings configuration interface for the CEO's account.
  * Manages profile details, security credentials, and notification preferences.
  */
 const CeoSettings = () => {
+  const auth = useSelector((state) => state.auth);
   const [form, setForm] = useState({
-    name: "John Doe",
-    email: "john.doe@cxo.com",
+    name: auth?.name || "",
+    email: auth?.email || "",
+    personalEmail: auth?.personalEmail || "",
     currentPassword: "",
     newPassword: "",
     emailNotifications: false,
     inAppNotifications: true,
   });
+
+  useEffect(() => {
+    if (auth) {
+      setForm(prev => ({
+        ...prev,
+        name: auth.name,
+        email: auth.email,
+        personalEmail: auth.personalEmail || ""
+      }));
+    }
+  }, [auth]);
 
   /**
    * Unified handler for processing input changes across text fields and checkboxes.
@@ -57,9 +72,20 @@ const CeoSettings = () => {
                 <input
                   name="email"
                   value={form.email}
-                  onChange={handleChange}
-                  className="w-full rounded border border-gray-300 pl-9 pr-3 py-2"
+                  disabled
+                  className="w-full rounded border border-gray-100 bg-slate-50 pl-9 pr-3 py-2 text-slate-400"
                   placeholder="Email Address"
+                />
+              </div>
+
+              <div className="relative">
+                <Mail className="absolute left-3 top-2.5 h-4 w-4 text-indigo-500" />
+                <input
+                  name="personalEmail"
+                  value={form.personalEmail}
+                  onChange={handleChange}
+                  className="w-full rounded border border-gray-300 pl-9 pr-3 py-2 focus:ring-2 focus:border-indigo-500 outline-none"
+                  placeholder="Personal Gmail (for notifications)"
                 />
               </div>
             </div>
@@ -145,10 +171,21 @@ const CeoSettings = () => {
           </button>
 
           <div className="flex gap-3">
-            <button className="rounded border border-gray-300 px-4 py-2">
+            <button className="rounded border border-gray-300 px-4 py-2 hover:bg-slate-50 transition-colors">
               Cancel
             </button>
-            <button className="rounded bg-indigo-600 px-4 py-2 text-white">
+            <button 
+              onClick={async () => {
+                try {
+                  await authApi.updateProfile({ personalEmail: form.personalEmail });
+                  alert("Profile updated successfully!");
+                } catch (err) {
+                  alert("Failed to update: " + err.message);
+                }
+              }}
+              className="rounded bg-indigo-600 px-6 py-2 text-white hover:bg-indigo-700 transition-all font-bold shadow-md flex items-center gap-2"
+            >
+              <Save size={18} />
               Save Changes
             </button>
           </div>

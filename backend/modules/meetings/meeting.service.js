@@ -56,16 +56,35 @@ const createMeeting = async (creatorId, data) => {
     link: data.link || '',
     topic: topic || '',
     creatorId,
-    departmentId: departmentId || null,
+    departmentId: departmentId || creator.departmentId || null,
     invitees: invitees || [],
     status: 'scheduled',
   });
 
-  return meeting.populate([
+  const populatedMeeting = await meeting.populate([
     { path: 'creatorId', select: 'name email username role' },
     { path: 'departmentId', select: 'name type' },
-    { path: 'invitees', select: 'name email username role' },
+    { path: 'invitees', select: 'name email username role personalEmail' },
   ]);
+
+  // Trigger Email Notifications
+  if (populatedMeeting.invitees && populatedMeeting.invitees.length > 0) {
+    const emailService = require('../../utils/emailService');
+    emailService.sendBulkMeetingNotifications(
+      populatedMeeting.invitees,
+      {
+        title: populatedMeeting.title,
+        date: populatedMeeting.date,
+        time: populatedMeeting.time,
+        link: populatedMeeting.link,
+        platform: populatedMeeting.platform,
+        description: populatedMeeting.description
+      },
+      populatedMeeting.creatorId
+    ).catch(err => console.error('[MeetingService] Bulk email error:', err.message));
+  }
+
+  return populatedMeeting;
 };
 
 /**
@@ -214,8 +233,11 @@ const searchInvitees = async (requestingUser, filters = {}) => {
     const canInviteAcross = await meetingConfigService.checkInvitePermission(requestingUser.role);
     
     if (!canInviteAcross) {
-      // Restrict to user's own department
-      query.departmentId = requestingUser.departmentId || filters.departmentId;
+      // Strictly restrict to user's own department
+      if (!requestingUser.departmentId) {
+        throw new Error('User must belong to a department to search for invitees');
+      }
+      query.departmentId = requestingUser.departmentId;
     } else if (filters.departmentId) {
       query.departmentId = filters.departmentId;
     }

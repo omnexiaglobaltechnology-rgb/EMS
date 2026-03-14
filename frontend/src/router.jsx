@@ -46,6 +46,7 @@ import Manager_internMeetings from "./pages/manager_intern/Manager_internMeeting
 import Manager_internDepartmentChat from "./pages/manager_intern/Manager_internDepartmentChat";
 import Manager_internReports from "./pages/manager_intern/Manager_internReports";
 import Manager_internSubmissionsReview from "./pages/manager_intern/Manager_internSubmissionsReview";
+import ProfileSettings from "./pages/ProfileSettings";
 
 
 
@@ -112,6 +113,7 @@ export const router = createBrowserRouter([
       { path: "meetings", element: <InternMeetings /> },
       { path: "chat", element: <InternDepartmentChat /> },
       { path: "profile", element: <InternProfile /> },
+      { path: "settings", element: <ProfileSettings /> },
       { path: "intern-meeting-room/:id", element: <InternMeetingRoom /> },
     ],
   },
@@ -131,6 +133,7 @@ export const router = createBrowserRouter([
       { path: "reviews", element: <TlSubmissionsReview /> },
       { path: "meetings", element: <TlMeetings /> },
       { path: "chat", element: <TlDepartmentChat /> },
+      { path: "settings", element: <ProfileSettings /> },
       { path: "tl-meeting-room/:id", element: <TlMeetingRoom /> },
     ],
   },
@@ -150,6 +153,7 @@ export const router = createBrowserRouter([
       { path: "reviews", element: <TlSubmissionsReviewIntern /> },
       { path: "meetings", element: <TlMeetingsIntern /> },
       { path: "chat", element: <TlDepartmentIntern /> },
+      { path: "settings", element: <ProfileSettings /> },
       { path: "tl-meeting-room/:id", element: <TlMeetingRoom /> },
     ],
   },
@@ -169,6 +173,7 @@ export const router = createBrowserRouter([
       { path: "reports", element: <ManagerReports /> },
       { path: "meetings", element: <ManagerMeetings /> },
       { path: "chat", element: <ManagerDepartmentChat /> },
+      { path: "settings", element: <ProfileSettings /> },
       // { path: "review-submissions", element: <InternSubmissionsReview /> },
       { path: "meeting-room/:id", element: <MeetingRoom /> },
       // { path: "meeting-room/:id", element: <MeetingRoom /> }
@@ -194,6 +199,7 @@ export const router = createBrowserRouter([
         path: "review-submissions",
         element: <Manager_internSubmissionsReview />,
       },
+      { path: "settings", element: <ProfileSettings /> },
       { path: "meeting-room/:id", element: <InternMeetingRoom /> },
     ],
   },

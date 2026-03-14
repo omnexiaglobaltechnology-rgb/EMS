@@ -89,6 +89,7 @@ export const authApi = {
   register: (userData) => apiFetch("/auth/register", { method: "POST", body: userData }),
   login: (credentials) => apiFetch("/auth/login", { method: "POST", body: credentials }),
   me: () => apiFetch("/auth/me", { method: "GET" }),
+  updateProfile: (data) => apiFetch("/auth/profile", { method: "PATCH", body: data }),
 };
 
 // User management API calls

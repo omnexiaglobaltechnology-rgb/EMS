@@ -137,3 +137,29 @@ exports.fixUserData = async (req, res) => {
     return res.status(500).json({ error: error.message });
   }
 };
+
+/**
+ * Allows users to update their personal email for meeting notifications.
+ */
+exports.updateProfile = async (req, res) => {
+  try {
+    const { personalEmail } = req.body;
+    const user = await User.findById(req.user.id);
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    if (personalEmail !== undefined) {
+      user.personalEmail = personalEmail;
+    }
+
+    await user.save();
+
+    return res.json({
+      success: true,
+      message: 'Profile updated successfully',
+      personalEmail: user.personalEmail
+    });
+  } catch (error) {
+    console.error('[updateProfile] ERROR:', error.message);
+    return res.status(500).json({ error: 'Failed to update profile' });
+  }
+};

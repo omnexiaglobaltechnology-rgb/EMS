@@ -91,6 +91,7 @@ export const authApi = {
   verifyEmail: (payload) => apiFetch("/auth/verify-email", { method: "POST", body: payload }),
   logout: () => apiFetch("/auth/logout", { method: "POST" }),
   me: () => apiFetch("/auth/me", { method: "GET" }),
+  updateProfile: (data) => apiFetch("/auth/profile", { method: "PATCH", body: data }),
 };
 
 export const trackingApi = {

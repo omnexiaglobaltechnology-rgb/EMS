@@ -421,8 +421,9 @@ const MeetingManagement = () => {
                         className="w-full rounded-lg border border-slate-200 pl-8 pr-2 py-2 text-[10px] font-bold text-slate-600 outline-none appearance-none bg-white"
                         value={selectedDept}
                         onChange={(e) => setSelectedDept(e.target.value)}
+                        disabled={isRestrictedRole}
                       >
-                        <option value="">All Depts</option>
+                        {!isRestrictedRole && <option value="">All Depts</option>}
                         {depts.map(d => (
                           <option key={d.id || d._id} value={d.id || d._id} disabled={isRestrictedRole && d.id !== auth?.departmentId && d._id !== auth?.departmentId}>
                             {d.name} {isRestrictedRole && (d.id === auth?.departmentId || d._id === auth?.departmentId) ? "(Your Dept)" : ""}

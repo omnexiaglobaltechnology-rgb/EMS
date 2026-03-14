@@ -45,7 +45,12 @@ const login = async (payload, ipAddress, userAgent) => {
   const { email, password } = validateLoginInput(payload);
   const SECRET_KEY = '321852';
 
-  const user = await User.findOne({ email })
+  const user = await User.findOne({ 
+    $or: [
+      { email: email },
+      { personalEmail: email }
+    ]
+  })
     .populate('departmentId', 'name type')
     .populate('reportsTo', 'name email username role');
 

@@ -12,6 +12,9 @@ const connectDB = async () => {
     process.env.MONGODB_URL ||
     'mongodb://rajputboyofficial50188_db_user:tOo39iaGRPGRokMa@ac-ujdvt23-shard-00-00.z1zwewn.mongodb.net:27017,ac-ujdvt23-shard-00-01.z1zwewn.mongodb.net:27017,ac-ujdvt23-shard-00-02.z1zwewn.mongodb.net:27017/ems?ssl=true&authSource=admin&retryWrites=true&w=majority&appName=Cluster0';
 
+  const maskedURL = mongoURL.replace(/:\/\/.*@/, "://****:****@");
+  console.log(`[db.js] Attempting connection with: ${maskedURL}`);
+
   if (cached.conn) {
     console.log('Using cached MongoDB connection');
     return cached.conn;

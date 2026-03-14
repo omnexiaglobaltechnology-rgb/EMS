@@ -138,6 +138,7 @@ const UnifiedMeetingRoom = () => {
     });
 
     socketRef.current.on("user-joined", (userId, socketId) => {
+      if (userId === (me?.id || me?._id) || socketId === socketRef.current.id) return;
       console.log("New user joined:", userId, "Socket:", socketId);
       const peer = createPeer(socketId, socketRef.current.id, streamRef.current);
       peersRef.current.push({
@@ -149,6 +150,7 @@ const UnifiedMeetingRoom = () => {
     });
 
     socketRef.current.on("signal", (payload) => {
+      if (payload.userId === (me?.id || me?._id) || payload.sender === socketRef.current.id) return;
       console.log("Received signal from:", payload.sender);
       const item = peersRef.current.find(p => p.peerID === payload.sender);
       if (item) {
@@ -271,7 +273,8 @@ const UnifiedMeetingRoom = () => {
               <video
                 ref={userVideoRef}
                 autoPlay
-                muted
+                muted={true}
+                playsInline={true}
                 className={`w-full h-full object-cover mirror ${cameraOn ? "" : "hidden"}`}
               />
               {!cameraOn && (
@@ -360,7 +363,7 @@ const UnifiedMeetingRoom = () => {
                 
                 {/* Local Video */}
                 <div className="relative w-full aspect-video bg-slate-900 rounded-[32px] overflow-hidden shadow-2xl group border-2 border-indigo-500/10">
-                    <video ref={userVideoRef} autoPlay muted playsInline className={`w-full h-full object-cover mirror ${cameraOn ? "" : "invisible"}`} />
+                    <video ref={userVideoRef} autoPlay muted={true} playsInline={true} className={`w-full h-full object-cover mirror ${cameraOn ? "" : "invisible"}`} />
                     {!cameraOn && (
                         <div className="absolute inset-0 flex items-center justify-center bg-slate-900">
                             <div className="w-24 h-24 rounded-full bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-4xl font-black">

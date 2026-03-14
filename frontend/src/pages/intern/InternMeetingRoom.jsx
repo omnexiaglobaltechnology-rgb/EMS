@@ -122,6 +122,7 @@ const InternMeetingRoom = () => {
     socketRef.current.emit("join-room", roomId, myId);
 
     socketRef.current.on("user-joined", (userId, socketId) => {
+      if (userId === (me?.id || me?._id) || socketId === socketRef.current.id) return;
       console.log("User joined:", userId, socketId);
       const peer = createPeer(socketId, socketRef.current.id, streamRef.current);
       peersRef.current.push({
@@ -132,6 +133,7 @@ const InternMeetingRoom = () => {
     });
 
     socketRef.current.on("signal", (payload) => {
+      if (payload.userId === (me?.id || me?._id) || payload.sender === socketRef.current.id) return;
       const item = peersRef.current.find(p => p.peerID === payload.sender);
       if (item) {
         item.peer.signal(payload.signal);
@@ -224,8 +226,8 @@ const InternMeetingRoom = () => {
               <video
                 ref={userVideoRef}
                 autoPlay
-                muted
-                playsInline
+                muted={true}
+                playsInline={true}
                 className={`w-full h-full object-cover mirror ${cameraOn ? "" : "hidden"}`}
               />
               {!cameraOn && (
@@ -319,8 +321,8 @@ const InternMeetingRoom = () => {
           <video
             ref={userVideoRef}
             autoPlay
-            muted
-            playsInline
+            muted={true}
+            playsInline={true}
             className={`w-full h-full object-cover mirror transform transition-transform duration-700 group-hover:scale-105 ${cameraOn ? "" : "invisible"}`}
           />
           {!cameraOn && (

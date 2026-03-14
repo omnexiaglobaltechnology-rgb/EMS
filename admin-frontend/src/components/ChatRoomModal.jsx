@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { departmentsApi, usersApi } from "../utils/api";
-import { Search, ChevronDown, ChevronRight, Users, Check } from "lucide-react";
+import { Search, ChevronDown, ChevronRight, Users, Check, Filter } from "lucide-react";
 
 const ROOM_TYPES = ["tech_support", "announcement", "department"];
 
@@ -16,6 +16,7 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
   const [departments, setDepartments] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
   const [selectedUserIds, setSelectedUserIds] = useState(new Set());
+  const [userDeptFilter, setUserDeptFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [expandedDepts, setExpandedDepts] = useState(new Set());
   const [loading, setLoading] = useState(false);
@@ -46,6 +47,11 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
           );
           setSelectedUserIds(existingIds);
         }
+
+        // Default user filter to the room's department if it exists
+        if (room?.departmentId?._id || room?.departmentId) {
+          setUserDeptFilter(room.departmentId?._id || room.departmentId);
+        }
       } catch (err) {
         console.error("Failed to fetch data", err);
       } finally {
@@ -54,6 +60,13 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
     };
     fetchData();
   }, []);
+
+  // Update user filter when main department changes (in create mode)
+  useEffect(() => {
+    if (!isEditMode && form.departmentId) {
+      setUserDeptFilter(form.departmentId);
+    }
+  }, [form.departmentId, isEditMode]);
 
   // Group users by department
   const usersByDepartment = useMemo(() => {
@@ -77,27 +90,34 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
     return grouped;
   }, [allUsers]);
 
-  // Filter users by search query
+  // Filter users by selected department AND search query
   const filteredUsersByDepartment = useMemo(() => {
-    if (!searchQuery.trim()) return usersByDepartment;
-
-    const q = searchQuery.toLowerCase();
+    const q = searchQuery.toLowerCase().trim();
     const filtered = {};
 
     Object.entries(usersByDepartment).forEach(([deptId, users]) => {
-      const matchedUsers = users.filter(
-        (u) =>
-          u.name?.toLowerCase().includes(q) ||
-          u.email?.toLowerCase().includes(q) ||
-          u.role?.toLowerCase().includes(q)
-      );
+      // 1. Filter by Department first
+      if (userDeptFilter !== "all" && userDeptFilter !== deptId) {
+        return;
+      }
+
+      // 2. Filter by Search Query
+      const matchedUsers = q 
+        ? users.filter(
+            (u) =>
+              u.name?.toLowerCase().includes(q) ||
+              u.email?.toLowerCase().includes(q) ||
+              u.role?.toLowerCase().includes(q)
+          )
+        : users;
+
       if (matchedUsers.length > 0) {
         filtered[deptId] = matchedUsers;
       }
     });
 
     return filtered;
-  }, [usersByDepartment, searchQuery]);
+  }, [usersByDepartment, searchQuery, userDeptFilter]);
 
   // Department name lookup
   const getDeptName = (deptId) => {
@@ -237,7 +257,7 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
 
               <div className="space-y-1">
                 <label className="text-sm font-medium text-slate-700">
-                  Department
+                  Room Department
                 </label>
                 <select
                   required
@@ -258,41 +278,68 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
             </div>
 
             {/* User Picker Section */}
-            <div className="space-y-2">
+            <div className="space-y-3 pt-2">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium text-slate-700">
+                <label className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                  <Users size={16} className="text-indigo-600" />
                   Select Participants
                 </label>
-                <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+                <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100">
                   {selectedUserIds.size} selected
                 </span>
               </div>
 
-              {/* Search */}
-              <div className="relative">
-                <Search
-                  size={16}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                />
-                <input
-                  type="text"
-                  placeholder="Search users by name, email, or role..."
-                  className="w-full rounded-lg border border-slate-300 pl-9 pr-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
+              {/* Filters Area */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1">
+                    <Filter size={10} />
+                    Filter by Department
+                  </label>
+                  <select
+                    className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
+                    value={userDeptFilter}
+                    onChange={(e) => setUserDeptFilter(e.target.value)}
+                  >
+                    <option value="all">All Departments</option>
+                    {departments.map((d) => (
+                      <option key={d.id || d._id} value={d.id || d._id}>
+                        {d.name}
+                      </option>
+                    ))}
+                    <option value="no_department">No Department</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1">
+                    <Search size={10} />
+                    Search Users
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      placeholder="Name, email..."
+                      className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-xs focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                  </div>
+                </div>
               </div>
 
               {/* Department-wise user list */}
-              <div className="border border-slate-200 rounded-lg max-h-[280px] overflow-y-auto">
+              <div className="border border-slate-200 rounded-lg max-h-[250px] overflow-y-auto shadow-inner bg-white">
                 {fetchingData ? (
                   <div className="py-8 text-center text-slate-400">
                     <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600 mx-auto mb-2"></div>
                     <p className="text-sm">Loading users...</p>
                   </div>
                 ) : Object.keys(filteredUsersByDepartment).length === 0 ? (
-                  <div className="py-8 text-center text-slate-400">
-                    <p className="text-sm">No users found</p>
+                  <div className="py-12 text-center text-slate-400">
+                    <Users size={32} className="mx-auto mb-3 opacity-20" />
+                    <p className="text-sm font-medium">No users found in this selection</p>
+                    <p className="text-xs mt-1">Try changing the department filter or search query</p>
                   </div>
                 ) : (
                   Object.entries(filteredUsersByDepartment).map(
@@ -309,7 +356,7 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
                         <div key={deptId} className="border-b border-slate-100 last:border-b-0">
                           {/* Department header */}
                           <div
-                            className="flex items-center gap-2 px-3 py-2.5 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors sticky top-0"
+                            className="flex items-center gap-2 px-3 py-2 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors sticky top-0 z-10"
                             onClick={() => toggleDept(deptId)}
                           >
                             {isExpanded ? (
@@ -338,8 +385,7 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
                               )}
                             </button>
 
-                            <Users size={14} className="text-indigo-500 shrink-0" />
-                            <span className="text-sm font-semibold text-slate-700 flex-1">
+                            <span className="text-xs font-bold text-slate-700 flex-1 truncate">
                               {getDeptName(deptId)}
                             </span>
                             <span className="text-[10px] font-bold text-slate-400 bg-white px-1.5 py-0.5 rounded border border-slate-200">
@@ -357,7 +403,7 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
                                     key={user.id}
                                     className={`flex items-center gap-3 px-4 py-2 cursor-pointer transition-colors ${
                                       isSelected
-                                        ? "bg-indigo-50/50"
+                                        ? "bg-indigo-50/30"
                                         : "hover:bg-slate-50"
                                     }`}
                                   >
@@ -380,10 +426,10 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
                                     </div>
 
                                     <div className="flex-1 min-w-0">
-                                      <p className="text-sm font-medium text-slate-800 truncate">
+                                      <p className="text-xs font-semibold text-slate-800 truncate">
                                         {user.name || user.username || "Unnamed"}
                                       </p>
-                                      <p className="text-xs text-slate-400 truncate">
+                                      <p className="text-[10px] text-slate-400 truncate">
                                         {user.email}
                                       </p>
                                     </div>

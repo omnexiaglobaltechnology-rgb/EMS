@@ -69,7 +69,14 @@ const InternMeetingRoom = () => {
 
   const requestMedia = async (audio, video) => {
     try {
-      const currentStream = await navigator.mediaDevices.getUserMedia({ video, audio });
+      const currentStream = await navigator.mediaDevices.getUserMedia({ 
+        video, 
+        audio: typeof audio === 'boolean' ? (audio ? {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        } : false) : audio
+      });
       setStream(currentStream);
       streamRef.current = currentStream;
       if (userVideoRef.current) {

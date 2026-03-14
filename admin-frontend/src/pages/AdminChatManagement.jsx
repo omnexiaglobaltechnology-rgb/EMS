@@ -1,12 +1,13 @@
 import { useState, useEffect } from "react";
 import { chatApi } from "../utils/api";
-import { Plus, MessageSquare, Users, Trash2, Hash } from "lucide-react";
+import { Plus, MessageSquare, Users, Pencil, Hash } from "lucide-react";
 import ChatRoomModal from "../components/ChatRoomModal";
 
 const AdminChatManagement = () => {
   const [rooms, setRooms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [editingRoom, setEditingRoom] = useState(null);
 
   useEffect(() => {
     fetchRooms();
@@ -34,6 +35,26 @@ const AdminChatManagement = () => {
     }
   };
 
+  const handleUpdateRoom = async (payload) => {
+    try {
+      await chatApi.updateRoom(editingRoom._id, payload);
+      fetchRooms();
+    } catch (err) {
+      console.error("Failed to update room", err);
+      throw err;
+    }
+  };
+
+  const openEditModal = (room) => {
+    setEditingRoom(room);
+    setShowModal(true);
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+    setEditingRoom(null);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -42,7 +63,7 @@ const AdminChatManagement = () => {
           <p className="text-slate-500">Create and manage organization-wide chat rooms</p>
         </div>
         <button
-          onClick={() => setShowModal(true)}
+          onClick={() => { setEditingRoom(null); setShowModal(true); }}
           className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-white text-sm font-medium hover:bg-indigo-700 transition-colors shadow-sm"
         >
           <Plus size={16} />
@@ -61,7 +82,7 @@ const AdminChatManagement = () => {
             <MessageSquare className="mx-auto h-12 w-12 text-slate-300 mb-2" />
             <p className="text-slate-500 font-medium">No chat rooms created yet</p>
             <button
-              onClick={() => setShowModal(true)}
+              onClick={() => { setEditingRoom(null); setShowModal(true); }}
               className="mt-4 text-indigo-600 text-sm font-semibold hover:text-indigo-700"
             >
               Create your first room
@@ -92,7 +113,14 @@ const AdminChatManagement = () => {
                   <Users size={14} />
                   <span>{room.participants?.length || 0} participants</span>
                 </div>
-                {/* Future: Add participants view or delete room */}
+                <button
+                  onClick={() => openEditModal(room)}
+                  className="flex items-center gap-1.5 text-indigo-600 text-xs font-semibold hover:text-indigo-700 hover:bg-indigo-50 px-2.5 py-1.5 rounded-lg transition-colors"
+                  title="Edit room participants"
+                >
+                  <Pencil size={13} />
+                  Edit
+                </button>
               </div>
             </div>
           ))
@@ -101,8 +129,9 @@ const AdminChatManagement = () => {
 
       {showModal && (
         <ChatRoomModal
-          onClose={() => setShowModal(false)}
-          onSave={handleCreateRoom}
+          onClose={closeModal}
+          onSave={editingRoom ? handleUpdateRoom : handleCreateRoom}
+          room={editingRoom}
         />
       )}
     </div>

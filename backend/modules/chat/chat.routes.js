@@ -45,6 +45,7 @@ router.post(
   chatController.sendMessage
 );
 router.patch('/rooms/:id/rename', chatController.renameRoom);
+router.patch('/rooms/:id', chatController.updateRoom);
 router.post('/admin/create', chatController.adminCreateRoom);
 
 // Announcements

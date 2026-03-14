@@ -263,6 +263,30 @@ const adminCreateRoom = async (payload, creatorId) => {
 
   return room;
 };
+/**
+ * Update an existing chat room (name, participants).
+ */
+const updateRoom = async (roomId, payload) => {
+  const room = await ChatRoom.findById(roomId);
+  if (!room) throw new Error('Chat room not found');
+
+  if (payload.name) {
+    room.name = payload.name;
+    room.customName = payload.name;
+  }
+
+  if (Array.isArray(payload.participants)) {
+    room.participants = payload.participants;
+  }
+
+  await room.save();
+
+  // Return populated room
+  return ChatRoom.findById(roomId)
+    .populate('departmentId', 'name type')
+    .populate('participants', 'name email role');
+};
+
 module.exports = {
   getRoomsForUser,
   getMessages,
@@ -272,4 +296,5 @@ module.exports = {
   renameRoom,
   autoCreateTeamRoom,
   adminCreateRoom,
+  updateRoom,
 };

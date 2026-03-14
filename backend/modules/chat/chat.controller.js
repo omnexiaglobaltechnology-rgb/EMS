@@ -89,6 +89,15 @@ const autoCreateTeamRoom = async (req, res, next) => {
   }
 };
 
+const updateRoom = async (req, res, next) => {
+  try {
+    const room = await chatService.updateRoom(req.params.id, req.body);
+    res.json(room);
+  } catch (err) {
+    next(err);
+  }
+};
+
 module.exports = {
   getRooms,
   getMessages,
@@ -98,4 +107,5 @@ module.exports = {
   renameRoom,
   adminCreateRoom,
   autoCreateTeamRoom,
+  updateRoom,
 };

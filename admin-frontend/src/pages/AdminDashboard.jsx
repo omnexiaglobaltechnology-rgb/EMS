@@ -63,7 +63,7 @@ const AdminDashboard = () => {
       setError(null);
 
       // Fetch system health from backend root
-      const API_ROOT = import.meta.env.VITE_API_URL?.replace("/api", "") || "https://ems-backend-seven-ruby.vercel.app";
+      const API_ROOT = import.meta.env.VITE_API_URL?.replace("/api", "") || "https://ems-backend-mcf0.onrender.com";
       try {
         const healthRes = await fetch(API_ROOT);
         if (healthRes.ok) {

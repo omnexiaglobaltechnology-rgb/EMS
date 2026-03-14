@@ -17,7 +17,8 @@ const allowedOrigins = [
   'http://localhost:5174',
   'https://ems-frontend-eight-lilac.vercel.app',
   'https://ems-adminpanal.vercel.app',
-  'https://ems-backend-seven-ruby.vercel.app'
+  'https://ems-backend-seven-ruby.vercel.app',
+  'https://ems-backend-mcf0.onrender.com'
 ];
 
 app.use(cors({

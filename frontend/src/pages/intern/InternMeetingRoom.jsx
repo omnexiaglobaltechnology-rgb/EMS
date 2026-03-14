@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { meetingsApi, authApi } from "../../utils/api";
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || "https://ems-backend-seven-ruby.vercel.app";
+const SOCKET_URL = import.meta.env.VITE_API_URL || "https://ems-backend-mcf0.onrender.com";
 
 const InternMeetingRoom = () => {
   const { id: roomId } = useParams();

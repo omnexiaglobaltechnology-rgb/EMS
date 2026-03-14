@@ -145,7 +145,7 @@ const ChatInterface = ({ type = "chat" }) => {
   );
 
   const getPublicUrl = (path) => {
-    const API_BASE = import.meta.env.VITE_API_URL || "https://ems-backend-seven-ruby.vercel.app";
+    const API_BASE = import.meta.env.VITE_API_URL || "https://ems-backend-mcf0.onrender.com";
     return path.startsWith("http") ? path : `${API_BASE}${path}`;
   };
 

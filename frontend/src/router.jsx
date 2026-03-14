@@ -309,7 +309,7 @@ export const router = createBrowserRouter([
       { path: "operations", element: <CeoOperations /> },
       { path: "finance", element: <CeoFinance /> },
       { path: "employee-management", element: <EmployeeManagement /> },
-      { path: "meetings", element: <CeoMeetingRooms /> },
+      { path: "meetings", element: <CeoMeetings /> },
       { path: "analytics", element: <ManagerAnalytics /> },
       { path: "reports", element: <ManagerReports /> },
       { path: "announcements", element: <CeoAnnouncements /> },

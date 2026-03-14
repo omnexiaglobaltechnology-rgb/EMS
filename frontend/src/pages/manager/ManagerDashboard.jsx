@@ -128,10 +128,7 @@ const ManagerDashboard = () => {
 
     return performance.length > 0
       ? performance
-      : [
-          { label: "Engineering", value: 0 },
-          { label: "Design", value: 0 },
-        ];
+      : [];
   };
 
   /**
@@ -206,13 +203,11 @@ const ManagerDashboard = () => {
         <StatCard
           title="Active Projects"
           value={String(stats.activeProjects)}
-          trend="+8% from last week"
           icon={BarChart3}
         />
         <StatCard
           title="Department KPI"
           value={`${stats.kpi}%`}
-          trend="+3% from last week"
           icon={TrendingUp}
         />
         <StatCard

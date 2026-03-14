@@ -1,25 +1,6 @@
 import { CheckSquare, Calendar, FileText } from "lucide-react";
 
-const activities = [
-  {
-    time: "10:30 AM",
-    text: 'Task "Project Research" updated with new requirements',
-    icon: CheckSquare,
-    color: "indigo",
-  },
-  {
-    time: "11:15 AM",
-    text: 'Meeting "Weekly Sync" schedule confirmed for 2:00 PM',
-    icon: Calendar,
-    color: "sky",
-  },
-  {
-    time: "12:00 PM",
-    text: 'Submission "Q4 Report Draft" uploaded successfully',
-    icon: FileText,
-    color: "emerald",
-  },
-];
+const activities = [];
 
 /**
  * Renders a list of the most recent activities relevant to the intern.

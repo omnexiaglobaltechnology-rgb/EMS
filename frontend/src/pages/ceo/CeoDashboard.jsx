@@ -74,8 +74,8 @@ const CeoDashboard = () => {
         totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
       setStats({
-        revenue: "Calculated Monthly", // Removed Math.random()
-        departments: 7, // Fixed actual department count from MENU/router
+        revenue: "$0", // Future: Fetch from finance module
+        departments: 0, // Should be fetched from departmentsApi
         employees: uniqueEmployees,
         growth: growthRate,
       });
@@ -132,11 +132,7 @@ const CeoDashboard = () => {
     },
   ];
 
-  const announcements = [
-    { title: "Q1 Results Published", time: "1 day ago" },
-    { title: "New Policy Updates", time: "2 day ago" },
-    { title: "Team Expansion", time: "3 day ago" },
-  ];
+  const announcements = []; // Future: Fetch from announcementsApi
 
   return (
     <div className="space-y-8">
@@ -227,7 +223,7 @@ const CeoDashboard = () => {
             <h2 className="mb-6 text-lg font-semibold">Recent Announcements</h2>
 
             <div className="space-y-4">
-              {announcements.map((a, i) => (
+              {announcements.length > 0 ? announcements.map((a, i) => (
                 <div
                   key={i}
                   className={`flex items-start gap-3 rounded-lg p-4 ${
@@ -240,7 +236,12 @@ const CeoDashboard = () => {
                     <p className="text-xs text-slate-500">{a.time}</p>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="py-8 text-center">
+                  <Megaphone size={24} className="mx-auto text-slate-200 mb-2" />
+                  <p className="text-xs text-slate-400 font-medium">No recent announcements</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

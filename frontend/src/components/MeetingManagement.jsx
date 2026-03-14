@@ -449,31 +449,51 @@ Join the meeting at: ${window.location.origin}/${auth.role}/meeting-room/${link}
                     />
                   </div>
                   
-                  <div className="grid grid-cols-2 gap-3">
-                    <select 
-                      className="rounded-xl border border-slate-200 px-4 py-3 text-[10px] font-extrabold text-slate-600 outline-none appearance-none bg-white shadow-sm focus:border-indigo-500"
-                      value={selectedDept}
-                      onChange={(e) => setSelectedDept(e.target.value)}
-                      disabled={isRestrictedRole}
-                    >
-                      {!isRestrictedRole && <option value="">All Departments</option>}
-                      {depts.map(d => (
-                        <option key={d.id || d._id} value={d.id || d._id} disabled={isRestrictedRole && d.id !== auth?.departmentId && d._id !== auth?.departmentId}>
-                          {d.name.toUpperCase()} {isRestrictedRole && (d.id === auth?.departmentId || d._id === auth?.departmentId) ? "(YOURS)" : ""}
-                        </option>
-                      ))}
-                    </select>
-                    <select 
-                      className="rounded-xl border border-slate-200 px-4 py-3 text-[10px] font-extrabold text-slate-600 outline-none appearance-none bg-white shadow-sm focus:border-indigo-500"
-                      value={selectedRole}
-                      onChange={(e) => setSelectedRole(e.target.value)}
-                    >
-                      <option value="">All Roles</option>
-                      <option value="manager">MANAGERS</option>
-                      <option value="team_lead">TEAM LEADS</option>
-                      <option value="intern">EMPLOYEES</option>
-                    </select>
+                  <div className="grid grid-cols-2 gap-3 relative">
+                    <div className="relative group">
+                      <select 
+                        className="w-full rounded-xl border border-slate-200 pl-4 pr-8 py-3 text-[10px] font-extrabold text-slate-600 outline-none appearance-none bg-white shadow-sm focus:border-indigo-500"
+                        value={selectedDept}
+                        onChange={(e) => setSelectedDept(e.target.value)}
+                        disabled={isRestrictedRole}
+                      >
+                        {!isRestrictedRole && <option value="">All Departments</option>}
+                        {depts.map(d => (
+                          <option key={d.id || d._id} value={d.id || d._id} disabled={isRestrictedRole && d.id !== auth?.departmentId && d._id !== auth?.departmentId}>
+                            {d.name.toUpperCase()} {isRestrictedRole && (d.id === auth?.departmentId || d._id === auth?.departmentId) ? "(YOURS)" : ""}
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={12} />
+                    </div>
+                    
+                    <div className="relative group">
+                      <select 
+                        className="w-full rounded-xl border border-slate-200 pl-4 pr-8 py-3 text-[10px] font-extrabold text-slate-600 outline-none appearance-none bg-white shadow-sm focus:border-indigo-500"
+                        value={selectedRole}
+                        onChange={(e) => setSelectedRole(e.target.value)}
+                      >
+                        <option value="">All Roles</option>
+                        <option value="manager">MANAGERS</option>
+                        <option value="team_lead">TEAM LEADS</option>
+                        <option value="intern">EMPLOYEES</option>
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" size={12} />
+                    </div>
                   </div>
+
+                  {(selectedDept || selectedRole || searchQuery) && (
+                    <button 
+                      onClick={() => {
+                        setSelectedDept("");
+                        setSelectedRole("");
+                        setSearchQuery("");
+                      }}
+                      className="text-[9px] font-black text-slate-400 hover:text-red-500 uppercase tracking-widest flex items-center gap-1 transition-colors"
+                    >
+                      <X size={10} /> Clear all filters
+                    </button>
+                  )}
                 </div>
 
                 {/* Results List */}

@@ -22,10 +22,7 @@ import { tasksApi, submissionsApi } from "../../utils/api";
  * upcoming meetings, and work hour progress.
  */
 const InternDashboard = () => {
-  const { name } = useSelector((state) => state.auth);
-
-  // Hardcoded intern ID - should come from Redux auth
-  const internId = "intern-1";
+  const { id: internId } = useSelector((state) => state.auth);
 
   const [stats, setStats] = useState({
     assignedTasks: 0,
@@ -109,46 +106,8 @@ const InternDashboard = () => {
    * @returns {string} Formatted time string (e.g., "6h 30m")
    */
   const calculateWorkHours = (tasks, period) => {
-    // Simplified calculation: 8 hours per completed task, 4 hours per in-progress task
-    let hours = 0;
-    let minutes = 0;
-
-    tasks.forEach((task) => {
-      if (period === "today") {
-        // Check if task was updated today
-        const taskDate = new Date(task.updatedAt || task.createdAt);
-        const today = new Date();
-        if (taskDate.toDateString() === today.toDateString()) {
-          if (task.status === "completed") {
-            hours += 8;
-          } else if (task.status === "in_progress") {
-            hours += 6;
-            minutes += 30;
-          }
-        }
-      } else if (period === "week") {
-        // Check if task was updated this week
-        const taskDate = new Date(task.updatedAt || task.createdAt);
-        const today = new Date();
-        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-
-        if (taskDate >= weekAgo) {
-          if (task.status === "completed") {
-            hours += 8;
-          } else if (task.status === "in_progress") {
-            hours += 6;
-            minutes += 30;
-          }
-        }
-      }
-    });
-
-    if (minutes >= 60) {
-      hours += Math.floor(minutes / 60);
-      minutes = minutes % 60;
-    }
-
-    return `${hours}h ${minutes}m`;
+    // Simulated logic removed to prevent dummy data impact in production
+    return "0h 0m";
   };
 
   /**

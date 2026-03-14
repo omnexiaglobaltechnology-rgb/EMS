@@ -60,23 +60,14 @@ const CfoDashboard = () => {
       const profit = (revenue - expenses).toFixed(1);
 
       setStats({
-        revenue: "Audit Pending...",
-        expenses: "Reviewing Accounts",
-        profit: "EBITDA Insight",
-        runway: "Analyzing Burn Rate",
+        revenue: "$0",
+        expenses: "$0",
+        profit: "$0",
+        runway: "0 Months",
       });
 
       // Generate activities
-      const generatedActivities = [
-        { title: "Q3 Budget Allocation Completed", progress: 95 },
-        { title: "Department Expense Audit", progress: 80 },
-        { title: "Vendor Cost Optimization Initiative", progress: 65 },
-        { title: "Payroll & Compensation Review", progress: 55 },
-        {
-          title: "Annual Financial Forecast Planning",
-          progress: Math.round((completedTasks / totalTasks) * 100),
-        },
-      ];
+      const generatedActivities = []; // Future: Fetch from financeApi
       setActivities(generatedActivities);
     } catch (err) {
       console.error("Error fetching dashboard data:", err);
@@ -140,7 +131,7 @@ const CfoDashboard = () => {
           <h2 className="text-lg font-semibold mb-6">Organization Activity Overview</h2>
 
           <div className="space-y-5">
-            {activities.map((a) => (
+            {activities.length > 0 ? activities.map((a) => (
               <div key={a.title}>
                 <div className="mb-2 flex justify-between text-sm">
                   <span className={theme === "dark" ? "text-slate-300" : "text-slate-700"}>{a.title}</span>
@@ -154,7 +145,11 @@ const CfoDashboard = () => {
                   />
                 </div>
               </div>
-            ))}
+            )) : (
+              <div className="py-12 text-center">
+                <p className="text-sm text-slate-400 font-medium italic">No active financial initiatives tracked</p>
+              </div>
+            )}
           </div>
         </div>
 

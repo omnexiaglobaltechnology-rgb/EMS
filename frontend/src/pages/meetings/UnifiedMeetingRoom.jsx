@@ -91,8 +91,12 @@ const UnifiedMeetingRoom = () => {
       setStream(currentStream);
       streamRef.current = currentStream;
       if (userVideoRef.current) {
-        userVideoRef.current.srcObject = currentStream;
+        // Create a separate stream for the local video that has NO audio tracks
+        // This is the most reliable way to prevent local audio feedback/echo
+        const previewStream = new MediaStream(currentStream.getVideoTracks());
+        userVideoRef.current.srcObject = previewStream;
         userVideoRef.current.muted = true;
+        userVideoRef.current.defaultMuted = true;
       }
       return currentStream;
     } catch (err) {
@@ -184,8 +188,10 @@ const UnifiedMeetingRoom = () => {
   // Re-apply local stream when joining (since video element is re-mounted)
   useEffect(() => {
     if (isJoined && streamRef.current && userVideoRef.current) {
-        userVideoRef.current.srcObject = streamRef.current;
+        const previewStream = new MediaStream(streamRef.current.getVideoTracks());
+        userVideoRef.current.srcObject = previewStream;
         userVideoRef.current.muted = true;
+        userVideoRef.current.defaultMuted = true;
     }
   }, [isJoined]);
 

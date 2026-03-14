@@ -80,8 +80,10 @@ const InternMeetingRoom = () => {
       setStream(currentStream);
       streamRef.current = currentStream;
       if (userVideoRef.current) {
-        userVideoRef.current.srcObject = currentStream;
+        const previewStream = new MediaStream(currentStream.getVideoTracks());
+        userVideoRef.current.srcObject = previewStream;
         userVideoRef.current.muted = true;
+        userVideoRef.current.defaultMuted = true;
       }
       return currentStream;
     } catch (err) {
@@ -162,8 +164,10 @@ const InternMeetingRoom = () => {
   // Re-apply local stream when joining (since video element is re-mounted)
   useEffect(() => {
     if (isJoined && streamRef.current && userVideoRef.current) {
-        userVideoRef.current.srcObject = streamRef.current;
+        const previewStream = new MediaStream(streamRef.current.getVideoTracks());
+        userVideoRef.current.srcObject = previewStream;
         userVideoRef.current.muted = true;
+        userVideoRef.current.defaultMuted = true;
     }
   }, [isJoined]);
 
@@ -454,11 +458,18 @@ const VideoComponent = ({ peer }) => {
   const ref = useRef();
 
   useEffect(() => {
-    peer.on("stream", stream => {
+    const handleStream = stream => {
       if (ref.current) {
         ref.current.srcObject = stream;
       }
-    });
+    };
+
+    if (peer.streams && peer.streams[0]) {
+      handleStream(peer.streams[0]);
+    }
+
+    peer.on("stream", handleStream);
+    return () => peer.off("stream", handleStream);
   }, [peer]);
 
   return (

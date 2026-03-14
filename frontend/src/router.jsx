@@ -93,9 +93,41 @@ import CeoOrganizationChat from "./pages/ceo/CeoOrganizationChat";
 import CeoSettings from "./pages/ceo/CeoSettings";
 import CeoMeetingRooms from "./pages/ceo/CeoMeetingRooms";
 
+/* Employee Pages */
+import EmployeeDashboard from "./pages/employee/EmployeeDashboard";
+import EmployeeMyTasks from "./pages/employee/EmployeeMyTasks";
+import EmployeeSubmissions from "./pages/employee/EmployeeSubmissions";
+import EmployeeMeetings from "./pages/employee/EmployeeMeetings";
+import EmployeeDepartmentChat from "./pages/employee/EmployeeDepartmentChat";
+import EmployeeProfile from "./pages/employee/EmployeeProfile";
+
+/* Manager & Senior Pages */
+import EmployeeManagement from "./pages/manager/EmployeeManagement";
+
 export const router = createBrowserRouter([
   { path: "/", element: <Login /> },
   { path: "/unauthorized", element: <Unauthorized /> },
+
+  /* ================= EMPLOYEE ================= */
+  {
+    path: "/employee",
+    element: (
+      <ProtectedRoute allowedRoles={[ROLES.EMPLOYEE]}>
+        <DashboardLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <Navigate to="dashboard" /> },
+      { path: "dashboard", element: <EmployeeDashboard /> },
+      { path: "my-tasks", element: <EmployeeMyTasks /> },
+      { path: "submissions", element: <EmployeeSubmissions /> },
+      { path: "meetings", element: <EmployeeMeetings /> },
+      { path: "chat", element: <EmployeeDepartmentChat /> },
+      { path: "profile", element: <EmployeeProfile /> },
+      { path: "settings", element: <ProfileSettings /> },
+      { path: "meeting-room/:id", element: <InternMeetingRoom /> },
+    ],
+  },
 
   /* ================= INTERN ================= */
   {
@@ -130,6 +162,7 @@ export const router = createBrowserRouter([
       { index: true, element: <Navigate to="dashboard" /> },
       { path: "dashboard", element: <TlDashboard /> },
       { path: "tasks", element: <TlInternTask /> },
+      { path: "employee-management", element: <EmployeeManagement /> },
       { path: "reviews", element: <TlSubmissionsReview /> },
       { path: "meetings", element: <TlMeetings /> },
       { path: "chat", element: <TlDepartmentChat /> },
@@ -260,12 +293,14 @@ export const router = createBrowserRouter([
       { index: true, element: <Navigate to="dashboard" /> },
       { path: "dashboard", element: <CooDashboard /> },
       { path: "organization", element: <CooOrganization /> },
-      { path: "analytics", element: <CooAnalytics /> },
-      { path: "meetings", element: <CooMeetings /> },
-      { path: "reports", element: <CooReports /> },
-      { path: "chat", element: <CooDepartmentChat /> },
-      { path: "settings", element: <CooSettings /> },
-      { path: "coo-meeting-room/:id", element: <CooMeetingRoom /> },
+      { path: "organization", element: <CtoOrganization /> },
+      { path: "employee-management", element: <EmployeeManagement /> },
+      { path: "analytics", element: <ManagerAnalytics /> },
+      { path: "meetings", element: <ManagerMeetings /> },
+      { path: "reports", element: <ManagerReports /> },
+      { path: "chat", element: <ManagerChat /> },
+      { path: "settings", element: <ManagerSettings /> },
+      { path: "meeting-room/:id", element: <InternMeetingRoom /> },
     ],
   },
 
@@ -283,13 +318,14 @@ export const router = createBrowserRouter([
       { path: "technical", element: <CeoTechnical /> },
       { path: "operations", element: <CeoOperations /> },
       { path: "finance", element: <CeoFinance /> },
-      { path: "meetings", element: <CeoMeetings /> },
-      { path: "analytics", element: <CeoAnalytics /> },
-      { path: "reports", element: <CeoReports /> },
-      { path: "announcements", element: <CeoAnnouncements /> },
-      { path: "chat", element: <CeoOrganizationChat /> },
+      { path: "employee-management", element: <EmployeeManagement /> },
+      { path: "meetings", element: <CeoMeetingRooms /> },
+      { path: "analytics", element: <ManagerAnalytics /> },
+      { path: "reports", element: <ManagerReports /> },
+      { path: "announcements", element: <CeoDashboard /> },
+      { path: "chat", element: <ManagerChat /> },
       { path: "settings", element: <CeoSettings /> },
-      { path: "ceo-meeting-rooms/:id", element: <CeoMeetingRooms /> },
+      { path: "meeting-room/:id", element: <InternMeetingRoom /> },
     ],
   },
 ]);

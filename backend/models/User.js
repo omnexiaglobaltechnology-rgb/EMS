@@ -28,6 +28,7 @@ const userSchema = new mongoose.Schema({
     default: 'intern',
     enum: [
       'intern',
+      'employee',
       'team_lead',
       'team_lead_intern',
       'manager',

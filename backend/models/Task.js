@@ -36,8 +36,13 @@ const taskSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    default: 'pending',
-    enum: ['pending', 'in_progress', 'completed', 'rejected'],
+    default: 'assigned',
+    enum: ['assigned', 'delegated', 'submitted', 'under_review', 'completed', 'rejected'],
+  },
+  currentResponsibleId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: false,
   },
   versionNo: {
     type: Number,

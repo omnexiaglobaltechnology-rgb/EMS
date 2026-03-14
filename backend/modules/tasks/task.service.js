@@ -1,178 +1,205 @@
 const Task = require('../../models/Task');
 const TaskVersion = require('../../models/TaskVersion');
-const User = require('../../models/User'); // Ensure User model is registered for populate
+const User = require('../../models/User');
+const { 
+  notifyTaskAssignment, 
+  notifyTaskDelegation, 
+  notifyTaskSubmission, 
+  notifyTaskReview 
+} = require('../../utils/taskNotification.service');
 
-// CREATE TASK
+const ROLE_LEVELS = {
+  'intern': 1,
+  'employee': 2,
+  'team_lead_intern': 3,
+  'team_lead': 4,
+  'manager_intern': 5,
+  'manager:': 6,
+  'admin': 7,
+  'cto': 8,
+  'cfo': 8,
+  'coo': 8,
+  'ceo': 9
+};
+
+const getRoleLevel = (role) => ROLE_LEVELS[role] || 0;
+
+const canAssignTo = (assignerRole, targetRole) => {
+  return getRoleLevel(assignerRole) > getRoleLevel(targetRole);
+};
+
 exports.createTask = async (data) => {
   if (!data.title) throw new Error('Title is required');
-  if (!data.description) throw new Error('Description is required');
   if (!data.assignedToId) throw new Error('Assigned To ID is required');
   if (!data.assignedById) throw new Error('Assigned By ID is required');
-  if (!data.priority) throw new Error('Priority is required');
-  if (!data.dueDate) throw new Error('Due date is required');
 
-  let departmentId = data.departmentId || null;
-  if (!departmentId) {
-    const assignee = await User.findById(data.assignedToId)
-      .select('departmentId')
-      .lean();
-    departmentId = assignee?.departmentId || null;
+  const assigner = await User.findById(data.assignedById);
+  const assignee = await User.findById(data.assignedToId);
+
+  if (!assigner || !assignee) throw new Error('User not found');
+
+  if (!canAssignTo(assigner.role, assignee.role)) {
+    throw new Error(`You cannot assign tasks to someone with a ${assignee.role} role.`);
   }
 
-  const safeData = {
+  const taskData = {
     title: data.title,
-    description: data.description,
+    description: data.description || '',
     assignedToId: data.assignedToId,
     assignedById: data.assignedById,
-    priority: data.priority,
+    currentResponsibleId: data.assignedToId,
+    priority: data.priority || 'medium',
+    dueDate: new Date(data.dueDate),
+    departmentId: data.departmentId || assignee.departmentId,
+    status: 'assigned',
+    history: [{
+      status: 'assigned',
+      changedById: data.assignedById,
+      note: 'Task created and assigned'
+    }]
   };
 
-  if (departmentId) {
-    safeData.departmentId = departmentId;
-  }
+  if (isNaN(taskData.dueDate)) throw new Error('Invalid dueDate');
 
-  const d = new Date(data.dueDate);
-  if (isNaN(d)) throw new Error('Invalid dueDate');
-  safeData.dueDate = d;
-
-  return Task.create(safeData);
-};
-
-// GET TASKS
-exports.getTasks = async () => {
-  try {
-    const tasks = await Task.find()
-      .populate('assignedToId', 'name email')
-      .populate('assignedById', 'name email')
-      .lean();
-
-    return (tasks || []).map((t) => ({
-      ...t,
-      id: t._id.toString(),
-      assignedTo: t.assignedToId
-        ? {
-            id: t.assignedToId._id.toString(),
-            name: t.assignedToId.name || 'Unknown',
-            email: t.assignedToId.email || '',
-          }
-        : null,
-      assignedBy: t.assignedById
-        ? {
-            id: t.assignedById._id.toString(),
-            name: t.assignedById.name || 'Unknown',
-            email: t.assignedById.email || '',
-          }
-        : null,
-      assignedToId: t.assignedToId ? t.assignedToId._id.toString() : null,
-      assignedById: t.assignedById ? t.assignedById._id.toString() : null,
-      departmentId: t.departmentId ? t.departmentId.toString() : null,
-    }));
-  } catch (error) {
-    console.error('[task.service] Error fetching tasks:', error);
-    throw error; // Re-throw the original error to get more detail in the controller
-  }
-};
-
-// GET TASK BY ID
-exports.getTaskById = async (id) => {
-  const task = await Task.findById(id)
-    .populate('assignedToId')
-    .populate('assignedById')
-    .populate('departmentId')
-    .lean();
-
-  if (!task) {
-    throw new Error('Task not found');
-  }
+  const task = await Task.create(taskData);
+  
+  // Notify
+  notifyTaskAssignment(assignee, task, assigner).catch(console.error);
 
   return task;
 };
 
-// UPDATE TASK WITH VERSION TRACKING
-exports.updateTask = async (id, data) => {
-  const existingTask = await Task.findById(id);
-
-  if (!existingTask) {
-    throw new Error('Task not found');
-  }
-
-  // Save old version
-  await TaskVersion.create({
-    taskId: existingTask._id,
-    versionNo: existingTask.versionNo,
-    title: existingTask.title,
-    description: existingTask.description,
-    dueDate: existingTask.dueDate,
-    changedById: data.changedById || 'system',
-  });
-
-  const updateData = {
-    versionNo: existingTask.versionNo + 1,
-  };
-
-  if (data.title !== undefined) updateData.title = data.title;
-  if (data.description !== undefined) updateData.description = data.description;
-
-  if (data.dueDate !== undefined) {
-    const d = new Date(data.dueDate);
-    if (isNaN(d)) throw new Error('Invalid dueDate');
-    updateData.dueDate = d;
-  }
-
-  if (data.priority !== undefined) updateData.priority = data.priority;
-  if (data.status !== undefined) updateData.status = data.status;
-
-  return Task.findByIdAndUpdate(id, updateData, { new: true });
+exports.getTasks = async (query = {}) => {
+  return await Task.find(query)
+    .populate('assignedToId', 'name email role')
+    .populate('assignedById', 'name email role')
+    .populate('currentResponsibleId', 'name email role')
+    .sort({ createdAt: -1 });
 };
 
-// GET TASK VERSIONS
-exports.getTaskVersions = async (taskId) => {
-  const task = await Task.findById(taskId);
-  if (!task) throw new Error('Task not found');
-
-  return TaskVersion.find({ taskId })
-    .populate('changedById')
-    .sort({ createdAt: -1 })
-    .lean();
-};
-
-// DELETE TASK
-exports.deleteTask = async (id) => {
+exports.updateTask = async (id, data, userId, userRole) => {
   const task = await Task.findById(id);
   if (!task) throw new Error('Task not found');
-  return Task.findByIdAndDelete(id);
-};
 
-// ASSIGN TASK (Only Team Lead / Admin can assign)
-exports.assignTask = async (taskId, assignedToId, assignedById, userRole) => {
-  if (
-    userRole !== 'team_lead' &&
-    userRole !== 'tl' &&
-    userRole !== 'admin'
-  ) {
-    throw new Error('Only Team Lead can assign tasks');
+  if (data.dueDate) {
+    const creator = await User.findById(task.assignedById);
+    const isCreator = task.assignedById.toString() === userId.toString();
+    const isSenior = getRoleLevel(userRole) > getRoleLevel(creator?.role || '');
+    if (!isCreator && !isSenior) {
+      throw new Error('Only the task creator or a senior role can modify the deadline.');
+    }
+    task.dueDate = new Date(data.dueDate);
   }
 
+  if (data.title) task.title = data.title;
+  if (data.description) task.description = data.description;
+  if (data.priority) task.priority = data.priority;
+  if (data.status) task.status = data.status;
+
+  task.history.push({
+    status: task.status,
+    changedById: userId,
+    note: data.note || 'Task updated'
+  });
+
+  return await task.save();
+};
+
+exports.delegateTask = async (taskId, delegateToId, userId, userRole) => {
   const task = await Task.findById(taskId);
   if (!task) throw new Error('Task not found');
 
-  await TaskVersion.create({
-    taskId: task._id,
-    versionNo: task.versionNo,
-    title: task.title,
-    description: task.description,
-    dueDate: task.dueDate,
-    changedById: assignedById,
+  if (task.currentResponsibleId.toString() !== userId.toString() && getRoleLevel(userRole) < getRoleLevel('admin')) {
+    throw new Error('You are not currently responsible for this task.');
+  }
+
+  const delegatee = await User.findById(delegateToId);
+  if (!delegatee) throw new Error('Delegatee not found');
+
+  if (!canAssignTo(userRole, delegatee.role)) {
+    throw new Error('Cannot delegate to a senior or equal role.');
+  }
+
+  task.currentResponsibleId = delegateToId;
+  task.status = 'delegated';
+  task.history.push({
+    status: 'delegated',
+    changedById: userId,
+    note: `Delegated to ${delegatee.name}`
   });
 
-  return Task.findByIdAndUpdate(
-    taskId,
-    {
-      assignedToId,
-      versionNo: task.versionNo + 1,
-    },
-    { new: true }
-  )
-    .populate('assignedToId')
-    .populate('assignedById');
+  const savedTask = await task.save();
+
+  // Notify
+  const delegator = await User.findById(userId);
+  notifyTaskDelegation(delegatee, savedTask, delegator).catch(console.error);
+
+  return savedTask;
+};
+
+exports.submitTask = async (taskId, userId) => {
+  const task = await Task.findById(taskId);
+  if (!task) throw new Error('Task not found');
+
+  if (task.currentResponsibleId.toString() !== userId.toString()) {
+    throw new Error('You are not currently responsible for this task.');
+  }
+
+  task.status = 'submitted';
+  task.history.push({
+    status: 'submitted',
+    changedById: userId,
+    note: 'Task submitted for review'
+  });
+
+  const savedTask = await task.save();
+
+  // Notify creator
+  const creator = await User.findById(task.assignedById);
+  const submitter = await User.findById(userId);
+  notifyTaskSubmission(creator, savedTask, submitter).catch(console.error);
+
+  return savedTask;
+};
+
+exports.reviewTask = async (taskId, status, comment, userId, userRole) => {
+  const task = await Task.findById(taskId);
+  if (!task) throw new Error('Task not found');
+
+  const creator = await User.findById(task.assignedById);
+  const isCreator = task.assignedById.toString() === userId.toString();
+  const isSenior = getRoleLevel(userRole) > getRoleLevel(creator?.role || '');
+
+  if (!isCreator && !isSenior) {
+    throw new Error('You do not have permission to review this task.');
+  }
+
+  if (!['completed', 'rejected', 'under_review', 'approved'].includes(status)) {
+    throw new Error('Invalid review status');
+  }
+
+  task.status = status;
+  task.history.push({
+    status,
+    changedById: userId,
+    note: comment || `Task reviewed: ${status}`
+  });
+
+  const savedTask = await task.save();
+
+  // Notify responsible person
+  const responsible = await User.findById(task.currentResponsibleId);
+  const reviewer = await User.findById(userId);
+  notifyTaskReview(responsible, savedTask, reviewer, status).catch(console.error);
+
+  return savedTask;
+};
+
+exports.deleteTask = async (id) => {
+  return await Task.findByIdAndDelete(id);
+};
+
+exports.getTaskVersions = async (taskId) => {
+  const task = await Task.findById(taskId).populate('history.changedById', 'name role');
+  return task ? task.history : [];
 };

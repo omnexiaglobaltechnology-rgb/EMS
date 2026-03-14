@@ -18,6 +18,8 @@
         "react-redux": "^9.2.0",
         "react-router-dom": "^7.13.0",
         "recharts": "^3.7.0",
+        "simple-peer": "^9.11.1",
+        "socket.io-client": "^4.8.3",
         "tailwindcss": "^4.1.18"
     },
     "devDependencies": {

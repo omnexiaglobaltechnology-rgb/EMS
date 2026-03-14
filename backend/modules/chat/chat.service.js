@@ -21,8 +21,8 @@ const getCLevelDepartmentName = (role) => {
 const getRoomsForUser = async (user) => {
   let rooms;
 
-  if (user.role === CEO_ROLE) {
-    // CEO sees all rooms
+  if (user.role === CEO_ROLE || user.role === 'admin') {
+    // CEO and Admin see all rooms
     rooms = await ChatRoom.find()
       .populate('departmentId', 'name type')
       .populate('teamLeadId', 'name username')

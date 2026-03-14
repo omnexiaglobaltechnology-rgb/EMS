@@ -12,8 +12,13 @@ if (require.main === module) {
     .then(() => {
       // Load app AFTER database connection is established
       const app = require('./app');
+      const http = require('http');
+      const { initSocket } = require('./utils/socket.service');
 
-      app.listen(PORT, () => {
+      const server = http.createServer(app);
+      initSocket(server);
+
+      server.listen(PORT, () => {
         console.log(`Server running on port ${PORT}`);
       });
     })

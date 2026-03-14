@@ -4,6 +4,7 @@
  */
 const ROLES = {
   INTERN: "intern",
+  EMPLOYEE: "employee",
   TL: "team_lead",
   TLINTERN: "team_lead_intern",
   MANAGER: "manager",

@@ -23,5 +23,20 @@ router.patch(
   authorizePermission('task.assign'),
   taskController.assignTask
 );
+router.patch(
+  '/:id/delegate',
+  authorizePermission('task.delegate'),
+  taskController.delegateTask
+);
+router.patch(
+  '/:id/submit',
+  authorizePermission('task.submit'),
+  taskController.submitTask
+);
+router.patch(
+  '/:id/review',
+  authorizePermission('task.review'),
+  taskController.reviewTask
+);
 
 module.exports = router;

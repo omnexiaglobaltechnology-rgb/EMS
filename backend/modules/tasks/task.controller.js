@@ -37,16 +37,15 @@ exports.getTaskById = async (req, res) => {
 };
 
 exports.updateTask = async (req, res) => {
-  console.log('REQ PARAM ID:', req.params.id);
   try {
-    const payload = {
-      ...req.body,
-      changedById: req.user?.id || req.body.changedById,
-    };
-    const task = await taskService.updateTask(req.params.id, payload);
+    const task = await taskService.updateTask(
+      req.params.id,
+      req.body,
+      req.user.id,
+      req.user.role
+    );
     res.json(task);
   } catch (error) {
-    console.error('UPDATE ERROR:', error.message);
     res.status(400).json({ error: error.message });
   }
 };
@@ -56,7 +55,6 @@ exports.deleteTask = async (req, res) => {
     const task = await taskService.deleteTask(req.params.id);
     res.json({ message: 'Task deleted successfully', task });
   } catch (error) {
-    console.error('DELETE TASK ERROR:', error.message);
     res.status(404).json({ error: error.message });
   }
 };
@@ -66,7 +64,6 @@ exports.getTaskVersions = async (req, res) => {
     const versions = await taskService.getTaskVersions(req.params.id);
     res.json(versions);
   } catch (error) {
-    console.error('GET VERSIONS ERROR:', error.message);
     res.status(404).json({ error: error.message });
   }
 };
@@ -74,23 +71,53 @@ exports.getTaskVersions = async (req, res) => {
 exports.assignTask = async (req, res) => {
   try {
     const { assignedToId } = req.body;
-    const taskId = req.params.id;
-    const assignedById = req.user?.id || req.body.assignedById;
-    const userRole = req.user?.role || req.body.role;
+    const task = await taskService.createTask({
+      ...req.body,
+      assignedById: req.user.id,
+      assignedToId
+    });
+    res.json(task);
+  } catch (error) {
+    res.status(403).json({ error: error.message });
+  }
+};
 
-    if (!assignedToId) {
-      return res.status(400).json({ error: 'assignedToId is required' });
-    }
-
-    const task = await taskService.assignTask(
-      taskId,
-      assignedToId,
-      assignedById,
-      userRole
+exports.delegateTask = async (req, res) => {
+  try {
+    const { delegateToId } = req.body;
+    const task = await taskService.delegateTask(
+      req.params.id,
+      delegateToId,
+      req.user.id,
+      req.user.role
     );
     res.json(task);
   } catch (error) {
-    console.error('ASSIGN TASK ERROR:', error.message);
+    res.status(403).json({ error: error.message });
+  }
+};
+
+exports.submitTask = async (req, res) => {
+  try {
+    const task = await taskService.submitTask(req.params.id, req.user.id);
+    res.json(task);
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+exports.reviewTask = async (req, res) => {
+  try {
+    const { status, comment } = req.body;
+    const task = await taskService.reviewTask(
+      req.params.id,
+      status,
+      comment,
+      req.user.id,
+      req.user.role
+    );
+    res.json(task);
+  } catch (error) {
     res.status(403).json({ error: error.message });
   }
 };

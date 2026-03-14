@@ -3,6 +3,7 @@ import { departmentsApi, usersApi } from "../utils/api";
 
 const ROLE_OPTIONS = [
   "intern",
+  "employee",
   "team_lead",
   "team_lead_intern",
   "manager",

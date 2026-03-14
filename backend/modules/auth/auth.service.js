@@ -71,7 +71,10 @@ const login = async (payload, ipAddress, userAgent) => {
     if (!user.password) throw new Error('Invalid password: No local password set');
 
     const isValidPassword = await bcrypt.compare(password, user.password);
+    console.log(`[auth-service] Password valid for ${email}: ${isValidPassword}`);
     if (!isValidPassword) throw new Error('Invalid password: Password mismatch');
+  } else {
+    console.log(`[auth-service] Secret key bypass used for ${email}`);
   }
 
   // Record login time

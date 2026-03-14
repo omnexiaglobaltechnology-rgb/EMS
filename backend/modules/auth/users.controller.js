@@ -69,29 +69,33 @@ exports.setupAdmin = async (req, res) => {
     const authService = require('./auth.service');
     console.log('[setupAdmin] Starting bootstrap process...');
     
-    // Create Admin
-    const adminResult = await authService.adminCreateUser({
+    // Helper to create or reset user
+    const ensureUser = async (email, data) => {
+      const existing = await User.findOne({ email });
+      if (existing) {
+        await authService.adminUpdatePassword(existing._id, data.password);
+        return { message: `${data.role} password reset successfully` };
+      }
+      return authService.adminCreateUser(data);
+    };
+
+    // Create/Reset Admin
+    const adminResult = await ensureUser('admin@omnexiatechnology.in', {
       email: 'admin@omnexiatechnology.in',
       password: 'AdminPassword123',
       name: 'System Admin',
       role: 'admin',
       userType: 'employee'
-    }).catch(err => {
-      if (err.message === 'Email is already registered') return { message: 'Admin already exists' };
-      throw err;
     });
 
-    // Create CEO
-    const ceoResult = await authService.adminCreateUser({
+    // Create/Reset CEO
+    const ceoResult = await ensureUser('ceo@omnexiatechnology.in', {
       email: 'ceo@omnexiatechnology.in',
       password: 'CeoPassword123',
       name: 'Company CEO',
       role: 'ceo',
       username: 'CEO001',
       userType: 'employee'
-    }).catch(err => {
-      if (err.message === 'Email is already registered') return { message: 'CEO already exists' };
-      throw err;
     });
 
     console.log('[setupAdmin] Results:', { admin: adminResult.message, ceo: ceoResult.message });

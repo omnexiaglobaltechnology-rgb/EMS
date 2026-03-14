@@ -7,7 +7,18 @@ import {
 } from "lucide-react";
 import { meetingsApi, authApi } from "../../utils/api";
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || "https://ems-backend-seven-ruby.vercel.app";
+const API_URL = import.meta.env.VITE_API_URL || "https://ems-backend-seven-ruby.vercel.app/api";
+const SOCKET_URL = API_URL.replace(/\/api$/, "");
+
+const ICE_SERVERS = {
+  iceServers: [
+    { urls: 'stun:stun.l.google.com:19302' },
+    { urls: 'stun:stun1.l.google.com:19302' },
+    { urls: 'stun:stun2.l.google.com:19302' },
+    { urls: 'stun:stun3.l.google.com:19302' },
+    { urls: 'stun:stun4.l.google.com:19302' },
+  ]
+};
 
 const UnifiedMeetingRoom = () => {
   const { id: roomId } = useParams();
@@ -92,21 +103,29 @@ const UnifiedMeetingRoom = () => {
 
   const joinMeeting = () => {
     setIsJoined(true);
-    socketRef.current = io(SOCKET_URL);
+    socketRef.current = io(SOCKET_URL, {
+      transports: ['websocket', 'polling'],
+      reconnection: true
+    });
 
-    socketRef.current.emit("join-room", roomId, me?._id);
+    socketRef.current.on("connect", () => {
+      console.log("Connected to socket server:", socketRef.current.id);
+      socketRef.current.emit("join-room", roomId, me?._id);
+    });
 
     socketRef.current.on("user-joined", (userId, socketId) => {
+      console.log("New user joined:", userId, "Socket:", socketId);
       const peer = createPeer(socketId, socketRef.current.id, streamRef.current);
       peersRef.current.push({
         peerID: socketId,
         peer,
-        userId: userId // We'll need this for metadata display
+        userId: userId
       });
       setPeers(prev => [...prev, { peerID: socketId, peer, userId }]);
     });
 
     socketRef.current.on("offer", (payload) => {
+      console.log("Received offer from:", payload.sender);
       const peer = addPeer(payload.offer, payload.sender, streamRef.current);
       peersRef.current.push({
         peerID: payload.sender,
@@ -117,13 +136,19 @@ const UnifiedMeetingRoom = () => {
     });
 
     socketRef.current.on("answer", (payload) => {
+      console.log("Received answer from:", payload.sender);
       const item = peersRef.current.find(p => p.peerID === payload.sender);
       if (item) item.peer.signal(payload.answer);
     });
 
     socketRef.current.on("ice-candidate", (payload) => {
       const item = peersRef.current.find(p => p.peerID === payload.sender);
-      if (item) item.peer.signal(payload.candidate);
+      if (item) {
+        // Only signal if it's a valid candidate
+        if (payload.candidate) {
+          item.peer.signal(payload.candidate);
+        }
+      }
     });
 
     socketRef.current.on("chat-message", (message) => {
@@ -131,6 +156,7 @@ const UnifiedMeetingRoom = () => {
     });
 
     socketRef.current.on("user-disconnected", (socketId) => {
+      console.log("User disconnected:", socketId);
       const peerObj = peersRef.current.find(p => p.peerID === socketId);
       if (peerObj) peerObj.peer.destroy();
       const remainingPeers = peersRef.current.filter(p => p.peerID !== socketId);
@@ -140,17 +166,25 @@ const UnifiedMeetingRoom = () => {
   };
 
   const createPeer = (userToSignal, callerID, stream) => {
-    const peer = new Peer({ initiator: true, trickle: false, stream });
+    const peer = new Peer({ initiator: true, trickle: true, stream, config: ICE_SERVERS });
     peer.on("signal", signal => {
-      socketRef.current.emit("offer", { target: userToSignal, sender: callerID, offer: signal, userId: me?._id });
+      if (signal.type === 'offer') {
+        socketRef.current.emit("offer", { target: userToSignal, sender: callerID, offer: signal, userId: me?._id });
+      } else if (signal.candidate) {
+        socketRef.current.emit("ice-candidate", { target: userToSignal, candidate: signal });
+      }
     });
     return peer;
   };
 
   const addPeer = (incomingSignal, callerID, stream) => {
-    const peer = new Peer({ initiator: false, trickle: false, stream });
+    const peer = new Peer({ initiator: false, trickle: true, stream, config: ICE_SERVERS });
     peer.on("signal", signal => {
-      socketRef.current.emit("answer", { target: callerID, answer: signal });
+      if (signal.type === 'answer') {
+        socketRef.current.emit("answer", { target: callerID, answer: signal });
+      } else if (signal.candidate) {
+        socketRef.current.emit("ice-candidate", { target: callerID, candidate: signal });
+      }
     });
     peer.signal(incomingSignal);
     return peer;

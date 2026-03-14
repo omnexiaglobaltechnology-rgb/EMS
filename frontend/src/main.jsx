@@ -1,7 +1,10 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { Buffer } from "buffer";
 import "./index.css";
 import App from "./App.jsx";
+
+window.Buffer = Buffer;
 
 import { store } from "./redux/store.js";
 

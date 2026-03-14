@@ -17,8 +17,11 @@ const getBaseUrl = () => {
 };
 
 // For socket, we need the root URL (no /api)
-const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ? "http://localhost:5000/api" : "https://ems-backend-mcf0.onrender.com/api");
-const SOCKET_URL = API_URL.replace(/\/api$/, "");
+const getSocketUrl = () => {
+    const rawUrl = import.meta.env.VITE_API_URL || (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ? "http://localhost:5000/api" : "https://ems-backend-mcf0.onrender.com/api");
+    return rawUrl.replace(/\/api$/, "").replace(/\/$/, "");
+};
+const SOCKET_URL = getSocketUrl();
 
 const ICE_SERVERS = {
   iceServers: [
@@ -112,10 +115,19 @@ const UnifiedMeetingRoom = () => {
   };
 
   const joinMeeting = () => {
+    if (!me?._id) {
+      console.warn("User data not loaded yet, cannot join meeting");
+      return;
+    }
+
     setIsJoined(true);
+    console.log("Connecting to socket at:", SOCKET_URL);
+    
     socketRef.current = io(SOCKET_URL, {
       transports: ['websocket', 'polling'],
-      reconnection: true
+      reconnection: true,
+      reconnectionAttempts: 5,
+      timeout: 10000
     });
 
     socketRef.current.on("connect", () => {
@@ -166,7 +178,7 @@ const UnifiedMeetingRoom = () => {
   };
 
   const createPeer = (userToSignal, callerID, stream) => {
-    const peer = new Peer({ initiator: true, trickle: true, stream, config: ICE_SERVERS });
+    const peer = new Peer({ initiator: true, trickle: false, stream, config: ICE_SERVERS });
     peer.on("signal", signal => {
       socketRef.current.emit("signal", { target: userToSignal, signal, userId: me?._id });
     });
@@ -174,7 +186,7 @@ const UnifiedMeetingRoom = () => {
   };
 
   const addPeer = (incomingSignal, callerID, stream) => {
-    const peer = new Peer({ initiator: false, trickle: true, stream, config: ICE_SERVERS });
+    const peer = new Peer({ initiator: false, trickle: false, stream, config: ICE_SERVERS });
     peer.on("signal", signal => {
       socketRef.current.emit("signal", { target: callerID, signal, userId: me?._id });
     });

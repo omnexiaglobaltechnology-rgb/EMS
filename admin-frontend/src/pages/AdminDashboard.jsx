@@ -64,7 +64,7 @@ const AdminDashboard = () => {
 
       // Fetch system health from backend root
       const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ? "http://localhost:5000/api" : "https://ems-backend-mcf0.onrender.com/api");
-      const API_ROOT = API_URL.replace("/api", "");
+      const API_ROOT = API_URL.replace(/\/api$/, "").replace(/\/$/, "");
       try {
         const healthRes = await fetch(API_ROOT);
         if (healthRes.ok) {

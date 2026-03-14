@@ -12,7 +12,7 @@ import {
   AlertCircle,
   Image as ImageIcon,
 } from "lucide-react";
-import { chatApi } from "../utils/api";
+import { chatApi, SOCKET_URL } from "../utils/api";
 
 /**
  * Unified Chat Interface for all departments and roles.
@@ -145,9 +145,8 @@ const ChatInterface = ({ type = "chat" }) => {
   );
 
   const getPublicUrl = (path) => {
-    const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ? "http://localhost:5000/api" : "https://ems-backend-mcf0.onrender.com/api");
-    const API_BASE = API_URL.replace(/\/api$/, "");
-    return path.startsWith("http") ? path : `${API_BASE}${path}`;
+    if (!path) return "";
+    return path.startsWith("http") ? path : `${SOCKET_URL}${path}`;
   };
 
   if (loading && !activeRoom) {

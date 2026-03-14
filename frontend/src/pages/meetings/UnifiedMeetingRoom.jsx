@@ -5,23 +5,9 @@ import Peer from "simple-peer";
 import {
   Loader2, Link, Copy, Check, Video, PhoneOff, UserPlus, MessageSquare, ScreenShare, Mic, MicOff, VideoOff, Send, X, Users, Settings, MoreVertical
 } from "lucide-react";
-import { meetingsApi, authApi } from "../../utils/api";
+import { meetingsApi, authApi, usersApi, SOCKET_URL } from "../../utils/api";
 
-// Use centralized detection logic or fallback
-const getBaseUrl = () => {
-    if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
-    const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-    return isLocal 
-      ? "https://ems-backend-mcf0.onrender.com/api" // fallback to prod or local? 
-      : "https://ems-backend-mcf0.onrender.com/api";
-};
-
-// For socket, we need the root URL (no /api)
-const getSocketUrl = () => {
-    const rawUrl = import.meta.env.VITE_API_URL || (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ? "http://localhost:5000/api" : "https://ems-backend-mcf0.onrender.com/api");
-    return rawUrl.replace(/\/api$/, "").replace(/\/$/, "");
-};
-const SOCKET_URL = getSocketUrl();
+// Socket URL is now imported from ../../utils/api
 
 const ICE_SERVERS = {
   iceServers: [
@@ -259,12 +245,19 @@ const UnifiedMeetingRoom = () => {
                 <div className="flex -space-x-3 justify-center lg:justify-start">
                     {[1,2,3].map(i => <div key={i} className="w-10 h-10 rounded-full bg-indigo-100 border-4 border-white" />)}
                 </div>
-                <p className="text-slate-600 font-medium">Some other team members are already here</p>
+                <p className="text-slate-600 font-medium">
+                  {me ? "Some other team members are already here" : "Loading your profile..."}
+                </p>
                 <button
                   onClick={joinMeeting}
-                  className="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-lg transition-all shadow-xl shadow-indigo-200 active:scale-95"
+                  disabled={!me || !meeting}
+                  className={`w-full py-4 rounded-2xl font-bold text-lg transition-all shadow-xl active:scale-95 ${
+                    me && meeting 
+                    ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-200" 
+                    : "bg-slate-200 text-slate-400 cursor-not-allowed"
+                  }`}
                 >
-                  Join Meeting Room
+                  {me ? "Join Meeting Room" : "Please Wait..."}
                 </button>
              </div>
              
@@ -460,7 +453,7 @@ const RemoteParticipantInfo = ({ userId }) => {
 
     useEffect(() => {
         if (userId) {
-            authApi.getById(userId).then(data => setUserData(data)).catch(() => {});
+            usersApi.getById(userId).then(data => setUserData(data)).catch(() => {});
         }
     }, [userId]);
 
@@ -493,7 +486,7 @@ const RemoteVideo = ({ peer, userId }) => {
 
         // Try to fetch metadata
         if (userId) {
-            authApi.getById(userId).then(data => setUserData(data)).catch(() => {});
+            usersApi.getById(userId).then(data => setUserData(data)).catch(() => {});
         }
 
         return () => {

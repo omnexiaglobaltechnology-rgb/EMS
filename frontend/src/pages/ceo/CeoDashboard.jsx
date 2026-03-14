@@ -55,7 +55,9 @@ const CeoDashboard = () => {
 
       for (const task of allTasks) {
         try {
-          const submissions = await submissionsApi.getByTask(task.id);
+          const taskId = task.id || task._id;
+          if (!taskId) continue;
+          const taskSubmissions = await submissionsApi.getByTask(taskId);
           allSubmissions.push(...submissions);
         } catch (err) {
           console.warn(`Could not fetch submissions for task ${task.id}`);

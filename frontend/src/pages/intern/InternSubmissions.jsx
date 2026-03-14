@@ -52,7 +52,9 @@ const InternSubmissions = () => {
       let allSubmissions = [];
       for (const task of internTasks) {
         try {
-          const taskSubmissions = await submissionsApi.getByTask(task.id);
+          const taskId = task.id || task._id;
+          if (!taskId) continue;
+          const taskSubmissions = await submissionsApi.getByTask(taskId);
           if (!Array.isArray(taskSubmissions)) {
             console.warn(`Invalid submissions response for task ${task.id}`);
             continue;

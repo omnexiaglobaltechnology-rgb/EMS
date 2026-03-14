@@ -43,8 +43,10 @@ const CfoDashboard = () => {
 
       for (const task of allTasks) {
         try {
-          const submissions = await submissionsApi.getByTask(task.id);
-          allSubmissions.push(...submissions);
+          const taskId = task.id || task._id;
+          if (!taskId) continue;
+          const taskSubmissions = await submissionsApi.getByTask(taskId);
+          allSubmissions.push(...taskSubmissions);
         } catch (err) {
           console.warn(`Could not fetch submissions for task ${task.id}`);
         }

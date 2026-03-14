@@ -1,15 +1,12 @@
 // API base URL configuration
-const getApiBaseUrl = () => {
-  if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
-  
-  // Dynamic detection based on current origin
-  const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-  return isLocal 
-    ? "http://localhost:5000/api" 
-    : "https://ems-backend-mcf0.onrender.com/api";
+const getApiUrls = () => {
+  const rawUrl = import.meta.env.VITE_API_URL || (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ? "http://localhost:5000/api" : "https://ems-backend-mcf0.onrender.com/api");
+  const apiBase = rawUrl.endsWith("/") ? rawUrl.slice(0, -1) : rawUrl;
+  const socketBase = apiBase.replace(/\/api$/, "");
+  return { API_BASE_URL: apiBase, SOCKET_URL: socketBase };
 };
 
-export const API_BASE_URL = getApiBaseUrl();
+export const { API_BASE_URL, SOCKET_URL } = getApiUrls();
 
 const getStoredToken = () => {
   try {

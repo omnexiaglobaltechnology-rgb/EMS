@@ -36,6 +36,7 @@ router.delete(
 
 // Get users (for list displays)
 router.get('/users', authenticate, usersController.getUsers);
+router.get('/users/:id', authenticate, usersController.getUserById);
 
 // Migration/Fix route
 router.post('/fix-data', authenticate, authorizeRoles('admin'), usersController.fixUserData);

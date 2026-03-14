@@ -65,7 +65,9 @@ const InternDashboard = () => {
       let allSubmissions = [];
       for (const task of internTasks) {
         try {
-          const taskSubmissions = await submissionsApi.getByTask(task.id);
+          const taskId = task.id || task._id;
+          if (!taskId) continue;
+          const taskSubmissions = await submissionsApi.getByTask(taskId);
           allSubmissions.push(...taskSubmissions);
         } catch (err) {
           console.warn(`Could not fetch submissions for task ${task.id}:`, err);

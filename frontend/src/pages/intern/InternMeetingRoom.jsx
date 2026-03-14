@@ -5,13 +5,9 @@ import Peer from "simple-peer";
 import {
   Loader2, Link, Copy, Check, Video, PhoneOff, UserPlus, MessageSquare, ScreenShare, Mic, MicOff, VideoOff, Send, X
 } from "lucide-react";
-import { meetingsApi, authApi } from "../../utils/api";
+import { meetingsApi, authApi, usersApi, SOCKET_URL } from "../../utils/api";
 
-const getSocketUrl = () => {
-    const rawUrl = import.meta.env.VITE_API_URL || (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ? "http://localhost:5000/api" : "https://ems-backend-mcf0.onrender.com/api");
-    return rawUrl.replace(/\/api$/, "").replace(/\/$/, "");
-};
-const SOCKET_URL = getSocketUrl();
+// Socket URL is now imported from ../../utils/api
 
 const InternMeetingRoom = () => {
   const { id: roomId } = useParams();
@@ -262,9 +258,14 @@ const InternMeetingRoom = () => {
             
             <button
               onClick={joinMeeting}
-              className="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full font-bold transition-all shadow-lg hover:shadow-indigo-500/20 active:scale-95"
+              disabled={!me}
+              className={`px-8 py-3 rounded-full font-bold transition-all shadow-lg active:scale-95 ${
+                me 
+                ? "bg-indigo-600 hover:bg-indigo-700 text-white hover:shadow-indigo-500/20" 
+                : "bg-slate-800 text-slate-500 cursor-not-allowed"
+              }`}
             >
-              Join now
+              {me ? "Join now" : "Loading profile..."}
             </button>
 
             <div className="pt-8 flex items-center gap-4 text-slate-500">

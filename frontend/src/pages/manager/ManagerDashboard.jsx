@@ -69,8 +69,18 @@ const ManagerDashboard = () => {
       try {
         const allSubmissions = [];
         for (const task of allTasks) {
-          const taskSubmissions = await submissionsApi.getByTask(task.id);
-          allSubmissions.push(...taskSubmissions);
+          try {
+            const taskId = task.id || task._id;
+            if (!taskId) {
+              console.warn("Task missing ID, skipping submission fetch:", task);
+              continue;
+            }
+            const taskSubmissions = await submissionsApi.getByTask(taskId);
+            allSubmissions.push(...taskSubmissions);
+          } catch (innerErr) {
+            console.warn(`Could not fetch submissions for task ${task.id || task._id}:`, innerErr);
+            // Continue to the next task even if one fails
+          }
         }
         submissionCount = allSubmissions.length;
       } catch (err) {

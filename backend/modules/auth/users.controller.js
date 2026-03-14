@@ -64,6 +64,34 @@ exports.getUsers = async (req, res) => {
   }
 };
 
+exports.getUserById = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id)
+      .select('_id name email username role userType departmentId')
+      .populate('departmentId', 'name type')
+      .lean();
+
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const mapped = {
+      id: user._id.toString(),
+      name: user.name,
+      email: user.email,
+      username: user.username || null,
+      role: user.role,
+      userType: user.userType || (user.role === 'intern' ? 'intern' : 'employee'),
+      department: user.departmentId
+        ? { id: user.departmentId._id.toString(), name: user.departmentId.name, type: user.departmentId.type }
+        : null,
+    };
+
+    return res.json(mapped);
+  } catch (error) {
+    console.error('[getUserById] ERROR:', error.message);
+    return res.status(500).json({ error: 'Failed to fetch user' });
+  }
+};
+
 exports.setupAdmin = async (req, res) => {
   try {
     const authService = require('./auth.service');

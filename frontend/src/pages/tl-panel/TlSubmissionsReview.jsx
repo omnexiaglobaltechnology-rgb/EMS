@@ -46,7 +46,9 @@ const TlSubmissionsReview = () => {
       let allSubmissions = [];
       for (const task of tasks) {
         try {
-          const taskSubmissions = await submissionsApi.getByTask(task.id);
+          const taskId = task.id || task._id;
+          if (!taskId) continue;
+          const taskSubmissions = await submissionsApi.getByTask(taskId);
           const mapped = taskSubmissions.map((sub) => ({
             ...sub,
             task: task.title,

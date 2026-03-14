@@ -14,7 +14,6 @@ import InternSubmissions from "./pages/intern/InternSubmissions";
 import InternMeetings from "./pages/intern/InternMeetings";
 import InternDepartmentChat from "./pages/intern/InternDepartmentChat";
 import InternProfile from "./pages/intern/InternProfile";
-import InternMeetingRoom from "./pages/intern/InternMeetingRoom";
 
 /* Team Lead Pages */
 import TlDashboard from "./pages/tl-panel/TlDashboard";
@@ -22,7 +21,6 @@ import TlInternTask from "./pages/tl-panel/TlTask";
 import TlSubmissionsReview from "./pages/tl-panel/TlSubmissionsReview";
 import TlMeetings from "./pages/tl-panel/TlMeetings";
 import TlDepartmentChat from "./pages/tl-panel/TlDepartmentChat";
-import TlMeetingRoom from "./pages/tl-panel/TlMeetingRoom";
 
 /*Team Lead Intern Pages */
 import TlDashboardIntern from "./pages/tl-intern/TlDashboardIntern";
@@ -37,7 +35,6 @@ import ManagerAnalytics from "./pages/manager/ManagerAnalytics";
 import ManagerReports from "./pages/manager/ManagerReports";
 import ManagerMeetings from "./pages/manager/ManagerMeetings";
 import ManagerDepartmentChat from "./pages/manager/ManagerDepartmentChat";
-import MeetingRoom from "./pages/manager/MeetingRoom";
 
 /* Manager Intern Pages */
 import Manager_internDashboard from "./pages/manager_intern/Manager_internDashboard";
@@ -58,7 +55,6 @@ import CtoReports from "./pages/cto/CtoReports";
 import CtoDepartmentChat from "./pages/cto/CtoDepartmentChat";
 import CtoMeetings from "./pages/cto/CtoMeetings";
 import CtoSettings from "./pages/cto/CtoSettings";
-import CtoMeetingRoom from "./pages/cto/CtoMeetingRoom";
 
 /* CFO Pages */
 import CfoDashboard from "./pages/cfo/CfoDashboard";
@@ -68,7 +64,6 @@ import CfoReports from "./pages/cfo/CfoReports";
 import CfoDepartmentChat from "./pages/cfo/CfoDepartmentChat";
 import CfoMeetings from "./pages/cfo/CfoMeetings";
 import CfoSettings from "./pages/cfo/CfoSettings";
-import CfoMeetingRoom from "./pages/cfo/CfoMeetingRoom";
 
 /* COO Pages */
 import CooDashboard from "./pages/coo/CooDashboard";
@@ -78,7 +73,6 @@ import CooMeetings from "./pages/coo/CooMeetings";
 import CooReports from "./pages/coo/CooReports";
 import CooDepartmentChat from "./pages/coo/CooDepartmentChat";
 import CooSettings from "./pages/coo/CooSettings";
-import CooMeetingRoom from "./pages/coo/CooMeetingRoom";
 
 /* CEO Pages */
 import CeoDashboard from "./pages/ceo/CeoDashboard";
@@ -101,7 +95,8 @@ import EmployeeMeetings from "./pages/employee/EmployeeMeetings";
 import EmployeeDepartmentChat from "./pages/employee/EmployeeDepartmentChat";
 import EmployeeProfile from "./pages/employee/EmployeeProfile";
 
-/* Manager & Senior Pages */
+/* Meeting Pages */
+import UnifiedMeetingRoom from "./pages/meetings/UnifiedMeetingRoom";
 import EmployeeManagement from "./pages/manager/EmployeeManagement";
 
 export const router = createBrowserRouter([
@@ -125,7 +120,7 @@ export const router = createBrowserRouter([
       { path: "chat", element: <EmployeeDepartmentChat /> },
       { path: "profile", element: <EmployeeProfile /> },
       { path: "settings", element: <ProfileSettings /> },
-      { path: "meeting-room/:id", element: <InternMeetingRoom /> },
+      { path: "meeting-room/:id", element: <UnifiedMeetingRoom /> },
     ],
   },
 
@@ -146,7 +141,7 @@ export const router = createBrowserRouter([
       { path: "chat", element: <InternDepartmentChat /> },
       { path: "profile", element: <InternProfile /> },
       { path: "settings", element: <ProfileSettings /> },
-      { path: "intern-meeting-room/:id", element: <InternMeetingRoom /> },
+      { path: "meeting-room/:id", element: <UnifiedMeetingRoom /> },
     ],
   },
 
@@ -167,7 +162,7 @@ export const router = createBrowserRouter([
       { path: "meetings", element: <TlMeetings /> },
       { path: "chat", element: <TlDepartmentChat /> },
       { path: "settings", element: <ProfileSettings /> },
-      { path: "tl-meeting-room/:id", element: <TlMeetingRoom /> },
+      { path: "meeting-room/:id", element: <UnifiedMeetingRoom /> },
     ],
   },
 
@@ -187,7 +182,7 @@ export const router = createBrowserRouter([
       { path: "meetings", element: <TlMeetingsIntern /> },
       { path: "chat", element: <TlDepartmentIntern /> },
       { path: "settings", element: <ProfileSettings /> },
-      { path: "tl-meeting-room/:id", element: <TlMeetingRoom /> },
+      { path: "meeting-room/:id", element: <UnifiedMeetingRoom /> },
     ],
   },
 
@@ -207,9 +202,7 @@ export const router = createBrowserRouter([
       { path: "meetings", element: <ManagerMeetings /> },
       { path: "chat", element: <ManagerDepartmentChat /> },
       { path: "settings", element: <ProfileSettings /> },
-      // { path: "review-submissions", element: <InternSubmissionsReview /> },
-      { path: "meeting-room/:id", element: <MeetingRoom /> },
-      // { path: "meeting-room/:id", element: <MeetingRoom /> }
+      { path: "meeting-room/:id", element: <UnifiedMeetingRoom /> },
     ],
   },
 
@@ -233,11 +226,9 @@ export const router = createBrowserRouter([
         element: <Manager_internSubmissionsReview />,
       },
       { path: "settings", element: <ProfileSettings /> },
-      { path: "meeting-room/:id", element: <InternMeetingRoom /> },
+      { path: "meeting-room/:id", element: <UnifiedMeetingRoom /> },
     ],
   },
-
-
 
   /* ================= CTO ================= */
   {
@@ -256,7 +247,7 @@ export const router = createBrowserRouter([
       { path: "meetings", element: <CtoMeetings /> },
       { path: "chat", element: <CtoDepartmentChat /> },
       { path: "settings", element: <CtoSettings /> },
-      { path: "cto-meeting-room/:id", element: <CtoMeetingRoom /> },
+      { path: "meeting-room/:id", element: <UnifiedMeetingRoom /> },
     ],
   },
 
@@ -277,7 +268,7 @@ export const router = createBrowserRouter([
       { path: "meetings", element: <CfoMeetings /> },
       { path: "chat", element: <CfoDepartmentChat /> },
       { path: "settings", element: <CfoSettings /> },
-      { path: "cfo-meeting-room/:id", element: <CfoMeetingRoom /> },
+      { path: "meeting-room/:id", element: <UnifiedMeetingRoom /> },
     ],
   },
 
@@ -299,7 +290,7 @@ export const router = createBrowserRouter([
       { path: "reports", element: <ManagerReports /> },
       { path: "chat", element: <ManagerDepartmentChat /> },
       { path: "settings", element: <CooSettings /> },
-      { path: "meeting-room/:id", element: <InternMeetingRoom /> },
+      { path: "meeting-room/:id", element: <UnifiedMeetingRoom /> },
     ],
   },
 
@@ -324,7 +315,7 @@ export const router = createBrowserRouter([
       { path: "announcements", element: <CeoAnnouncements /> },
       { path: "chat", element: <CeoOrganizationChat /> },
       { path: "settings", element: <CeoSettings /> },
-      { path: "meeting-room/:id", element: <InternMeetingRoom /> },
+      { path: "meeting-room/:id", element: <UnifiedMeetingRoom /> },
     ],
   },
 ]);

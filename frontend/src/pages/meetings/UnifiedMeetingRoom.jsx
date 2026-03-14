@@ -91,6 +91,17 @@ const UnifiedMeetingRoom = () => {
     };
   }, [roomId]);
 
+  // Ref callback for local video — forces mute at the DOM level
+  // React has a known bug where the `muted` JSX prop doesn't always apply
+  // See: https://github.com/facebook/react/issues/10389
+  const setLocalVideoRef = (el) => {
+    userVideoRef.current = el;
+    if (el) {
+      el.muted = true;
+      el.volume = 0;
+    }
+  };
+
   const requestMedia = async (audio, video) => {
     try {
       const currentStream = await navigator.mediaDevices.getUserMedia({ 
@@ -104,16 +115,16 @@ const UnifiedMeetingRoom = () => {
       setStream(currentStream);
       streamRef.current = currentStream;
       if (userVideoRef.current) {
-        // Create a separate stream for the local video that has NO audio tracks
-        // This is the most reliable way to prevent local audio feedback/echo
-        const previewStream = new MediaStream(currentStream.getVideoTracks());
-        userVideoRef.current.srcObject = previewStream;
+        // Attach the FULL stream (audio+video) to local video element
+        // Audio won't play because the element is muted via ref callback
+        // The audio track stays in the stream so it can be sent to peers
+        userVideoRef.current.srcObject = currentStream;
         userVideoRef.current.muted = true;
-        userVideoRef.current.defaultMuted = true;
+        userVideoRef.current.volume = 0;
       }
       return currentStream;
     } catch (err) {
-      console.error("Media error", err);
+      console.error("[MEET] Media error", err);
       return null;
     }
   };
@@ -220,10 +231,9 @@ const UnifiedMeetingRoom = () => {
   // Re-apply local stream when joining (since video element is re-mounted)
   useEffect(() => {
     if (isJoined && streamRef.current && userVideoRef.current) {
-        const previewStream = new MediaStream(streamRef.current.getVideoTracks());
-        userVideoRef.current.srcObject = previewStream;
+        userVideoRef.current.srcObject = streamRef.current;
         userVideoRef.current.muted = true;
-        userVideoRef.current.defaultMuted = true;
+        userVideoRef.current.volume = 0;
     }
   }, [isJoined]);
 
@@ -349,10 +359,10 @@ const UnifiedMeetingRoom = () => {
             
             <div className="relative group aspect-video bg-slate-900 rounded-3xl overflow-hidden shadow-2xl ring-8 ring-slate-50">
               <video
-                ref={userVideoRef}
+                ref={setLocalVideoRef}
                 autoPlay
-                muted={true}
-                playsInline={true}
+                muted
+                playsInline
                 className={`w-full h-full object-cover mirror ${cameraOn ? "" : "hidden"}`}
               />
               {!cameraOn && (
@@ -441,7 +451,7 @@ const UnifiedMeetingRoom = () => {
                 
                 {/* Local Video */}
                 <div className="relative w-full aspect-video bg-slate-900 rounded-[32px] overflow-hidden shadow-2xl group border-2 border-indigo-500/10">
-                    <video ref={userVideoRef} autoPlay muted={true} playsInline={true} className={`w-full h-full object-cover mirror ${cameraOn ? "" : "invisible"}`} />
+                    <video ref={setLocalVideoRef} autoPlay muted playsInline className={`w-full h-full object-cover mirror ${cameraOn ? "" : "invisible"}`} />
                     {!cameraOn && (
                         <div className="absolute inset-0 flex items-center justify-center bg-slate-900">
                             <div className="w-24 h-24 rounded-full bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-4xl font-black">

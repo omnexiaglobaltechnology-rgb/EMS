@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import Peer from "simple-peer";
 import {
-  Loader2, Link, Copy, Check, Video, PhoneOff, UserPlus, MessageSquare, ScreenShare, Mic, MicOff, VideoOff, Send, X, Users, Settings, MoreVertical
+  Loader2, Link, Copy, Check, Video, PhoneOff, UserPlus, MessageSquare, ScreenShare, Mic, MicOff, VideoOff, Send, X, Users, Settings, MoreVertical, Search
 } from "lucide-react";
 import { meetingsApi, authApi, usersApi, SOCKET_URL } from "../../utils/api";
 
@@ -16,6 +16,8 @@ const ICE_SERVERS = {
     { urls: 'stun:stun2.l.google.com:19302' },
     { urls: 'stun:stun3.l.google.com:19302' },
     { urls: 'stun:stun4.l.google.com:19302' },
+    { urls: 'stun:stun.services.mozilla.com' },
+    { urls: 'stun:stun.node.com' },
   ]
 };
 
@@ -37,6 +39,11 @@ const UnifiedMeetingRoom = () => {
   const [chatInput, setChatInput] = useState("");
   const [activeTab, setActiveTab] = useState("chat"); // "chat" or "people"
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  
+  // Invitation State
+  const [userSearch, setUserSearch] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   // Refs
   const socketRef = useRef();
@@ -164,6 +171,13 @@ const UnifiedMeetingRoom = () => {
     });
   };
 
+  // Re-apply local stream when joining (since video element is re-mounted)
+  useEffect(() => {
+    if (isJoined && streamRef.current && userVideoRef.current) {
+        userVideoRef.current.srcObject = streamRef.current;
+    }
+  }, [isJoined]);
+
   const createPeer = (userToSignal, callerID, stream) => {
     const peer = new Peer({ initiator: true, trickle: false, stream, config: ICE_SERVERS });
     peer.on("signal", signal => {
@@ -197,6 +211,41 @@ const UnifiedMeetingRoom = () => {
     if (socketRef.current) socketRef.current.disconnect();
     if (stream) stream.getTracks().forEach(track => track.stop());
     navigate(-1);
+  };
+
+  const handleSearchUsers = async (val) => {
+    setUserSearch(val);
+    if (val.length < 2) {
+      setSearchResults([]);
+      return;
+    }
+    setIsSearching(true);
+    try {
+      const results = await meetingsApi.searchInvitees({ search: val });
+      // Filter out people already in meeting.invitees
+      const existingIds = meeting.invitees.map(i => i.id || i._id);
+      setSearchResults(results.filter(u => !existingIds.includes(u.id || u._id)));
+    } catch (err) {
+      console.error("Search failed", err);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const handleInviteUser = async (user) => {
+    try {
+      const updatedInvitees = [...meeting.invitees, user];
+      const inviteeIds = updatedInvitees.map(i => i.id || i._id);
+      await meetingsApi.updateInvitees(roomId, inviteeIds);
+      
+      // Update local state
+      setMeeting(prev => ({ ...prev, invitees: updatedInvitees }));
+      setSearchResults(prev => prev.filter(u => (u.id || u._id) !== (user.id || user._id)));
+      
+      // We could emit a socket event here if we wanted to notify the invited user
+    } catch (err) {
+      console.error("Invite failed", err);
+    }
   };
 
   if (!isJoined) {
@@ -416,7 +465,55 @@ const UnifiedMeetingRoom = () => {
                            <div className="space-y-3">
                                {peers.map(p => (
                                   <RemoteParticipantInfo key={p.peerID} userId={p.userId} />
+                                ))}
+                           </div>
+                        </div>
+                      )}
+
+                      {/* Invite Section (Visible to Creator or CEO) */}
+                      {(me?.id === meeting?.creatorId?.id || me?.role === 'ceo') && (
+                        <div className="pt-8 border-t border-slate-100 mt-6 space-y-4">
+                           <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                               <UserPlus size={10} /> Invite Team Members
+                           </div>
+                           
+                           <div className="relative">
+                                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                                <input 
+                                    type="text"
+                                    placeholder="Search by name or email..."
+                                    value={userSearch}
+                                    onChange={(e) => handleSearchUsers(e.target.value)}
+                                    className="w-full bg-slate-50 border border-slate-100 rounded-xl pl-9 pr-4 py-2.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-medium"
+                                />
+                           </div>
+
+                           <div className="space-y-2 max-h-48 overflow-y-auto">
+                               {isSearching ? (
+                                   <div className="text-center py-4"><Loader2 size={16} className="animate-spin mx-auto text-indigo-500" /></div>
+                               ) : searchResults.map(user => (
+                                   <div key={user.id || user._id} className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 border border-transparent transition-all">
+                                       <div className="flex items-center gap-2">
+                                           <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600">
+                                               {user.name?.charAt(0)}
+                                           </div>
+                                           <div>
+                                               <p className="text-xs font-bold text-slate-800">{user.name}</p>
+                                               <p className="text-[9px] text-slate-400 font-medium">{user.role?.replace("_", " ")}</p>
+                                           </div>
+                                       </div>
+                                       <button 
+                                          onClick={() => handleInviteUser(user)}
+                                          className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-all"
+                                          title="Add to meeting"
+                                       >
+                                           <UserPlus size={14} />
+                                       </button>
+                                   </div>
                                ))}
+                               {!isSearching && userSearch.length >= 2 && searchResults.length === 0 && (
+                                   <p className="text-center py-4 text-[10px] text-slate-400 font-medium">No users found</p>
+                               )}
                            </div>
                         </div>
                       )}
@@ -482,6 +579,11 @@ const RemoteVideo = ({ peer, userId }) => {
                 videoRef.current.srcObject = stream;
             }
         };
+
+        // If peer already has a stream, apply it immediately
+        if (peer.streams && peer.streams[0]) {
+            handleStream(peer.streams[0]);
+        }
 
         peer.on("stream", handleStream);
 

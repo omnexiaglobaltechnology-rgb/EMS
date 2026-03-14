@@ -102,6 +102,14 @@ import EmployeeManagement from "./pages/manager/EmployeeManagement";
 export const router = createBrowserRouter([
   { path: "/", element: <Login /> },
   { path: "/unauthorized", element: <Unauthorized /> },
+  {
+    path: "/room/:id",
+    element: (
+      <ProtectedRoute allowedRoles={Object.values(ROLES)}>
+        <UnifiedMeetingRoom />
+      </ProtectedRoute>
+    ),
+  },
 
   /* ================= EMPLOYEE ================= */
   {

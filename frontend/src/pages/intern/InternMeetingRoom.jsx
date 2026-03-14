@@ -123,26 +123,14 @@ const InternMeetingRoom = () => {
       setPeers(prev => [...prev, { peerID: socketId, peer }]);
     });
 
-    socketRef.current.on("offer", (payload) => {
-      const peer = addPeer(payload.offer, payload.sender, streamRef.current);
-      peersRef.current.push({
-        peerID: payload.sender,
-        peer,
-      });
-      setPeers(prev => [...prev, { peerID: payload.sender, peer }]);
-    });
-
-    socketRef.current.on("answer", (payload) => {
+    socketRef.current.on("signal", (payload) => {
       const item = peersRef.current.find(p => p.peerID === payload.sender);
       if (item) {
-        item.peer.signal(payload.answer);
-      }
-    });
-
-    socketRef.current.on("ice-candidate", (payload) => {
-      const item = peersRef.current.find(p => p.peerID === payload.sender);
-      if (item) {
-        item.peer.signal(payload.candidate);
+        item.peer.signal(payload.signal);
+      } else {
+        const peer = addPeer(payload.signal, payload.sender, streamRef.current);
+        peersRef.current.push({ peerID: payload.sender, peer });
+        setPeers(prev => [...prev, { peerID: payload.sender, peer }]);
       }
     });
 
@@ -169,7 +157,7 @@ const InternMeetingRoom = () => {
     });
 
     peer.on("signal", signal => {
-      socketRef.current.emit("offer", { target: userToSignal, sender: callerID, offer: signal, userId: me?.id || me?._id });
+      socketRef.current.emit("signal", { target: userToSignal, signal, userId: me?.id || me?._id });
     });
 
     return peer;
@@ -183,7 +171,7 @@ const InternMeetingRoom = () => {
     });
 
     peer.on("signal", signal => {
-      socketRef.current.emit("answer", { target: callerID, answer: signal });
+      socketRef.current.emit("signal", { target: callerID, signal, userId: me?.id || me?._id });
     });
 
     peer.signal(incomingSignal);

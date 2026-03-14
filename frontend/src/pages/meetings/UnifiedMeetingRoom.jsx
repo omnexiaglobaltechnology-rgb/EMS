@@ -595,6 +595,24 @@ const RemoteVideo = ({ peer, userId }) => {
             console.log("Setting remote stream for user:", userId);
             if (videoRef.current) {
                 videoRef.current.srcObject = stream;
+                videoRef.current.volume = 1.0;
+                
+                // Explicitly attempt playback to handle browser autoplay policies
+                const playPromise = videoRef.current.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(err => {
+                        console.warn("Autoplay blocked for remote video, retrying...", err);
+                        // If autoplay is blocked, try playing after a short delay
+                        // The user has already interacted with the page by clicking "Join Meeting"
+                        setTimeout(() => {
+                            if (videoRef.current) {
+                                videoRef.current.play().catch(e => {
+                                    console.error("Remote video play failed:", e);
+                                });
+                            }
+                        }, 500);
+                    });
+                }
             }
         };
 

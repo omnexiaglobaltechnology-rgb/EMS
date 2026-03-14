@@ -424,8 +424,8 @@ const MeetingManagement = () => {
                       >
                         <option value="">All Depts</option>
                         {depts.map(d => (
-                          <option key={d.id || d._id} value={d.id || d._id} disabled={isRestrictedRole && d.id !== user?.departmentId && d._id !== user?.departmentId}>
-                            {d.name} {isRestrictedRole && (d.id === user?.departmentId || d._id === user?.departmentId) ? "(Your Dept)" : ""}
+                          <option key={d.id || d._id} value={d.id || d._id} disabled={isRestrictedRole && d.id !== auth?.departmentId && d._id !== auth?.departmentId}>
+                            {d.name} {isRestrictedRole && (d.id === auth?.departmentId || d._id === auth?.departmentId) ? "(Your Dept)" : ""}
                           </option>
                         ))}
                       </select>

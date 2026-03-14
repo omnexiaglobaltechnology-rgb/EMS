@@ -92,6 +92,7 @@ const UnifiedMeetingRoom = () => {
       streamRef.current = currentStream;
       if (userVideoRef.current) {
         userVideoRef.current.srcObject = currentStream;
+        userVideoRef.current.muted = true;
       }
       return currentStream;
     } catch (err) {
@@ -182,6 +183,7 @@ const UnifiedMeetingRoom = () => {
   useEffect(() => {
     if (isJoined && streamRef.current && userVideoRef.current) {
         userVideoRef.current.srcObject = streamRef.current;
+        userVideoRef.current.muted = true;
     }
   }, [isJoined]);
 
@@ -358,7 +360,7 @@ const UnifiedMeetingRoom = () => {
                 
                 {/* Local Video */}
                 <div className="relative w-full aspect-video bg-slate-900 rounded-[32px] overflow-hidden shadow-2xl group border-2 border-indigo-500/10">
-                    <video ref={userVideoRef} autoPlay muted className={`w-full h-full object-cover mirror ${cameraOn ? "" : "invisible"}`} />
+                    <video ref={userVideoRef} autoPlay muted playsInline className={`w-full h-full object-cover mirror ${cameraOn ? "" : "invisible"}`} />
                     {!cameraOn && (
                         <div className="absolute inset-0 flex items-center justify-center bg-slate-900">
                             <div className="w-24 h-24 rounded-full bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-4xl font-black">

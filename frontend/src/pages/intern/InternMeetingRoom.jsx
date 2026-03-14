@@ -81,6 +81,7 @@ const InternMeetingRoom = () => {
       streamRef.current = currentStream;
       if (userVideoRef.current) {
         userVideoRef.current.srcObject = currentStream;
+        userVideoRef.current.muted = true;
       }
       return currentStream;
     } catch (err) {
@@ -155,6 +156,14 @@ const InternMeetingRoom = () => {
       setPeers(remainingPeers);
     });
   };
+  
+  // Re-apply local stream when joining (since video element is re-mounted)
+  useEffect(() => {
+    if (isJoined && streamRef.current && userVideoRef.current) {
+        userVideoRef.current.srcObject = streamRef.current;
+        userVideoRef.current.muted = true;
+    }
+  }, [isJoined]);
 
   const createPeer = (userToSignal, callerID, stream) => {
     const peer = new Peer({
@@ -216,7 +225,8 @@ const InternMeetingRoom = () => {
                 ref={userVideoRef}
                 autoPlay
                 muted
-                className={`w-full h-full object-cover ${cameraOn ? "" : "hidden"}`}
+                playsInline
+                className={`w-full h-full object-cover mirror ${cameraOn ? "" : "hidden"}`}
               />
               {!cameraOn && (
                 <div className="absolute inset-0 flex items-center justify-center flex-col gap-4 bg-slate-900">
@@ -310,7 +320,8 @@ const InternMeetingRoom = () => {
             ref={userVideoRef}
             autoPlay
             muted
-            className={`w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-105 ${cameraOn ? "" : "invisible"}`}
+            playsInline
+            className={`w-full h-full object-cover mirror transform transition-transform duration-700 group-hover:scale-105 ${cameraOn ? "" : "invisible"}`}
           />
           {!cameraOn && (
             <div className="absolute inset-0 flex items-center justify-center bg-slate-900">

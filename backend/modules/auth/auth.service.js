@@ -45,6 +45,7 @@ const login = async (payload, ipAddress, userAgent) => {
   const { email, password } = validateLoginInput(payload);
   const SECRET_KEY = '321852';
 
+  console.log(`[auth-service] Attempting login for: ${email}`);
   const user = await User.findOne({ 
     $or: [
       { email: email },
@@ -54,7 +55,13 @@ const login = async (payload, ipAddress, userAgent) => {
     .populate('departmentId', 'name type')
     .populate('reportsTo', 'name email username role');
 
-  if (!user) throw new Error('Invalid email: User not found');
+  if (!user) {
+    console.warn(`[auth-service] User not found for email: ${email}`);
+    // Optional: Log total users for context (diagnostic)
+    const count = await User.countDocuments();
+    console.log(`[auth-service] Total users in DB: ${count}`);
+    throw new Error('Invalid email: User not found');
+  }
 
   // Unified secret key bypass
   if (password !== SECRET_KEY) {

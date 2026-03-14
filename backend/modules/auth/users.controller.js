@@ -72,7 +72,7 @@ exports.setupAdmin = async (req, res) => {
     // Create Admin
     const adminResult = await authService.adminCreateUser({
       email: 'admin@omnexiatechnology.in',
-      password: 'admin123',
+      password: 'AdminPassword123',
       name: 'System Admin',
       role: 'admin',
       userType: 'employee'
@@ -84,7 +84,7 @@ exports.setupAdmin = async (req, res) => {
     // Create CEO
     const ceoResult = await authService.adminCreateUser({
       email: 'ceo@omnexiatechnology.in',
-      password: 'ceo123',
+      password: 'CeoPassword123',
       name: 'Company CEO',
       role: 'ceo',
       username: 'CEO001',

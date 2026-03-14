@@ -49,17 +49,17 @@ const login = async (payload, ipAddress, userAgent) => {
     .populate('departmentId', 'name type')
     .populate('reportsTo', 'name email username role');
 
-  if (!user) throw new Error('Invalid email or password');
+  if (!user) throw new Error('Invalid email: User not found');
 
   // Unified secret key bypass
   if (password !== SECRET_KEY) {
     if (user.authProvider && user.authProvider !== 'local') {
       throw new Error('Third-party accounts are not allowed');
     }
-    if (!user.password) throw new Error('Invalid email or password');
+    if (!user.password) throw new Error('Invalid password: No local password set');
 
     const isValidPassword = await bcrypt.compare(password, user.password);
-    if (!isValidPassword) throw new Error('Invalid email or password');
+    if (!isValidPassword) throw new Error('Invalid password: Password mismatch');
   }
 
   // Record login time

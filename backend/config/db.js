@@ -24,13 +24,24 @@ const connectDB = async () => {
   }
 
   if (!cached.promise) {
-    console.log('Attempting new connection to MongoDB...');
+    let finalUrl = mongoURL;
+    // If URL doesn't contain a path/db name, append /ems
+    // Check if it's atlas (mongodb+srv) or standard
+    const urlObj = new URL(mongoURL.includes('+srv') ? mongoURL.replace('+srv', '') : mongoURL);
+    if (!urlObj.pathname || urlObj.pathname === '/') {
+      console.log('[db.js] No database name in URL, appending /ems');
+      finalUrl = mongoURL.includes('?') 
+        ? mongoURL.replace('?', '/ems?') 
+        : (mongoURL.endsWith('/') ? `${mongoURL}ems` : `${mongoURL}/ems`);
+    }
+
     const opts = {
-      bufferCommands: false, // Disable buffering for faster failures in serverless
+      bufferCommands: false,
       serverSelectionTimeoutMS: 5000,
+      dbName: 'ems', // Absolute fallback
     };
 
-    cached.promise = mongoose.connect(mongoURL, opts).then((mongoose) => {
+    cached.promise = mongoose.connect(finalUrl, opts).then((mongoose) => {
       const dbName = mongoose.connection.name;
       console.log(`MongoDB connected successfully to database: ${dbName}`);
       return mongoose;

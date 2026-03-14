@@ -97,7 +97,8 @@ const InternMeetingRoom = () => {
   };
 
   const joinMeeting = () => {
-    if (!me?._id) {
+    const myId = me?.id || me?._id;
+    if (!myId) {
       console.warn("User data not loaded yet, cannot join meeting");
       return;
     }
@@ -110,7 +111,7 @@ const InternMeetingRoom = () => {
       timeout: 10000
     });
 
-    socketRef.current.emit("join-room", roomId, me?._id);
+    socketRef.current.emit("join-room", roomId, myId);
 
     socketRef.current.on("user-joined", (userId, socketId) => {
       console.log("User joined:", userId, socketId);
@@ -168,7 +169,7 @@ const InternMeetingRoom = () => {
     });
 
     peer.on("signal", signal => {
-      socketRef.current.emit("offer", { target: userToSignal, sender: callerID, offer: signal, userId: me?._id });
+      socketRef.current.emit("offer", { target: userToSignal, sender: callerID, offer: signal, userId: me?.id || me?._id });
     });
 
     return peer;

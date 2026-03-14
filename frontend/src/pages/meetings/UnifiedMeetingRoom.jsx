@@ -101,7 +101,8 @@ const UnifiedMeetingRoom = () => {
   };
 
   const joinMeeting = () => {
-    if (!me?._id) {
+    const myId = me?.id || me?._id;
+    if (!myId) {
       console.warn("User data not loaded yet, cannot join meeting");
       return;
     }
@@ -118,7 +119,7 @@ const UnifiedMeetingRoom = () => {
 
     socketRef.current.on("connect", () => {
       console.log("Connected to socket server:", socketRef.current.id);
-      socketRef.current.emit("join-room", roomId, me?._id);
+      socketRef.current.emit("join-room", roomId, myId);
     });
 
     socketRef.current.on("user-joined", (userId, socketId) => {
@@ -166,7 +167,7 @@ const UnifiedMeetingRoom = () => {
   const createPeer = (userToSignal, callerID, stream) => {
     const peer = new Peer({ initiator: true, trickle: false, stream, config: ICE_SERVERS });
     peer.on("signal", signal => {
-      socketRef.current.emit("signal", { target: userToSignal, signal, userId: me?._id });
+      socketRef.current.emit("signal", { target: userToSignal, signal, userId: me?.id || me?._id });
     });
     return peer;
   };
@@ -174,7 +175,7 @@ const UnifiedMeetingRoom = () => {
   const addPeer = (incomingSignal, callerID, stream) => {
     const peer = new Peer({ initiator: false, trickle: false, stream, config: ICE_SERVERS });
     peer.on("signal", signal => {
-      socketRef.current.emit("signal", { target: callerID, signal, userId: me?._id });
+      socketRef.current.emit("signal", { target: callerID, signal, userId: me?.id || me?._id });
     });
     peer.signal(incomingSignal);
     return peer;

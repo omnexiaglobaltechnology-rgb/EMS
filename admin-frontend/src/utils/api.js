@@ -90,6 +90,7 @@ export const authApi = {
   login: (credentials) => apiFetch("/auth/login", { method: "POST", body: credentials }),
   me: () => apiFetch("/auth/me", { method: "GET" }),
   updateProfile: (data) => apiFetch("/auth/profile", { method: "PATCH", body: data }),
+  changePassword: (data) => apiFetch("/auth/change-password", { method: "POST", body: data }),
 };
 
 // User management API calls

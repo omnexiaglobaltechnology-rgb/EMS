@@ -55,6 +55,43 @@ const ProfileSettings = () => {
     }
   };
 
+  const [pwForm, setPwForm] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: ""
+  });
+  const [pwSaving, setPwSaving] = useState(false);
+  const [pwMessage, setPwMessage] = useState(null);
+
+  const handlePwChange = async (e) => {
+    e.preventDefault();
+    setPwMessage(null);
+
+    if (pwForm.newPassword !== pwForm.confirmPassword) {
+      setPwMessage({ type: "error", text: "New passwords do not match" });
+      return;
+    }
+
+    if (pwForm.newPassword.length < 6) {
+      setPwMessage({ type: "error", text: "Password must be at least 6 characters long" });
+      return;
+    }
+
+    setPwSaving(true);
+    try {
+      await authApi.changePassword({ 
+        currentPassword: pwForm.currentPassword, 
+        newPassword: pwForm.newPassword 
+      });
+      setPwMessage({ type: "success", text: "Password updated successfully!" });
+      setPwForm({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    } catch (err) {
+      setPwMessage({ type: "error", text: err.message || "Failed to update password" });
+    } finally {
+      setPwSaving(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-12">
@@ -79,10 +116,19 @@ const ProfileSettings = () => {
         </div>
       )}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      {pwMessage && (
+        <div className={`flex items-center gap-3 p-4 rounded-xl border ${
+          pwMessage.type === "success" ? "bg-emerald-50 border-emerald-200 text-emerald-800" : "bg-red-50 border-red-200 text-red-800"
+        } animate-in fade-in slide-in-from-top-2`}>
+          {pwMessage.type === "success" ? <CheckCircle size={20} /> : <AlertCircle size={20} />}
+          <p className="text-sm font-medium">{pwMessage.text}</p>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pb-12">
         {/* Left: User Card */}
         <div className="lg:col-span-1">
-          <div className="bg-white rounded-3xl border border-slate-200 p-8 text-center space-y-4 shadow-sm">
+          <div className="bg-white rounded-3xl border border-slate-200 p-8 text-center space-y-4 shadow-sm h-fit">
             <div className="h-24 w-24 bg-indigo-100 rounded-full flex items-center justify-center mx-auto text-indigo-600 text-3xl font-bold">
               {auth?.name?.charAt(0) || "U"}
             </div>
@@ -99,8 +145,9 @@ const ProfileSettings = () => {
           </div>
         </div>
 
-        {/* Right: Settings Form */}
-        <div className="lg:col-span-2 space-y-6">
+        {/* Right: Settings Forms */}
+        <div className="lg:col-span-2 space-y-10">
+          {/* PERSONAL INFO FORM */}
           <form onSubmit={handleSave} className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
             <div className="px-8 py-6 border-b border-slate-50 bg-slate-50/30">
               <h3 className="font-bold text-slate-800">Email Notifications</h3>
@@ -113,7 +160,7 @@ const ProfileSettings = () => {
                   <div className="p-2 bg-indigo-600 text-white rounded-lg">
                     <Mail size={18} />
                   </div>
-                  <div>
+                  <div className="flex-1">
                     <label className="text-sm font-bold text-slate-800 block mb-1">Personal Gmail Address</label>
                     <p className="text-xs text-slate-500 leading-relaxed mb-4">
                       Add your personal Gmail to receive instant notifications for meeting schedules and assignments.
@@ -129,14 +176,6 @@ const ProfileSettings = () => {
                   </div>
                 </div>
               </div>
-
-              <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                <Shield size={18} className="text-slate-400" />
-                <div>
-                  <p className="text-xs font-bold text-slate-700">Privacy Policy</p>
-                  <p className="text-[10px] text-slate-500">Your personal email is only used for meeting invitations and is never shared with third parties.</p>
-                </div>
-              </div>
             </div>
 
             <div className="px-8 py-6 bg-slate-50/50 border-t border-slate-100 flex justify-end">
@@ -147,6 +186,61 @@ const ProfileSettings = () => {
               >
                 {saving ? <Loader2 className="animate-spin" size={18} /> : <Save size={18} />}
                 Save Changes
+              </button>
+            </div>
+          </form>
+
+          {/* PASSWORD CHANGE FORM */}
+          <form onSubmit={handlePwChange} className="bg-white rounded-3xl border border-slate-200 overflow-hidden shadow-sm">
+            <div className="px-8 py-6 border-b border-slate-50 bg-slate-50/30">
+              <h3 className="font-bold text-slate-800">Password & Security</h3>
+              <p className="text-xs text-slate-500">Update your account password regularly for better security.</p>
+            </div>
+
+            <div className="p-8 space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Current Password</label>
+                  <input 
+                    type="password"
+                    required
+                    className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:ring-4 focus:border-indigo-500 ring-indigo-500/5 transition-all font-medium"
+                    value={pwForm.currentPassword}
+                    onChange={(e) => setPwForm({...pwForm, currentPassword: e.target.value})}
+                  />
+                </div>
+                <div className="hidden md:block"></div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">New Password</label>
+                  <input 
+                    type="password"
+                    required
+                    className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:ring-4 focus:border-indigo-500 ring-indigo-500/5 transition-all font-medium"
+                    value={pwForm.newPassword}
+                    onChange={(e) => setPwForm({...pwForm, newPassword: e.target.value})}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-bold text-slate-700">Confirm New Password</label>
+                  <input 
+                    type="password"
+                    required
+                    className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:ring-4 focus:border-indigo-500 ring-indigo-500/5 transition-all font-medium"
+                    value={pwForm.confirmPassword}
+                    onChange={(e) => setPwForm({...pwForm, confirmPassword: e.target.value})}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="px-8 py-6 bg-slate-50/50 border-t border-slate-100 flex justify-end">
+              <button
+                type="submit"
+                disabled={pwSaving}
+                className="flex items-center gap-2 rounded-xl bg-slate-800 px-8 py-2.5 text-sm font-bold text-white hover:bg-slate-900 transition-all shadow-lg shadow-slate-200 disabled:opacity-50"
+              >
+                {pwSaving ? <Loader2 className="animate-spin" size={18} /> : <Shield size={18} />}
+                Update Password
               </button>
             </div>
           </form>

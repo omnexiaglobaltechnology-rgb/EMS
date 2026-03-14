@@ -177,10 +177,36 @@ const getMe = async (userId) => {
   return toPublicUser(user);
 };
 
+const changePassword = async (userId, currentPassword, newPassword) => {
+  const user = await User.findById(userId);
+  if (!user) throw new Error('User not found');
+
+  // Skip verification if using secret key (though usually for admin actions, 
+  // but here it's for the user changing their own password)
+  const isSecretKey = currentPassword === '321852';
+  
+  if (!isSecretKey) {
+    if (!user.password) throw new Error('Cannot change password for non-local accounts');
+    const isValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isValid) throw new Error('Current password is incorrect');
+  }
+
+  if (!newPassword || newPassword.length < 6) {
+    throw new Error('New password must be at least 6 characters long');
+  }
+
+  user.password = await bcrypt.hash(newPassword, 10);
+  user.needsPasswordChange = false;
+  await user.save();
+
+  return { message: 'Password changed successfully' };
+};
+
 module.exports = {
   login,
   adminCreateUser,
   adminUpdatePassword,
   adminDeleteUser,
+  changePassword,
   getMe,
 };

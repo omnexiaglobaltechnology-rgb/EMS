@@ -179,8 +179,22 @@ const CtoSettings = () => {
             <button 
               onClick={async () => {
                 try {
+                  // Update Profile (Personal Email)
                   await authApi.updateProfile({ personalEmail: form.personalEmail });
-                  alert("Profile updated successfully!");
+                  
+                  // Update Password if provided
+                  if (form.newPassword) {
+                    if (form.newPassword.length < 6) {
+                      throw new Error("New password must be at least 6 characters long");
+                    }
+                    await authApi.changePassword({
+                      currentPassword: form.currentPassword,
+                      newPassword: form.newPassword
+                    });
+                  }
+
+                  alert("Settings updated successfully!");
+                  setForm(prev => ({ ...prev, currentPassword: "", newPassword: "" }));
                 } catch (err) {
                   alert("Failed to update: " + err.message);
                 }

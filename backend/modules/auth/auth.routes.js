@@ -12,6 +12,7 @@ router.post('/login', authController.login);
 router.post('/logout', authController.logout);
 router.get('/me', authenticate, authController.me);
 router.patch('/profile', authenticate, usersController.updateProfile);
+router.post('/change-password', authenticate, authController.changePassword);
 
 // Admin-only user management
 router.post(

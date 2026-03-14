@@ -92,6 +92,7 @@ export const authApi = {
   logout: () => apiFetch("/auth/logout", { method: "POST" }),
   me: () => apiFetch("/auth/me", { method: "GET" }),
   updateProfile: (data) => apiFetch("/auth/profile", { method: "PATCH", body: data }),
+  changePassword: (data) => apiFetch("/auth/change-password", { method: "POST", body: data }),
 };
 
 export const trackingApi = {

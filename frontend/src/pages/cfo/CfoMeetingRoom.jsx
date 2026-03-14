@@ -76,7 +76,11 @@ const CfoMeetingRoom = () => {
       streamRef.current = stream;
 
       if (videoRef.current) {
-        videoRef.current.srcObject = stream;
+        // Use a video-only stream for local preview to prevent audio echo/feedback
+        const previewStream = new MediaStream(stream.getVideoTracks());
+        videoRef.current.srcObject = previewStream;
+        videoRef.current.muted = true;
+        videoRef.current.defaultMuted = true;
       }
 
       setMicOn(stream.getAudioTracks().length > 0);

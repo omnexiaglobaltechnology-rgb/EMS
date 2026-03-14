@@ -1,5 +1,5 @@
 // API base URL configuration
-const API_BASE_URL = import.meta.env.VITE_API_URL || "https://ems-backend-seven-ruby.vercel.app/api";
+const API_BASE_URL = import.meta.env.VITE_API_URL || "https://ems-backend-mcf0.onrender.com/api";
 
 const getStoredToken = () => {
   try {

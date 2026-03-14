@@ -43,6 +43,14 @@ const initSocket = (server) => {
       });
     });
 
+    socket.on("signal", (payload) => {
+      io.to(payload.target).emit("signal", {
+        signal: payload.signal,
+        sender: socket.id,
+        userId: payload.userId
+      });
+    });
+
     socket.on("send-chat-message", (roomId, message) => {
       io.to(roomId).emit("chat-message", message);
     });

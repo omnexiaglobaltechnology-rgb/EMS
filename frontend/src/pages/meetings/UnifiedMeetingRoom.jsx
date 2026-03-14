@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { meetingsApi, authApi } from "../../utils/api";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://ems-backend-seven-ruby.vercel.app/api";
+const API_URL = import.meta.env.VITE_API_URL || "https://ems-backend-mcf0.onrender.com/api";
 const SOCKET_URL = API_URL.replace(/\/api$/, "");
 
 const ICE_SERVERS = {
@@ -124,30 +124,20 @@ const UnifiedMeetingRoom = () => {
       setPeers(prev => [...prev, { peerID: socketId, peer, userId }]);
     });
 
-    socketRef.current.on("offer", (payload) => {
-      console.log("Received offer from:", payload.sender);
-      const peer = addPeer(payload.offer, payload.sender, streamRef.current);
-      peersRef.current.push({
-        peerID: payload.sender,
-        peer,
-        userId: payload.userId
-      });
-      setPeers(prev => [...prev, { peerID: payload.sender, peer, userId: payload.userId }]);
-    });
-
-    socketRef.current.on("answer", (payload) => {
-      console.log("Received answer from:", payload.sender);
-      const item = peersRef.current.find(p => p.peerID === payload.sender);
-      if (item) item.peer.signal(payload.answer);
-    });
-
-    socketRef.current.on("ice-candidate", (payload) => {
+    socketRef.current.on("signal", (payload) => {
+      console.log("Received signal from:", payload.sender);
       const item = peersRef.current.find(p => p.peerID === payload.sender);
       if (item) {
-        // Only signal if it's a valid candidate
-        if (payload.candidate) {
-          item.peer.signal(payload.candidate);
-        }
+        item.peer.signal(payload.signal);
+      } else {
+        // This is likely an incoming offer from someone who was already in the room
+        const peer = addPeer(payload.signal, payload.sender, streamRef.current);
+        peersRef.current.push({
+          peerID: payload.sender,
+          peer,
+          userId: payload.userId
+        });
+        setPeers(prev => [...prev, { peerID: payload.sender, peer, userId: payload.userId }]);
       }
     });
 
@@ -168,11 +158,7 @@ const UnifiedMeetingRoom = () => {
   const createPeer = (userToSignal, callerID, stream) => {
     const peer = new Peer({ initiator: true, trickle: true, stream, config: ICE_SERVERS });
     peer.on("signal", signal => {
-      if (signal.type === 'offer') {
-        socketRef.current.emit("offer", { target: userToSignal, sender: callerID, offer: signal, userId: me?._id });
-      } else if (signal.candidate) {
-        socketRef.current.emit("ice-candidate", { target: userToSignal, candidate: signal });
-      }
+      socketRef.current.emit("signal", { target: userToSignal, signal, userId: me?._id });
     });
     return peer;
   };
@@ -180,11 +166,7 @@ const UnifiedMeetingRoom = () => {
   const addPeer = (incomingSignal, callerID, stream) => {
     const peer = new Peer({ initiator: false, trickle: true, stream, config: ICE_SERVERS });
     peer.on("signal", signal => {
-      if (signal.type === 'answer') {
-        socketRef.current.emit("answer", { target: callerID, answer: signal });
-      } else if (signal.candidate) {
-        socketRef.current.emit("ice-candidate", { target: callerID, candidate: signal });
-      }
+      socketRef.current.emit("signal", { target: callerID, signal, userId: me?._id });
     });
     peer.signal(incomingSignal);
     return peer;
@@ -401,7 +383,7 @@ const UnifiedMeetingRoom = () => {
                    <div className="p-6 space-y-4">
                       <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Host & Speaker</div>
                       <div className="flex items-center gap-3 p-3 bg-indigo-50/50 rounded-2xl border border-indigo-100/50">
-                         <div className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">
+                         <div className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs uppercase">
                              {me?.name?.charAt(0)}
                          </div>
                          <div>
@@ -409,6 +391,19 @@ const UnifiedMeetingRoom = () => {
                             <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-tighter">{me?.role?.replace("_", " ")}</p>
                          </div>
                       </div>
+
+                      {peers.length > 0 && (
+                        <div className="pt-6 space-y-4">
+                           <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
+                               <Users size={10} /> Remote Participants
+                           </div>
+                           <div className="space-y-3">
+                               {peers.map(p => (
+                                  <RemoteParticipantInfo key={p.peerID} userId={p.userId} />
+                               ))}
+                           </div>
+                        </div>
+                      )}
                    </div>
                 )}
             </div>
@@ -438,25 +433,60 @@ const UnifiedMeetingRoom = () => {
   );
 };
 
+const RemoteParticipantInfo = ({ userId }) => {
+    const [userData, setUserData] = useState(null);
+
+    useEffect(() => {
+        if (userId) {
+            authApi.getById(userId).then(data => setUserData(data)).catch(() => {});
+        }
+    }, [userId]);
+
+    return (
+        <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
+            <div className="w-10 h-10 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs uppercase">
+                {userData?.name?.charAt(0) || "?"}
+            </div>
+            <div>
+               <p className="text-sm font-bold text-slate-900">{userData?.name || "Loading..."}</p>
+               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{userData?.role?.replace("_", " ") || "PARTICIPANT"}</p>
+            </div>
+        </div>
+    );
+};
+
 const RemoteVideo = ({ peer, userId }) => {
     const videoRef = useRef();
     const [userData, setUserData] = useState(null);
 
     useEffect(() => {
-        peer.on("stream", stream => {
-            if (videoRef.current) videoRef.current.srcObject = stream;
-        });
+        const handleStream = stream => {
+            console.log("Setting remote stream for user:", userId);
+            if (videoRef.current) {
+                videoRef.current.srcObject = stream;
+            }
+        };
 
-        // Try to fetch metadata if we have a userId
+        peer.on("stream", handleStream);
+
+        // Try to fetch metadata
         if (userId) {
-            // In a real app we might use a user cache here
             authApi.getById(userId).then(data => setUserData(data)).catch(() => {});
         }
+
+        return () => {
+            peer.off("stream", handleStream);
+        };
     }, [peer, userId]);
 
     return (
         <div className="relative w-full aspect-video bg-slate-900 rounded-[32px] overflow-hidden shadow-2xl group border-2 border-transparent hover:border-indigo-500/20 transition-all">
-            <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover" />
+            <video 
+                ref={videoRef} 
+                autoPlay 
+                playsInline 
+                className="w-full h-full object-cover" 
+            />
             <div className="absolute bottom-6 left-6 flex items-center gap-2 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl text-xs font-bold text-white border border-white/10">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
                 {userData ? `${userData.name} (${userData.role?.replace("_", " ").toUpperCase()})` : "Participant"}

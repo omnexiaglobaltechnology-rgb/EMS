@@ -14,10 +14,23 @@ const ICE_SERVERS = {
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
     { urls: 'stun:stun2.l.google.com:19302' },
-    { urls: 'stun:stun3.l.google.com:19302' },
-    { urls: 'stun:stun4.l.google.com:19302' },
-    { urls: 'stun:stun.services.mozilla.com' },
-    { urls: 'stun:stun.node.com' },
+    // Free TURN servers – required when users are behind NAT/firewalls
+    // Without TURN, WebRTC connections silently fail for many network configurations
+    {
+      urls: 'turn:openrelay.metered.ca:80',
+      username: 'openrelayproject',
+      credential: 'openrelayproject',
+    },
+    {
+      urls: 'turn:openrelay.metered.ca:443',
+      username: 'openrelayproject',
+      credential: 'openrelayproject',
+    },
+    {
+      urls: 'turns:openrelay.metered.ca:443',
+      username: 'openrelayproject',
+      credential: 'openrelayproject',
+    },
   ]
 };
 
@@ -122,12 +135,17 @@ const UnifiedMeetingRoom = () => {
   const joinMeeting = () => {
     const myId = me?.id || me?._id;
     if (!myId) {
-      console.warn("User data not loaded yet, cannot join meeting");
+      console.warn("[MEET] User data not loaded yet, cannot join meeting");
+      return;
+    }
+
+    if (!streamRef.current) {
+      console.error("[MEET] No media stream available! Cannot join without camera/mic.");
       return;
     }
 
     setIsJoined(true);
-    console.log("Connecting to socket at:", SOCKET_URL);
+    console.log("[MEET] Connecting to socket at:", SOCKET_URL);
     
     socketRef.current = io(SOCKET_URL, {
       transports: ['websocket', 'polling'],
@@ -137,13 +155,23 @@ const UnifiedMeetingRoom = () => {
     });
 
     socketRef.current.on("connect", () => {
-      console.log("Connected to socket server:", socketRef.current.id);
+      console.log("[MEET] ✅ Socket connected:", socketRef.current.id);
       socketRef.current.emit("join-room", roomId, myId);
+    });
+
+    socketRef.current.on("connect_error", (err) => {
+      console.error("[MEET] ❌ Socket connection error:", err.message);
     });
 
     socketRef.current.on("user-joined", (userId, socketId) => {
       if (userId === (me?.id || me?._id) || socketId === socketRef.current.id) return;
-      console.log("New user joined:", userId, "Socket:", socketId);
+      console.log("[MEET] 👤 New user joined:", userId, "Socket:", socketId);
+      
+      if (!streamRef.current) {
+        console.error("[MEET] ❌ Cannot create peer - no local stream!");
+        return;
+      }
+
       const peer = createPeer(socketId, socketRef.current.id, streamRef.current);
       peersRef.current.push({
         peerID: socketId,
@@ -155,12 +183,16 @@ const UnifiedMeetingRoom = () => {
 
     socketRef.current.on("signal", (payload) => {
       if (payload.userId === (me?.id || me?._id) || payload.sender === socketRef.current.id) return;
-      console.log("Received signal from:", payload.sender);
+      console.log("[MEET] 📡 Received signal from:", payload.sender, "type:", payload.signal?.type || "candidate");
       const item = peersRef.current.find(p => p.peerID === payload.sender);
       if (item) {
-        item.peer.signal(payload.signal);
+        try {
+          item.peer.signal(payload.signal);
+        } catch (err) {
+          console.error("[MEET] ❌ Error processing signal:", err);
+        }
       } else {
-        // This is likely an incoming offer from someone who was already in the room
+        console.log("[MEET] Creating new peer for incoming signal from:", payload.sender);
         const peer = addPeer(payload.signal, payload.sender, streamRef.current);
         peersRef.current.push({
           peerID: payload.sender,
@@ -176,7 +208,7 @@ const UnifiedMeetingRoom = () => {
     });
 
     socketRef.current.on("user-disconnected", (socketId) => {
-      console.log("User disconnected:", socketId);
+      console.log("[MEET] 👤 User disconnected:", socketId);
       const peerObj = peersRef.current.find(p => p.peerID === socketId);
       if (peerObj) peerObj.peer.destroy();
       const remainingPeers = peersRef.current.filter(p => p.peerID !== socketId);
@@ -196,18 +228,58 @@ const UnifiedMeetingRoom = () => {
   }, [isJoined]);
 
   const createPeer = (userToSignal, callerID, stream) => {
-    const peer = new Peer({ initiator: true, trickle: false, stream, config: ICE_SERVERS });
+    console.log("[MEET] Creating peer (initiator) for:", userToSignal, "with stream tracks:", stream.getTracks().map(t => t.kind + ':' + t.enabled));
+    const peer = new Peer({ initiator: true, trickle: true, stream, config: ICE_SERVERS });
+    
     peer.on("signal", signal => {
+      console.log("[MEET] 📤 Sending signal to:", userToSignal, "type:", signal?.type || "candidate");
       socketRef.current.emit("signal", { target: userToSignal, signal, userId: me?.id || me?._id });
     });
+    
+    peer.on("connect", () => {
+      console.log("[MEET] ✅ Peer connected to:", userToSignal);
+    });
+    
+    peer.on("stream", (remoteStream) => {
+      console.log("[MEET] 🎵 Received remote stream from:", userToSignal, "tracks:", remoteStream.getTracks().map(t => t.kind + ':' + t.enabled));
+    });
+    
+    peer.on("error", (err) => {
+      console.error("[MEET] ❌ Peer error with:", userToSignal, err.message);
+    });
+    
+    peer.on("close", () => {
+      console.log("[MEET] Peer connection closed with:", userToSignal);
+    });
+    
     return peer;
   };
 
   const addPeer = (incomingSignal, callerID, stream) => {
-    const peer = new Peer({ initiator: false, trickle: false, stream, config: ICE_SERVERS });
+    console.log("[MEET] Creating peer (receiver) for:", callerID, "with stream tracks:", stream.getTracks().map(t => t.kind + ':' + t.enabled));
+    const peer = new Peer({ initiator: false, trickle: true, stream, config: ICE_SERVERS });
+    
     peer.on("signal", signal => {
+      console.log("[MEET] 📤 Sending signal to:", callerID, "type:", signal?.type || "candidate");
       socketRef.current.emit("signal", { target: callerID, signal, userId: me?.id || me?._id });
     });
+    
+    peer.on("connect", () => {
+      console.log("[MEET] ✅ Peer connected to:", callerID);
+    });
+    
+    peer.on("stream", (remoteStream) => {
+      console.log("[MEET] 🎵 Received remote stream from:", callerID, "tracks:", remoteStream.getTracks().map(t => t.kind + ':' + t.enabled));
+    });
+    
+    peer.on("error", (err) => {
+      console.error("[MEET] ❌ Peer error with:", callerID, err.message);
+    });
+    
+    peer.on("close", () => {
+      console.log("[MEET] Peer connection closed with:", callerID);
+    });
+    
     peer.signal(incomingSignal);
     return peer;
   };
@@ -589,30 +661,42 @@ const RemoteParticipantInfo = ({ userId }) => {
 const RemoteVideo = ({ peer, userId }) => {
     const videoRef = useRef();
     const [userData, setUserData] = useState(null);
+    const [hasAudio, setHasAudio] = useState(false);
 
     useEffect(() => {
         const handleStream = stream => {
-            console.log("Setting remote stream for user:", userId);
+            console.log("[MEET] 🔊 Setting remote stream for user:", userId, "tracks:", stream.getTracks().map(t => `${t.kind}:${t.enabled}`));
+            
+            const audioTracks = stream.getAudioTracks();
+            setHasAudio(audioTracks.length > 0);
+            console.log("[MEET] Remote audio tracks:", audioTracks.length, audioTracks.map(t => `enabled:${t.enabled}, muted:${t.muted}, readyState:${t.readyState}`));
+            
             if (videoRef.current) {
+                // Assign the FULL stream (audio + video) to the remote video element
                 videoRef.current.srcObject = stream;
                 videoRef.current.volume = 1.0;
+                videoRef.current.muted = false; // Explicitly ensure remote video is NOT muted
                 
                 // Explicitly attempt playback to handle browser autoplay policies
-                const playPromise = videoRef.current.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(err => {
-                        console.warn("Autoplay blocked for remote video, retrying...", err);
-                        // If autoplay is blocked, try playing after a short delay
-                        // The user has already interacted with the page by clicking "Join Meeting"
-                        setTimeout(() => {
-                            if (videoRef.current) {
-                                videoRef.current.play().catch(e => {
-                                    console.error("Remote video play failed:", e);
-                                });
-                            }
-                        }, 500);
-                    });
-                }
+                const attemptPlay = () => {
+                    if (!videoRef.current) return;
+                    const playPromise = videoRef.current.play();
+                    if (playPromise !== undefined) {
+                        playPromise
+                            .then(() => console.log("[MEET] ✅ Remote video playing with audio for:", userId))
+                            .catch(err => {
+                                console.warn("[MEET] ⚠️ Autoplay blocked, retrying in 500ms...", err.name);
+                                setTimeout(() => {
+                                    if (videoRef.current) {
+                                        videoRef.current.play()
+                                            .then(() => console.log("[MEET] ✅ Remote video playing on retry"))
+                                            .catch(e => console.error("[MEET] ❌ Remote play failed after retry:", e.name));
+                                    }
+                                }, 500);
+                            });
+                    }
+                };
+                attemptPlay();
             }
         };
 

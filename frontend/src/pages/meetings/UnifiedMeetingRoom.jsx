@@ -7,7 +7,17 @@ import {
 } from "lucide-react";
 import { meetingsApi, authApi } from "../../utils/api";
 
-const API_URL = import.meta.env.VITE_API_URL || "https://ems-backend-mcf0.onrender.com/api";
+// Use centralized detection logic or fallback
+const getBaseUrl = () => {
+    if (import.meta.env.VITE_API_URL) return import.meta.env.VITE_API_URL;
+    const isLocal = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+    return isLocal 
+      ? "https://ems-backend-mcf0.onrender.com/api" // fallback to prod or local? 
+      : "https://ems-backend-mcf0.onrender.com/api";
+};
+
+// For socket, we need the root URL (no /api)
+const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ? "http://localhost:5000/api" : "https://ems-backend-mcf0.onrender.com/api");
 const SOCKET_URL = API_URL.replace(/\/api$/, "");
 
 const ICE_SERVERS = {

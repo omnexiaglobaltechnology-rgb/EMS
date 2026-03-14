@@ -7,7 +7,8 @@ import {
 } from "lucide-react";
 import { meetingsApi, authApi } from "../../utils/api";
 
-const SOCKET_URL = import.meta.env.VITE_API_URL || "https://ems-backend-mcf0.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL || (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" ? "http://localhost:5000/api" : "https://ems-backend-mcf0.onrender.com/api");
+const SOCKET_URL = API_URL.replace(/\/api$/, "");
 
 const InternMeetingRoom = () => {
   const { id: roomId } = useParams();

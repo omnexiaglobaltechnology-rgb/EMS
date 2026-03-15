@@ -63,10 +63,7 @@ const UnifiedMeetingRoom = () => {
   const userVideoRef = useRef();
   const peersRef = useRef([]);
   const streamRef = useRef();
-  // Web Audio refs for mic muting (GainNode approach — never disables the track)
-  const audioCtxRef = useRef();
-  const gainNodeRef = useRef();
-
+  
   useEffect(() => {
     const init = async () => {
       try {
@@ -87,16 +84,9 @@ const UnifiedMeetingRoom = () => {
     return () => {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
-        if (streamRef.current._rawStream) {
-          streamRef.current._rawStream.getTracks().forEach(track => track.stop());
-        }
       }
       if (socketRef.current) {
         socketRef.current.disconnect();
-      }
-      // Close Web Audio context
-      if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
-        audioCtxRef.current.close();
       }
     };
   }, [roomId]);
@@ -143,7 +133,7 @@ const UnifiedMeetingRoom = () => {
 
   const requestMedia = async (audio, video) => {
     try {
-      const rawStream = await navigator.mediaDevices.getUserMedia({ 
+      const currentStream = await navigator.mediaDevices.getUserMedia({ 
         video, 
         audio: typeof audio === 'boolean' ? (audio ? {
           echoCancellation: true,
@@ -152,37 +142,17 @@ const UnifiedMeetingRoom = () => {
         } : false) : audio
       });
 
-      // ── Web Audio GainNode mic pipeline ─────────────────────────────────
-      // Route mic audio through a GainNode so we can mute by setting gain=0
-      // instead of track.enabled=false. This keeps the track "active" in
-      // WebRTC and prevents the browser from changing its audio routing/AEC
-      // mode, which is what was causing remote audio to cut out when muted.
-      let processedStream = rawStream;
-      const audioTracks = rawStream.getAudioTracks();
-      if (audioTracks.length > 0) {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const source = audioCtx.createMediaStreamSource(rawStream);
-        const gainNode = audioCtx.createGain();
-        gainNode.gain.value = 1; // Start unmuted
-        const dest = audioCtx.createMediaStreamDestination();
-        source.connect(gainNode);
-        gainNode.connect(dest);
-        audioCtxRef.current = audioCtx;
-        gainNodeRef.current = gainNode;
-        // Combine processed audio with the original video tracks
-        processedStream = new MediaStream([
-          ...rawStream.getVideoTracks(),
-          ...dest.stream.getAudioTracks()
-        ]);
+      // Ensure initial mute state is applied
+      if (!micOn) {
+        currentStream.getAudioTracks().forEach(track => track.enabled = false);
       }
-      // ────────────────────────────────────────────────────────────────────
+      if (!cameraOn) {
+        currentStream.getVideoTracks().forEach(track => track.enabled = false);
+      }
 
-      // setStream triggers the mute-sync useEffect above
-      setStream(processedStream);
-      streamRef.current = processedStream;
-      // Keep raw stream ref for track stopping on cleanup
-      processedStream._rawStream = rawStream;
-      return processedStream;
+      setStream(currentStream);
+      streamRef.current = currentStream;
+      return currentStream;
     } catch (err) {
       console.error("[MEET] Media error", err);
       return null;
@@ -190,23 +160,22 @@ const UnifiedMeetingRoom = () => {
   };
 
   const toggleMic = () => {
-    if (gainNodeRef.current) {
-      // Use GainNode to mute/unmute: keeps the track "active" in WebRTC
-      // so the browser's audio subsystem never changes routing/AEC mode.
-      // This is what prevents remote audio from cutting out when you mute.
-      gainNodeRef.current.gain.value = micOn ? 0 : 1;
-    } else if (stream) {
-      // Fallback: no audio context (e.g., audio was disabled initially)
-      stream.getAudioTracks().forEach(track => { track.enabled = !micOn; });
+    if (streamRef.current) {
+      const nextMicState = !micOn;
+      streamRef.current.getAudioTracks().forEach(track => {
+        track.enabled = nextMicState;
+      });
+      setMicOn(nextMicState);
     }
-    setMicOn(!micOn);
   };
 
   const toggleCamera = () => {
-    if (stream) {
-      // Camera uses track.enabled — no side effects on audio routing
-      stream.getVideoTracks().forEach(track => { track.enabled = !cameraOn; });
-      setCameraOn(!cameraOn);
+    if (streamRef.current) {
+      const nextCameraState = !cameraOn;
+      streamRef.current.getVideoTracks().forEach(track => {
+        track.enabled = nextCameraState;
+      });
+      setCameraOn(nextCameraState);
     }
   };
 
@@ -742,6 +711,12 @@ const RemoteVideo = ({ peer, userId }) => {
 
     useEffect(() => {
         const handleStream = stream => {
+            // Safety check: Never play our own audio back to ourselves
+            if (userId && (userId === (me?.id || me?._id))) {
+                console.warn("[MEET] 🛑 Preventing self-audio playback in RemoteVideo for:", userId);
+                return;
+            }
+            
             console.log("[MEET] 🔊 Setting remote stream for user:", userId, "tracks:", stream.getTracks().map(t => `${t.kind}:${t.enabled}`));
             
             const audioTracks = stream.getAudioTracks();

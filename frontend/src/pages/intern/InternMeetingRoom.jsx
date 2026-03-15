@@ -60,22 +60,14 @@ const InternMeetingRoom = () => {
     return () => {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
-        if (streamRef.current._rawStream) {
-          streamRef.current._rawStream.getTracks().forEach(track => track.stop());
-        }
       }
       if (socketRef.current) {
         socketRef.current.disconnect();
-      }
-      if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
-        audioCtxRef.current.close();
       }
     };
   }, [roomId]);
 
   const [videoElMounted, setVideoElMounted] = useState(0);
-  const audioCtxRef = useRef();
-  const gainNodeRef = useRef();
 
   const setLocalVideoRef = useCallback((el) => {
     userVideoRef.current = el;
@@ -93,7 +85,7 @@ const InternMeetingRoom = () => {
 
   const requestMedia = async (audio, video) => {
     try {
-      const rawStream = await navigator.mediaDevices.getUserMedia({ 
+      const currentStream = await navigator.mediaDevices.getUserMedia({ 
         video, 
         audio: typeof audio === 'boolean' ? (audio ? {
           echoCancellation: true,
@@ -102,28 +94,17 @@ const InternMeetingRoom = () => {
         } : false) : audio
       });
 
-      let processedStream = rawStream;
-      const audioTracks = rawStream.getAudioTracks();
-      if (audioTracks.length > 0) {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const source = audioCtx.createMediaStreamSource(rawStream);
-        const gainNode = audioCtx.createGain();
-        gainNode.gain.value = 1;
-        const dest = audioCtx.createMediaStreamDestination();
-        source.connect(gainNode);
-        gainNode.connect(dest);
-        audioCtxRef.current = audioCtx;
-        gainNodeRef.current = gainNode;
-        processedStream = new MediaStream([
-          ...rawStream.getVideoTracks(),
-          ...dest.stream.getAudioTracks()
-        ]);
+      // Ensure initial mute state is applied
+      if (!micOn) {
+        currentStream.getAudioTracks().forEach(track => track.enabled = false);
+      }
+      if (!cameraOn) {
+        currentStream.getVideoTracks().forEach(track => track.enabled = false);
       }
 
-      setStream(processedStream);
-      streamRef.current = processedStream;
-      processedStream._rawStream = rawStream;
-      return processedStream;
+      setStream(currentStream);
+      streamRef.current = currentStream;
+      return currentStream;
     } catch (err) {
       console.error("Media error", err);
       return null;
@@ -131,12 +112,13 @@ const InternMeetingRoom = () => {
   };
 
   const toggleMic = () => {
-    if (gainNodeRef.current) {
-      gainNodeRef.current.gain.value = micOn ? 0 : 1;
-    } else if (stream) {
-      stream.getAudioTracks().forEach(track => { track.enabled = !micOn; });
+    if (streamRef.current) {
+      const nextMicState = !micOn;
+      streamRef.current.getAudioTracks().forEach(track => {
+        track.enabled = nextMicState;
+      });
+      setMicOn(nextMicState);
     }
-    setMicOn(!micOn);
   };
 
   const toggleCamera = () => {

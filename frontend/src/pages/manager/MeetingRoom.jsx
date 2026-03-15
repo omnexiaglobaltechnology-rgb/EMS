@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Mic,
@@ -66,6 +66,43 @@ const MeetingRoom = () => {
    * @param {object} constraints - Media requirement flags
    * @returns {Promise<MediaStream|null>} The acquired stream or null on failure
    */
+  const [videoElMounted, setVideoElMounted] = useState(0);
+
+  const setLocalVideoRef = useCallback((el) => {
+    videoRef.current = el;
+    setVideoElMounted(n => n + 1);
+  }, []);
+
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el || !streamRef.current) return;
+    // AEC works best with the original tracks, but for local preview 
+    // we MUST use zero audio tracks to definitively kill echo.
+    const previewStream = new MediaStream(streamRef.current.getVideoTracks());
+    el.srcObject = previewStream;
+    el.muted = true;
+    el.volume = 0;
+  }, [streamRef.current, videoElMounted]);
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        const data = await meetingsApi.getById(id);
+        setMeeting(data);
+      } catch (err) {
+        console.error("Failed to fetch meeting", err);
+      }
+      await requestMedia({ audio: true, video: true });
+    };
+    init();
+
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+    };
+  }, [id]);
+
   const requestMedia = async ({ audio = true, video = true } = {}) => {
     if (!navigator.mediaDevices?.getUserMedia) {
       setMediaError("Media devices are not supported in this browser.");
@@ -75,25 +112,26 @@ const MeetingRoom = () => {
     }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
+      const currentStream = await navigator.mediaDevices.getUserMedia({
         audio,
         video,
       });
-      stopCurrentStream();
-      streamRef.current = stream;
 
-      if (videoRef.current) {
-        // Use a video-only stream for local preview to prevent audio echo/feedback
-        const previewStream = new MediaStream(stream.getVideoTracks());
-        videoRef.current.srcObject = previewStream;
-        videoRef.current.muted = true;
-        videoRef.current.defaultMuted = true;
+      // Apply current mute state to the new stream
+      if (!micOn) {
+        currentStream.getAudioTracks().forEach(track => track.enabled = false);
+      }
+      if (!cameraOn) {
+        currentStream.getVideoTracks().forEach(track => track.enabled = false);
       }
 
-      setMicOn(stream.getAudioTracks().length > 0);
-      setCameraOn(stream.getVideoTracks().length > 0);
+      stopCurrentStream();
+      streamRef.current = currentStream;
+
+      setMicOn(currentStream.getAudioTracks().length > 0);
+      setCameraOn(currentStream.getVideoTracks().length > 0);
       setMediaError("");
-      return stream;
+      return currentStream;
     } catch (error) {
       setMediaError(
         "Camera/Microphone permission is blocked. Please allow access in browser site settings.",
@@ -104,44 +142,24 @@ const MeetingRoom = () => {
     }
   };
 
-  /**
-   * Toggles the hardware microphone track state.
-   */
   const toggleMic = () => {
-    if (!streamRef.current) {
-      requestMedia({ audio: true, video: cameraOn });
-      return;
+    if (streamRef.current) {
+      const nextMicState = !micOn;
+      streamRef.current.getAudioTracks().forEach(track => {
+        track.enabled = nextMicState;
+      });
+      setMicOn(nextMicState);
     }
-
-    const audioTracks = streamRef.current.getAudioTracks();
-    if (audioTracks.length === 0 && !micOn) {
-      requestMedia({ audio: true, video: cameraOn });
-      return;
-    }
-
-    const nextMicOn = !micOn;
-    audioTracks.forEach((track) => (track.enabled = nextMicOn));
-    setMicOn(nextMicOn);
   };
 
-  /**
-   * Toggles the hardware camera track state.
-   */
   const toggleCamera = () => {
-    if (!streamRef.current) {
-      requestMedia({ audio: micOn, video: true });
-      return;
+    if (streamRef.current) {
+      const nextCameraState = !cameraOn;
+      streamRef.current.getVideoTracks().forEach(track => {
+        track.enabled = nextCameraState;
+      });
+      setCameraOn(nextCameraState);
     }
-
-    const videoTracks = streamRef.current.getVideoTracks();
-    if (videoTracks.length === 0 && !cameraOn) {
-      requestMedia({ audio: micOn, video: true });
-      return;
-    }
-
-    const nextCameraOn = !cameraOn;
-    videoTracks.forEach((track) => (track.enabled = nextCameraOn));
-    setCameraOn(nextCameraOn);
   };
 
   /**
@@ -315,7 +333,7 @@ const MeetingRoom = () => {
           </p>
         ) : null}
         <video
-          ref={videoRef}
+          ref={setLocalVideoRef}
           autoPlay
           muted
           playsInline

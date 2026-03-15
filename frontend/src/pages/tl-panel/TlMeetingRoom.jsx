@@ -67,12 +67,6 @@ const TlMeetingRoom = () => {
     return () => {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
-        if (streamRef.current._rawStream) {
-          streamRef.current._rawStream.getTracks().forEach(track => track.stop());
-        }
-      }
-      if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
-        audioCtxRef.current.close();
       }
     };
   }, [id]);
@@ -104,37 +98,26 @@ const TlMeetingRoom = () => {
     }
 
     try {
-      const rawStream = await navigator.mediaDevices.getUserMedia({
+      const currentStream = await navigator.mediaDevices.getUserMedia({
         audio,
         video,
       });
 
-      let processedStream = rawStream;
-      const audioTracks = rawStream.getAudioTracks();
-      if (audioTracks.length > 0) {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const source = audioCtx.createMediaStreamSource(rawStream);
-        const gainNode = audioCtx.createGain();
-        gainNode.gain.value = 1;
-        const dest = audioCtx.createMediaStreamDestination();
-        source.connect(gainNode);
-        gainNode.connect(dest);
-        audioCtxRef.current = audioCtx;
-        gainNodeRef.current = gainNode;
-        processedStream = new MediaStream([
-          ...rawStream.getVideoTracks(),
-          ...dest.stream.getAudioTracks()
-        ]);
+      // Ensure initial mute state is applied
+      if (!micOn) {
+        currentStream.getAudioTracks().forEach(track => track.enabled = false);
+      }
+      if (!cameraOn) {
+        currentStream.getVideoTracks().forEach(track => track.enabled = false);
       }
 
       stopCurrentStream();
-      streamRef.current = processedStream;
-      processedStream._rawStream = rawStream;
+      streamRef.current = currentStream;
 
-      setMicOn(rawStream.getAudioTracks().length > 0);
-      setCameraOn(rawStream.getVideoTracks().length > 0);
+      setMicOn(currentStream.getAudioTracks().length > 0);
+      setCameraOn(currentStream.getVideoTracks().length > 0);
       setMediaError("");
-      return processedStream;
+      return currentStream;
     } catch (error) {
       setMediaError(
         "Camera/Microphone permission is blocked. Please allow access in browser site settings.",
@@ -149,16 +132,13 @@ const TlMeetingRoom = () => {
    * Toggles the hardware microphone status.
    */
   const toggleMic = () => {
-    if (gainNodeRef.current) {
-      // Use GainNode to mute/unmute: keeps the track "active" in WebRTC
-      // so the browser's audio subsystem never changes routing/AEC mode.
-      // This is what prevents remote audio from cutting out when you mute.
-      gainNodeRef.current.gain.value = micOn ? 0 : 1;
-    } else if (streamRef.current) {
-      // Fallback: no audio context
-      streamRef.current.getAudioTracks().forEach(track => { track.enabled = !micOn; });
+    if (streamRef.current) {
+      const nextMicState = !micOn;
+      streamRef.current.getAudioTracks().forEach(track => {
+        track.enabled = nextMicState;
+      });
+      setMicOn(nextMicState);
     }
-    setMicOn(!micOn);
   };
 
   /**

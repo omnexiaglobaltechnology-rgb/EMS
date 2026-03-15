@@ -52,6 +52,7 @@ const UnifiedMeetingRoom = () => {
   const [chatInput, setChatInput] = useState("");
   const [activeTab, setActiveTab] = useState("chat"); // "chat" or "people"
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
   
   // Invitation State
   const [userSearch, setUserSearch] = useState("");
@@ -170,6 +171,74 @@ const UnifiedMeetingRoom = () => {
       });
       setCameraOn(nextCameraState);
     }
+  };
+
+  const toggleScreenShare = async () => {
+    if (!isScreenSharing) {
+      try {
+        const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+        const screenTrack = screenStream.getVideoTracks()[0];
+
+        // Replace track for all peers
+        peersRef.current.forEach(({ peer }) => {
+          const videoTrack = streamRef.current.getVideoTracks()[0];
+          if (videoTrack) {
+            peer.replaceTrack(videoTrack, screenTrack, streamRef.current);
+          }
+        });
+
+        // Replace track in local streamRef
+        const localVideoTrack = streamRef.current.getVideoTracks()[0];
+        if (localVideoTrack) {
+          localVideoTrack.stop();
+          streamRef.current.removeTrack(localVideoTrack);
+          streamRef.current.addTrack(screenTrack);
+        }
+
+        // Trigger local preview update
+        setStream(new MediaStream(streamRef.current.getTracks()));
+
+        screenTrack.onended = () => {
+          stopScreenShare(screenTrack);
+        };
+
+        setIsScreenSharing(true);
+      } catch (err) {
+        console.error("[MEET] Screen share error:", err);
+      }
+    } else {
+      const screenTrack = streamRef.current.getVideoTracks()[0];
+      stopScreenShare(screenTrack);
+    }
+  };
+
+  const stopScreenShare = async (screenTrack) => {
+    if (screenTrack) screenTrack.stop();
+    
+    // Get camera back using the existing helper to maintain audio settings
+    const cameraStream = await requestMedia(micOn, true);
+    const cameraTrack = cameraStream.getVideoTracks()[0];
+
+    // Replace track back for all peers
+    peersRef.current.forEach(({ peer }) => {
+      const currentTrack = streamRef.current.getVideoTracks()[0];
+      if (currentTrack) {
+        peer.replaceTrack(currentTrack, cameraTrack, streamRef.current);
+      }
+    });
+
+    // Update local streamRef
+    const currentTrack = streamRef.current.getVideoTracks()[0];
+    if (currentTrack) {
+      currentTrack.stop();
+      streamRef.current.removeTrack(currentTrack);
+      streamRef.current.addTrack(cameraTrack);
+    }
+
+    // Trigger local preview update
+    setStream(new MediaStream(streamRef.current.getTracks()));
+    setIsScreenSharing(false);
+    setCameraOn(true); // Ensure camera is marked as on
   };
 
   const joinMeeting = () => {
@@ -519,7 +588,11 @@ const UnifiedMeetingRoom = () => {
 
                 <div className="w-px h-10 bg-white/10 mx-2" />
 
-                <button className="w-14 h-14 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center hover:bg-slate-700 transition-all">
+                <button 
+                  onClick={toggleScreenShare}
+                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${isScreenSharing ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20" : "bg-slate-800 text-slate-300 hover:bg-slate-700"}`}
+                  title={isScreenSharing ? "Stop Sharing" : "Share Screen"}
+                >
                   <ScreenShare size={22} />
                 </button>
 

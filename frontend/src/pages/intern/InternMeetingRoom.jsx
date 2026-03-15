@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import Peer from "simple-peer/simplepeer.min.js";
@@ -60,16 +60,40 @@ const InternMeetingRoom = () => {
     return () => {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
+        if (streamRef.current._rawStream) {
+          streamRef.current._rawStream.getTracks().forEach(track => track.stop());
+        }
       }
       if (socketRef.current) {
         socketRef.current.disconnect();
       }
+      if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
+        audioCtxRef.current.close();
+      }
     };
   }, [roomId]);
 
+  const [videoElMounted, setVideoElMounted] = useState(0);
+  const audioCtxRef = useRef();
+  const gainNodeRef = useRef();
+
+  const setLocalVideoRef = useCallback((el) => {
+    userVideoRef.current = el;
+    setVideoElMounted(n => n + 1);
+  }, []);
+
+  useEffect(() => {
+    const el = userVideoRef.current;
+    if (!el || !stream) return;
+    const videoOnlyStream = new MediaStream(stream.getVideoTracks());
+    el.srcObject = videoOnlyStream;
+    el.muted = true;
+    el.volume = 0;
+  }, [stream, videoElMounted]);
+
   const requestMedia = async (audio, video) => {
     try {
-      const currentStream = await navigator.mediaDevices.getUserMedia({ 
+      const rawStream = await navigator.mediaDevices.getUserMedia({ 
         video, 
         audio: typeof audio === 'boolean' ? (audio ? {
           echoCancellation: true,
@@ -77,15 +101,29 @@ const InternMeetingRoom = () => {
           autoGainControl: true
         } : false) : audio
       });
-      setStream(currentStream);
-      streamRef.current = currentStream;
-      if (userVideoRef.current) {
-        const previewStream = new MediaStream(currentStream.getVideoTracks());
-        userVideoRef.current.srcObject = previewStream;
-        userVideoRef.current.muted = true;
-        userVideoRef.current.defaultMuted = true;
+
+      let processedStream = rawStream;
+      const audioTracks = rawStream.getAudioTracks();
+      if (audioTracks.length > 0) {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioCtx.createMediaStreamSource(rawStream);
+        const gainNode = audioCtx.createGain();
+        gainNode.gain.value = 1;
+        const dest = audioCtx.createMediaStreamDestination();
+        source.connect(gainNode);
+        gainNode.connect(dest);
+        audioCtxRef.current = audioCtx;
+        gainNodeRef.current = gainNode;
+        processedStream = new MediaStream([
+          ...rawStream.getVideoTracks(),
+          ...dest.stream.getAudioTracks()
+        ]);
       }
-      return currentStream;
+
+      setStream(processedStream);
+      streamRef.current = processedStream;
+      processedStream._rawStream = rawStream;
+      return processedStream;
     } catch (err) {
       console.error("Media error", err);
       return null;
@@ -93,10 +131,12 @@ const InternMeetingRoom = () => {
   };
 
   const toggleMic = () => {
-    if (stream) {
-      stream.getAudioTracks().forEach(track => track.enabled = !micOn);
-      setMicOn(!micOn);
+    if (gainNodeRef.current) {
+      gainNodeRef.current.gain.value = micOn ? 0 : 1;
+    } else if (stream) {
+      stream.getAudioTracks().forEach(track => { track.enabled = !micOn; });
     }
+    setMicOn(!micOn);
   };
 
   const toggleCamera = () => {
@@ -161,15 +201,9 @@ const InternMeetingRoom = () => {
     });
   };
   
-  // Re-apply local stream when joining (since video element is re-mounted)
-  useEffect(() => {
-    if (isJoined && streamRef.current && userVideoRef.current) {
-        const previewStream = new MediaStream(streamRef.current.getVideoTracks());
-        userVideoRef.current.srcObject = previewStream;
-        userVideoRef.current.muted = true;
-        userVideoRef.current.defaultMuted = true;
-    }
-  }, [isJoined]);
+  // When joining, the video element remounts into the meeting grid.
+  // setLocalVideoRef fires → bumps videoElMounted → mute-sync useEffect handles it.
+  // No manual re-application needed here.
 
   const createPeer = (userToSignal, callerID, stream) => {
     const peer = new Peer({
@@ -215,7 +249,12 @@ const InternMeetingRoom = () => {
 
   const leaveMeeting = () => {
     if (socketRef.current) socketRef.current.disconnect();
-    if (stream) stream.getTracks().forEach(track => track.stop());
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      if (stream._rawStream) {
+        stream._rawStream.getTracks().forEach(track => track.stop());
+      }
+    }
     navigate(-1);
   };
 
@@ -228,7 +267,7 @@ const InternMeetingRoom = () => {
             <h1 className="text-3xl font-bold text-white">Ready to join?</h1>
             <div className="relative aspect-video bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
               <video
-                ref={userVideoRef}
+                ref={setLocalVideoRef}
                 autoPlay
                 muted={true}
                 playsInline={true}
@@ -323,7 +362,7 @@ const InternMeetingRoom = () => {
         {/* Local Video */}
         <div className="relative bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 group shadow-2xl">
           <video
-            ref={userVideoRef}
+            ref={setLocalVideoRef}
             autoPlay
             muted={true}
             playsInline={true}

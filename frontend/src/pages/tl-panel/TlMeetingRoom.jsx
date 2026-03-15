@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Mic, MicOff, Video, VideoOff, MessageSquare, ScreenShare, UserPlus, Link, Flag, PhoneOff
@@ -30,13 +30,68 @@ const TlMeetingRoom = () => {
   const streamRef = useRef(null);
   const videoRef = useRef(null);
 
+  const [videoElMounted, setVideoElMounted] = useState(0);
+  const audioCtxRef = useRef();
+  const gainNodeRef = useRef();
+
+  const setLocalVideoRef = useCallback((el) => {
+    videoRef.current = el;
+    setVideoElMounted(n => n + 1);
+  }, []);
+
+  useEffect(() => {
+    const el = videoRef.current;
+    if (!el || !streamRef.current) return;
+    const previewStream = new MediaStream(streamRef.current.getVideoTracks());
+    el.srcObject = previewStream;
+    el.muted = true;
+    el.volume = 0;
+  }, [streamRef.current, videoElMounted]);
+
+  useEffect(() => {
+    const init = async () => {
+      // Fetch meeting data
+      try {
+        const response = await meetingsApi.getById(id);
+        setMeeting(response);
+      } catch (err) {
+        console.error("Failed to fetch meeting", err);
+      }
+
+      // Initial Media Request for Pre-join preview
+      await requestMedia({ audio: true, video: true });
+    };
+
+    init();
+
+    return () => {
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+        if (streamRef.current._rawStream) {
+          streamRef.current._rawStream.getTracks().forEach(track => track.stop());
+        }
+      }
+      if (audioCtxRef.current && audioCtxRef.current.state !== 'closed') {
+        audioCtxRef.current.close();
+      }
+    };
+  }, [id]);
+
+  /**
+   * Stops all tracks of the current media stream correctly.
+   */
   const stopCurrentStream = () => {
-    streamRef.current?.getTracks().forEach((track) => track.stop());
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((track) => track.stop());
+      if (streamRef.current._rawStream) {
+        streamRef.current._rawStream.getTracks().forEach((track) => track.stop());
+      }
+      streamRef.current = null;
+    }
   };
 
   /**
-   * Requests access to hardware media devices (camera/microphone).
-   *
+   * Acquires the media stream (camera and/or microphone).
    * @param {object} constraints - Requested media types
    * @returns {Promise<MediaStream|null>} The acquired stream or null
    */
@@ -49,25 +104,37 @@ const TlMeetingRoom = () => {
     }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({
+      const rawStream = await navigator.mediaDevices.getUserMedia({
         audio,
         video,
       });
-      stopCurrentStream();
-      streamRef.current = stream;
 
-      if (videoRef.current) {
-        // Use a video-only stream for local preview to prevent audio echo/feedback
-        const previewStream = new MediaStream(stream.getVideoTracks());
-        videoRef.current.srcObject = previewStream;
-        videoRef.current.muted = true;
-        videoRef.current.defaultMuted = true;
+      let processedStream = rawStream;
+      const audioTracks = rawStream.getAudioTracks();
+      if (audioTracks.length > 0) {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const source = audioCtx.createMediaStreamSource(rawStream);
+        const gainNode = audioCtx.createGain();
+        gainNode.gain.value = 1;
+        const dest = audioCtx.createMediaStreamDestination();
+        source.connect(gainNode);
+        gainNode.connect(dest);
+        audioCtxRef.current = audioCtx;
+        gainNodeRef.current = gainNode;
+        processedStream = new MediaStream([
+          ...rawStream.getVideoTracks(),
+          ...dest.stream.getAudioTracks()
+        ]);
       }
 
-      setMicOn(stream.getAudioTracks().length > 0);
-      setCameraOn(stream.getVideoTracks().length > 0);
+      stopCurrentStream();
+      streamRef.current = processedStream;
+      processedStream._rawStream = rawStream;
+
+      setMicOn(rawStream.getAudioTracks().length > 0);
+      setCameraOn(rawStream.getVideoTracks().length > 0);
       setMediaError("");
-      return stream;
+      return processedStream;
     } catch (error) {
       setMediaError(
         "Camera/Microphone permission is blocked. Please allow access in browser site settings.",
@@ -82,40 +149,26 @@ const TlMeetingRoom = () => {
    * Toggles the hardware microphone status.
    */
   const toggleMic = () => {
-    if (!streamRef.current) {
-      requestMedia({ audio: true, video: cameraOn });
-      return;
+    if (gainNodeRef.current) {
+      // Use GainNode to mute/unmute: keeps the track "active" in WebRTC
+      // so the browser's audio subsystem never changes routing/AEC mode.
+      // This is what prevents remote audio from cutting out when you mute.
+      gainNodeRef.current.gain.value = micOn ? 0 : 1;
+    } else if (streamRef.current) {
+      // Fallback: no audio context
+      streamRef.current.getAudioTracks().forEach(track => { track.enabled = !micOn; });
     }
-
-    const audioTracks = streamRef.current.getAudioTracks();
-    if (audioTracks.length === 0 && !micOn) {
-      requestMedia({ audio: true, video: cameraOn });
-      return;
-    }
-
-    const nextMicOn = !micOn;
-    audioTracks.forEach((track) => (track.enabled = nextMicOn));
-    setMicOn(nextMicOn);
+    setMicOn(!micOn);
   };
 
   /**
    * Toggles the hardware camera status.
    */
   const toggleCamera = () => {
-    if (!streamRef.current) {
-      requestMedia({ audio: micOn, video: true });
-      return;
+    if (streamRef.current) {
+      streamRef.current.getVideoTracks().forEach((track) => (track.enabled = !cameraOn));
+      setCameraOn(!cameraOn);
     }
-
-    const videoTracks = streamRef.current.getVideoTracks();
-    if (videoTracks.length === 0 && !cameraOn) {
-      requestMedia({ audio: micOn, video: true });
-      return;
-    }
-
-    const nextCameraOn = !cameraOn;
-    videoTracks.forEach((track) => (track.enabled = nextCameraOn));
-    setCameraOn(nextCameraOn);
   };
 
   const stopScreenShare = async () => {
@@ -181,30 +234,8 @@ const TlMeetingRoom = () => {
     setChatInput("");
   };
 
-  // Get camera + mic stream and fetch meeting
-  useEffect(() => {
-    const init = async () => {
-      await requestMedia({ video: true, audio: true });
-      try {
-        const data = await meetingsApi.getById(id);
-        setMeeting(data);
-      } catch (err) {
-        console.error("Failed to fetch meeting details", err);
-      }
-    };
+  // Cleanup handled by the first useEffect
 
-    init();
-
-    return () => {
-      if (
-        mediaRecorderRef.current &&
-        mediaRecorderRef.current.state !== "inactive"
-      ) {
-        mediaRecorderRef.current.stop();
-      }
-      stopCurrentStream();
-    };
-  }, []);
 
   // Start Recording
   /**
@@ -286,7 +317,7 @@ const TlMeetingRoom = () => {
           </p>
         ) : null}
         <video
-          ref={videoRef}
+          ref={setLocalVideoRef}
           autoPlay
           muted
           playsInline

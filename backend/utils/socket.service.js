@@ -51,6 +51,19 @@ const initSocket = (server) => {
       });
     });
 
+    socket.on("leave-room", (roomId) => {
+      console.log(`User ${socket.id} explicitly left room ${roomId}`);
+      socket.leave(roomId);
+      socket.to(roomId).emit("user-disconnected", socket.id);
+    });
+
+    socket.on("screen-share-toggle", (roomId, isSharing) => {
+      socket.to(roomId).emit("remote-screen-share-toggle", {
+        socketId: socket.id,
+        isSharing
+      });
+    });
+
     socket.on("send-chat-message", (roomId, message) => {
       // Broadcast to everyone in the room EXCEPT the sender
       socket.to(roomId).emit("chat-message", message);
@@ -58,12 +71,18 @@ const initSocket = (server) => {
       socket.emit("chat-message", message);
     });
 
+    socket.on("disconnecting", () => {
+      console.log("Client disconnecting:", socket.id);
+      // Notify rooms this socket was part of before they are cleared
+      for (const roomId of socket.rooms) {
+        if (roomId !== socket.id) {
+          socket.to(roomId).emit("user-disconnected", socket.id);
+        }
+      }
+    });
+
     socket.on("disconnect", () => {
       console.log("Client disconnected:", socket.id);
-      // Notify only rooms this socket was part of (not ALL sockets globally)
-      socket.rooms.forEach(roomId => {
-        socket.to(roomId).emit("user-disconnected", socket.id);
-      });
     });
   });
 

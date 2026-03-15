@@ -180,18 +180,24 @@ const UnifiedMeetingRoom = () => {
         const screenTrack = screenStream.getVideoTracks()[0];
 
         // Replace track for all peers
-        peersRef.current.forEach(({ peer }) => {
-          const videoTrack = streamRef.current.getVideoTracks()[0];
-          if (videoTrack) {
-            peer.replaceTrack(videoTrack, screenTrack, streamRef.current);
+        console.log("[MEET] 🔄 Replacing video track with screen track for", peersRef.current.length, "peers");
+        const videoTrack = streamRef.current.getVideoTracks()[0];
+        
+        peersRef.current.forEach(({ peer, peerID }) => {
+          if (videoTrack && screenTrack) {
+            try {
+              peer.replaceTrack(videoTrack, screenTrack, streamRef.current);
+              console.log("[MEET] ✅ Track replaced for peer:", peerID);
+            } catch (pErr) {
+              console.error("[MEET] ❌ replaceTrack failed for peer:", peerID, pErr);
+            }
           }
         });
 
         // Replace track in local streamRef
-        const localVideoTrack = streamRef.current.getVideoTracks()[0];
-        if (localVideoTrack) {
-          localVideoTrack.stop();
-          streamRef.current.removeTrack(localVideoTrack);
+        if (videoTrack) {
+          videoTrack.stop();
+          streamRef.current.removeTrack(videoTrack);
           streamRef.current.addTrack(screenTrack);
         }
 
@@ -199,10 +205,12 @@ const UnifiedMeetingRoom = () => {
         setStream(new MediaStream(streamRef.current.getTracks()));
 
         screenTrack.onended = () => {
+          console.log("[MEET] 🖥️ Screen sharing ended by browser");
           stopScreenShare(screenTrack);
         };
 
         setIsScreenSharing(true);
+        socketRef.current.emit("screen-share-toggle", roomId, true);
       } catch (err) {
         console.error("[MEET] Screen share error:", err);
       }
@@ -217,21 +225,28 @@ const UnifiedMeetingRoom = () => {
     
     // Get camera back using the existing helper to maintain audio settings
     const cameraStream = await requestMedia(micOn, true);
+    if (!cameraStream) {
+      console.error("[MEET] ❌ Failed to restore camera after screen share");
+      return;
+    }
     const cameraTrack = cameraStream.getVideoTracks()[0];
+    const currentVideoTrack = streamRef.current.getVideoTracks()[0];
 
     // Replace track back for all peers
-    peersRef.current.forEach(({ peer }) => {
-      const currentTrack = streamRef.current.getVideoTracks()[0];
-      if (currentTrack) {
-        peer.replaceTrack(currentTrack, cameraTrack, streamRef.current);
+    peersRef.current.forEach(({ peer, peerID }) => {
+      if (currentVideoTrack && cameraTrack) {
+        try {
+          peer.replaceTrack(currentVideoTrack, cameraTrack, streamRef.current);
+        } catch (pErr) {
+          console.error("[MEET] ❌ replaceTrack (revert) failed for peer:", peerID, pErr);
+        }
       }
     });
 
     // Update local streamRef
-    const currentTrack = streamRef.current.getVideoTracks()[0];
-    if (currentTrack) {
-      currentTrack.stop();
-      streamRef.current.removeTrack(currentTrack);
+    if (currentVideoTrack) {
+      currentVideoTrack.stop();
+      streamRef.current.removeTrack(currentVideoTrack);
       streamRef.current.addTrack(cameraTrack);
     }
 
@@ -239,6 +254,10 @@ const UnifiedMeetingRoom = () => {
     setStream(new MediaStream(streamRef.current.getTracks()));
     setIsScreenSharing(false);
     setCameraOn(true); // Ensure camera is marked as on
+    
+    if (socketRef.current) {
+      socketRef.current.emit("screen-share-toggle", roomId, false);
+    }
   };
 
   const joinMeeting = () => {
@@ -324,6 +343,13 @@ const UnifiedMeetingRoom = () => {
       peersRef.current = remainingPeers;
       setPeers(remainingPeers);
     });
+
+    socketRef.current.on("remote-screen-share-toggle", ({ socketId, isSharing }) => {
+      console.log("[MEET] 🔄 Remote screen share toggle for:", socketId, "Sharing:", isSharing);
+      // We don't necessarily need to do much here if replaceTrack works,
+      // but we update the peer object state to trigger a re-render of the RemoteVideo component
+      setPeers(prev => prev.map(p => p.peerID === socketId ? { ...p, refreshKey: Date.now() } : p));
+    });
   };
 
   // When joining, the video element remounts into the meeting grid.
@@ -400,7 +426,10 @@ const UnifiedMeetingRoom = () => {
   };
 
   const leaveMeeting = () => {
-    if (socketRef.current) socketRef.current.disconnect();
+    if (socketRef.current) {
+      socketRef.current.emit("leave-room", roomId);
+      socketRef.current.disconnect();
+    }
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
       if (stream._rawStream) {
@@ -565,7 +594,7 @@ const UnifiedMeetingRoom = () => {
 
                 {/* Remote Participants */}
                 {peers.map(p => (
-                    <RemoteVideo key={p.peerID} peer={p.peer} userId={p.userId} me={me} />
+                    <RemoteVideo key={p.peerID} peer={p.peer} userId={p.userId} me={me} refreshKey={p.refreshKey} />
                 ))}
             </div>
         </div>
@@ -770,10 +799,21 @@ const RemoteParticipantInfo = ({ userId }) => {
     );
 };
 
-const RemoteVideo = ({ peer, userId, me }) => {
+const RemoteVideo = ({ peer, userId, me, refreshKey }) => {
     const videoRef = useRef();
     const [userData, setUserData] = useState(null);
     const [hasAudio, setHasAudio] = useState(false);
+
+    useEffect(() => {
+        const el = videoRef.current;
+        if (el && el.srcObject) {
+            console.log("[MEET] 🔄 Forcing srcObject refresh for:", userId);
+            const currentStream = el.srcObject;
+            el.srcObject = null;
+            el.srcObject = currentStream;
+            el.play().catch(() => {});
+        }
+    }, [refreshKey, userId]);
 
     useEffect(() => {
         const handleStream = stream => {

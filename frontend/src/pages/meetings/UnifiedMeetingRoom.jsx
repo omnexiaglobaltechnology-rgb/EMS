@@ -3,583 +3,546 @@ import { useParams, useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import Peer from "simple-peer/simplepeer.min.js";
 import {
-  Loader2, Link, Copy, Check, Video, PhoneOff, UserPlus, MessageSquare, ScreenShare, Mic, MicOff, VideoOff, Send, X, Users, Settings, MoreVertical, Search
+  Loader2, Copy, Check, Video, PhoneOff, UserPlus, MessageSquare, ScreenShare,
+  Mic, MicOff, VideoOff, Send, X, Users, Search
 } from "lucide-react";
 import { meetingsApi, authApi, usersApi, SOCKET_URL } from "../../utils/api";
 
-// Socket URL is now imported from ../../utils/api
-
+// ─── ICE Configuration ──────────────────────────────────────────────────────
 const ICE_SERVERS = {
   iceServers: [
-    { urls: 'stun:stun.l.google.com:19302' },
-    { urls: 'stun:stun1.l.google.com:19302' },
-    { urls: 'stun:stun2.l.google.com:19302' },
-    // Free TURN servers – required when users are behind NAT/firewalls
-    // Without TURN, WebRTC connections silently fail for many network configurations
+    { urls: "stun:stun.l.google.com:19302" },
+    { urls: "stun:stun1.l.google.com:19302" },
     {
-      urls: 'turn:openrelay.metered.ca:80',
-      username: 'openrelayproject',
-      credential: 'openrelayproject',
+      urls: "turn:openrelay.metered.ca:80",
+      username: "openrelayproject",
+      credential: "openrelayproject",
     },
     {
-      urls: 'turn:openrelay.metered.ca:443',
-      username: 'openrelayproject',
-      credential: 'openrelayproject',
+      urls: "turn:openrelay.metered.ca:443",
+      username: "openrelayproject",
+      credential: "openrelayproject",
     },
     {
-      urls: 'turns:openrelay.metered.ca:443',
-      username: 'openrelayproject',
-      credential: 'openrelayproject',
+      urls: "turns:openrelay.metered.ca:443",
+      username: "openrelayproject",
+      credential: "openrelayproject",
     },
-  ]
+  ],
 };
 
+// ─── Helper: create a simple-peer wrapper ────────────────────────────────────
+function createSimplePeer({ initiator, stream, onSignal, onStream, onClose, onError }) {
+  const peer = new Peer({
+    initiator,
+    trickle: true,
+    stream,
+    config: ICE_SERVERS,
+  });
+
+  peer.on("signal", onSignal);
+  peer.on("stream", onStream);
+  peer.on("close", onClose);
+  peer.on("error", onError);
+
+  return peer;
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// MAIN COMPONENT
+// ═══════════════════════════════════════════════════════════════════════════════
 const UnifiedMeetingRoom = () => {
   const { id: roomId } = useParams();
   const navigate = useNavigate();
 
-  // User State
+  // ── User & Meeting State ─────────────────────────────────────────────────
   const [me, setMe] = useState(null);
+  const [meeting, setMeeting] = useState(null);
   const [isJoined, setIsJoined] = useState(false);
+
+  // ── Media State ──────────────────────────────────────────────────────────
   const [micOn, setMicOn] = useState(true);
   const [cameraOn, setCameraOn] = useState(true);
   const [stream, setStream] = useState(null);
+  const [isScreenSharing, setIsScreenSharing] = useState(false);
 
-  // Meeting State
-  const [meeting, setMeeting] = useState(null);
+  // ── Peers State ──────────────────────────────────────────────────────────
+  // peers: Array<{ socketId, userId, micOn, cameraOn, peer }>
   const [peers, setPeers] = useState([]);
+
+  // ── Chat & Sidebar ──────────────────────────────────────────────────────
   const [messages, setMessages] = useState([]);
   const [chatInput, setChatInput] = useState("");
-  const [activeTab, setActiveTab] = useState("chat"); // "chat" or "people"
+  const [activeTab, setActiveTab] = useState("chat");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isScreenSharing, setIsScreenSharing] = useState(false);
-  
-  // Invitation State
+
+  // ── Invite State ─────────────────────────────────────────────────────────
   const [userSearch, setUserSearch] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
 
-  // Simple local cache for user metadata to avoid redundant API calls
-  const userMetadataCache = useRef({});
+  // ── Refs ──────────────────────────────────────────────────────────────────
+  const socketRef = useRef(null);
+  const streamRef = useRef(null);
+  const userVideoRef = useRef(null);
+  // Map<socketId, { peer, userId, micOn, cameraOn }>
+  const peersRef = useRef(new Map());
+  const myIdRef = useRef(null);
 
-  // Refs
-  const socketRef = useRef();
-  const userVideoRef = useRef();
-  const peersRef = useRef([]);
-  const streamRef = useRef();
-  
+  // ═════════════════════════════════════════════════════════════════════════
+  // INITIALIZATION
+  // ═════════════════════════════════════════════════════════════════════════
   useEffect(() => {
+    let cancelled = false;
+
     const init = async () => {
       try {
         const userData = await authApi.me();
+        if (cancelled) return;
         setMe(userData);
-        
+        myIdRef.current = String(userData?.id || userData?._id);
+
         const meetingData = await meetingsApi.getById(roomId);
+        if (cancelled) return;
         setMeeting(meetingData);
-        
+
         await requestMedia(true, true);
       } catch (err) {
-        console.error("Meeting init failed", err);
+        console.error("[MEET] Init failed:", err);
       }
     };
-
     init();
 
     return () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
-      }
-      
-      // Cleanup all peers
-      peersRef.current.forEach(p => {
-        try {
-          p.peer.destroy();
-        } catch (err) {
-          console.error("[MEET] Error destroying peer on unmount:", err);
-        }
-      });
-      peersRef.current = [];
-
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-      }
+      cancelled = true;
+      cleanup();
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomId]);
 
-  // videoElMounted is a counter that bumps every time the local <video> element
-  // mounts/unmounts. This lets the useEffect below react to the DOM element appearing.
-  const [videoElMounted, setVideoElMounted] = useState(0);
+  // ═════════════════════════════════════════════════════════════════════════
+  // CLEANUP
+  // ═════════════════════════════════════════════════════════════════════════
+  const cleanup = useCallback(() => {
+    // Destroy all peers
+    for (const [, entry] of peersRef.current) {
+      try { entry.peer.destroy(); } catch (e) { /* ignore */ }
+    }
+    peersRef.current = new Map();
 
-  // useCallback keeps the ref callback stable across renders.
-  // When React attaches the element it calls this; we store it and bump the counter.
-  const setLocalVideoRef = useCallback((el) => {
-    userVideoRef.current = el;
-    // Bump counter so the mute-sync useEffect fires
-    setVideoElMounted(n => n + 1);
+    // Stop media tracks
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
+
+    // Disconnect socket
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+      socketRef.current = null;
+    }
   }, []);
 
-  // ─── DEFINITIVE ECHO FIX ───────────────────────────────────────────────────
-  // Give the local <video> element a VIDEO-ONLY MediaStream (zero audio tracks).
-  // It is physically impossible to play back audio that doesn't exist in the stream.
-  // Previous mute/volume=0 approaches failed because browsers and React can
-  // un-mute elements during re-renders or autoPlay. This approach needs no muting.
-  //
-  // The FULL stream (audio + video) stays in streamRef.current and is passed to
-  // WebRTC peers — so remote participants still hear you normally.
+  // ═════════════════════════════════════════════════════════════════════════
+  // LOCAL VIDEO PREVIEW (ECHO-PROOF)
+  // ═════════════════════════════════════════════════════════════════════════
+  // Track when the <video> element mounts/unmounts
+  const [videoElMounted, setVideoElMounted] = useState(0);
+  const setLocalVideoRef = useCallback((el) => {
+    userVideoRef.current = el;
+    setVideoElMounted((n) => n + 1);
+  }, []);
+
+  // Apply video-only stream to the local preview (no audio tracks = no echo)
   useEffect(() => {
     const el = userVideoRef.current;
     if (!el || !stream) return;
 
-    // Create a preview stream with ONLY the video track(s) — no audio at all
     const videoOnlyStream = new MediaStream(stream.getVideoTracks());
     el.srcObject = videoOnlyStream;
-    // Still mark muted as belt-and-suspenders, but the zero-audio-track
-    // approach is what actually makes this bulletproof
     el.muted = true;
     el.volume = 0;
-
-    console.log(
-      '[MEET] Local preview: video-only stream, tracks:',
-      videoOnlyStream.getTracks().map(t => t.kind)
-    );
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stream, videoElMounted]);
-  // ────────────────────────────────────────────────────────────────────────────
 
+  // ═════════════════════════════════════════════════════════════════════════
+  // MEDIA MANAGEMENT
+  // ═════════════════════════════════════════════════════════════════════════
   const requestMedia = async (audio, video) => {
     try {
       const constraints = {
-        video: video ? {
-          width: { ideal: 1280 },
-          height: { ideal: 720 },
-          frameRate: { ideal: 24 }
-        } : false,
-        audio: typeof audio === 'boolean' ? (audio ? {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-          sampleRate: 48000
-        } : false) : audio
+        video: video
+          ? { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 24 } }
+          : false,
+        audio: audio
+          ? { echoCancellation: true, noiseSuppression: true, autoGainControl: true, sampleRate: 48000 }
+          : false,
       };
 
-      const currentStream = await navigator.mediaDevices.getUserMedia(constraints);
-
-      console.log("[MEET] 🎥 requestMedia successful. micOn:", micOn, "cameraOn:", cameraOn, "tracks:", currentStream.getTracks().map(t => `${t.kind}:${t.enabled}`));
-      setStream(currentStream);
-      streamRef.current = currentStream;
-      return currentStream;
+      const newStream = await navigator.mediaDevices.getUserMedia(constraints);
+      setStream(newStream);
+      streamRef.current = newStream;
+      return newStream;
     } catch (err) {
-      console.error("[MEET] Media error", err);
+      console.error("[MEET] Media error:", err);
       return null;
     }
   };
 
   const toggleMic = () => {
-    if (streamRef.current) {
-      const nextMicState = !micOn;
-      streamRef.current.getAudioTracks().forEach(track => {
-        track.enabled = nextMicState;
-      });
-      setMicOn(nextMicState);
-      if (socketRef.current) {
-        socketRef.current.emit("mic-toggle", roomId, nextMicState);
-      }
-    }
+    if (!streamRef.current) return;
+    const next = !micOn;
+    streamRef.current.getAudioTracks().forEach((t) => { t.enabled = next; });
+    setMicOn(next);
+    socketRef.current?.emit("mic-toggle", roomId, next);
   };
 
   const toggleCamera = () => {
-    if (streamRef.current) {
-      const nextCameraState = !cameraOn;
-      streamRef.current.getVideoTracks().forEach(track => {
-        track.enabled = nextCameraState;
-      });
-      setCameraOn(nextCameraState);
-      if (socketRef.current) {
-        socketRef.current.emit("camera-toggle", roomId, nextCameraState);
-      }
-    }
+    if (!streamRef.current) return;
+    const next = !cameraOn;
+    streamRef.current.getVideoTracks().forEach((t) => { t.enabled = next; });
+    setCameraOn(next);
+    socketRef.current?.emit("camera-toggle", roomId, next);
   };
 
+  // ═════════════════════════════════════════════════════════════════════════
+  // SCREEN SHARING
+  // ═════════════════════════════════════════════════════════════════════════
   const toggleScreenShare = async () => {
     if (!isScreenSharing) {
       try {
         const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
         const screenTrack = screenStream.getVideoTracks()[0];
+        const oldVideoTrack = streamRef.current?.getVideoTracks()[0];
 
-        // Replace track for all peers
-        console.log("[MEET] 🔄 Replacing video track with screen track for", peersRef.current.length, "peers");
-        const videoTrack = streamRef.current.getVideoTracks()[0];
-        
-        peersRef.current.forEach(({ peer, peerID }) => {
-          if (videoTrack && screenTrack) {
-            try {
-              // Try to replace track first
-              peer.replaceTrack(videoTrack, screenTrack, streamRef.current);
-              console.log("[MEET] ✅ Track replaced for peer:", peerID);
-            } catch (pErr) {
-              console.error("[MEET] ❌ replaceTrack failed for peer:", peerID, pErr);
-              // Fallback: If replaceTrack fails, we might need to remove and add
-              try {
-                peer.removeTrack(videoTrack, streamRef.current);
-                peer.addTrack(screenTrack, streamRef.current);
-                console.log("[MEET] 🔄 Fallback addTrack successful for peer:", peerID);
-              } catch (fErr) {
-                console.error("[MEET] ❌ Fallback track placement failed for peer:", peerID, fErr);
-              }
+        // Replace track on every existing peer
+        for (const [, entry] of peersRef.current) {
+          try {
+            if (oldVideoTrack && screenTrack) {
+              entry.peer.replaceTrack(oldVideoTrack, screenTrack, streamRef.current);
             }
-          } else if (screenTrack) {
-            // If we didn't have a video track (camera was off), just add the screen track
-            try {
-              peer.addTrack(screenTrack, streamRef.current);
-              console.log("[MEET] ➕ Screen track added for peer (camera was off):", peerID);
-            } catch (aErr) {
-              console.error("[MEET] ❌ addTrack failed for peer:", peerID, aErr);
-            }
+          } catch (err) {
+            console.error("[MEET] replaceTrack failed:", err);
           }
-        });
-
-        // Replace track in local streamRef
-        if (videoTrack) {
-          videoTrack.stop();
-          streamRef.current.removeTrack(videoTrack);
-          streamRef.current.addTrack(screenTrack);
         }
 
-        // Trigger local preview update
+        // Swap in local stream
+        if (oldVideoTrack) {
+          oldVideoTrack.stop();
+          streamRef.current.removeTrack(oldVideoTrack);
+        }
+        streamRef.current.addTrack(screenTrack);
         setStream(new MediaStream(streamRef.current.getTracks()));
 
-        screenTrack.onended = () => {
-          console.log("[MEET] 🖥️ Screen sharing ended by browser");
-          stopScreenShare(screenTrack);
-        };
+        screenTrack.onended = () => stopScreenShare(screenTrack);
 
         setIsScreenSharing(true);
-        socketRef.current.emit("screen-share-toggle", roomId, true);
+        socketRef.current?.emit("screen-share-toggle", roomId, true);
       } catch (err) {
         console.error("[MEET] Screen share error:", err);
       }
     } else {
-      const screenTrack = streamRef.current.getVideoTracks()[0];
+      const screenTrack = streamRef.current?.getVideoTracks()[0];
       stopScreenShare(screenTrack);
     }
   };
 
   const stopScreenShare = async (screenTrack) => {
     if (screenTrack) screenTrack.stop();
-    
-    // Get camera back using the existing helper to maintain audio settings
-    const cameraStream = await requestMedia(micOn, true);
-    if (!cameraStream) {
-      console.error("[MEET] ❌ Failed to restore camera after screen share");
-      return;
-    }
-    const cameraTrack = cameraStream.getVideoTracks()[0];
-    const currentVideoTrack = streamRef.current.getVideoTracks()[0];
 
-    // Replace track back for all peers
-    peersRef.current.forEach(({ peer, peerID }) => {
+    const cameraStream = await requestMedia(micOn, true);
+    if (!cameraStream) return;
+
+    const cameraTrack = cameraStream.getVideoTracks()[0];
+    const currentVideoTrack = streamRef.current?.getVideoTracks()[0];
+
+    for (const [, entry] of peersRef.current) {
       try {
         if (currentVideoTrack && cameraTrack) {
-          peer.replaceTrack(currentVideoTrack, cameraTrack, streamRef.current);
-        } else if (cameraTrack) {
-          peer.addTrack(cameraTrack, streamRef.current);
+          entry.peer.replaceTrack(currentVideoTrack, cameraTrack, streamRef.current);
         }
-      } catch (pErr) {
-        console.error("[MEET] ❌ replace/add track (revert) failed for peer:", peerID, pErr);
+      } catch (err) {
+        console.error("[MEET] revert replaceTrack failed:", err);
       }
-    });
+    }
 
-    // Update local streamRef
     if (currentVideoTrack) {
       currentVideoTrack.stop();
       streamRef.current.removeTrack(currentVideoTrack);
-      streamRef.current.addTrack(cameraTrack);
     }
-
-    // Trigger local preview update
+    streamRef.current.addTrack(cameraTrack);
     setStream(new MediaStream(streamRef.current.getTracks()));
+
     setIsScreenSharing(false);
-    setCameraOn(true); // Ensure camera is marked as on
-    
-    if (socketRef.current) {
-      socketRef.current.emit("screen-share-toggle", roomId, false);
-    }
+    setCameraOn(true);
+    socketRef.current?.emit("screen-share-toggle", roomId, false);
   };
 
-  const joinMeeting = () => {
-    const myRawId = me?.id || me?._id;
-    if (!myRawId) {
-      console.warn("[MEET] User data not loaded yet, cannot join meeting");
-      return;
+  // ═════════════════════════════════════════════════════════════════════════
+  // PEER MANAGEMENT
+  // ═════════════════════════════════════════════════════════════════════════
+
+  /** Sync peersRef → React state */
+  const syncPeersToState = useCallback(() => {
+    const arr = [];
+    for (const [socketId, entry] of peersRef.current) {
+      arr.push({ socketId, ...entry });
     }
-    const myId = String(myRawId);
+    setPeers(arr);
+  }, []);
 
-    if (!streamRef.current) {
-      console.error("[MEET] No media stream available! Cannot join without camera/mic.");
-      return;
-    }
-
-    if (socketRef.current) {
-      console.warn("[MEET] Socket already connected, skipping joinMeeting");
-      return;
-    }
-
-    setIsJoined(true);
-    console.log("[MEET] Connecting to socket at:", SOCKET_URL);
-    
-    socketRef.current = io(SOCKET_URL, {
-      transports: ['websocket', 'polling'],
-      reconnection: true,
-      reconnectionAttempts: 5,
-      timeout: 10000
-    });
-
-    socketRef.current.on("connect", () => {
-      console.log("[MEET] ✅ Socket connected:", socketRef.current.id);
-      socketRef.current.emit("join-room", roomId, myId);
-      
-      // Broadcast initial state immediately after joining
-      socketRef.current.emit("mic-toggle", roomId, micOn);
-      socketRef.current.emit("camera-toggle", roomId, cameraOn);
-    });
-
-    socketRef.current.on("connect_error", (err) => {
-      console.error("[MEET] ❌ Socket connection error:", err.message);
-    });
-
-    socketRef.current.on("user-joined", (userId, socketId) => {
-      const myId = String(me?.id || me?._id);
-      if (String(userId) === myId || String(socketId) === String(socketRef.current.id)) return;
-      console.log("[MEET] 👤 New user joined:", userId, "Socket:", socketId);
-      
-      // Check if peer already exists
-      if (peersRef.current.find(p => String(p.peerID) === String(socketId))) {
-        console.log("[MEET] Peer already exists for socket:", socketId);
+  /** Create a peer for a remote user. `initiator` = true if WE are initiating. */
+  const createPeer = useCallback(
+    (targetSocketId, targetUserId, isInitiator, initialSignal) => {
+      // Guard against duplicates
+      if (peersRef.current.has(targetSocketId)) {
+        console.log("[MEET] Peer already exists for:", targetSocketId);
+        // If we received a signal for an existing peer, forward it
+        if (initialSignal && !isInitiator) {
+          try {
+            peersRef.current.get(targetSocketId).peer.signal(initialSignal);
+          } catch (e) { /* ignore */ }
+        }
         return;
       }
 
       if (!streamRef.current) {
-        console.error("[MEET] ❌ Cannot create peer - no local stream!");
+        console.error("[MEET] No local stream, cannot create peer for:", targetSocketId);
         return;
       }
 
-      const peer = createPeer(socketId, socketRef.current.id, streamRef.current);
-      
-      const newPeerObj = {
-        peerID: String(socketId),
+      console.log(`[MEET] Creating peer for ${targetSocketId} (initiator=${isInitiator})`);
+
+      const peer = createSimplePeer({
+        initiator: isInitiator,
+        stream: streamRef.current,
+        onSignal: (signal) => {
+          socketRef.current?.emit("signal", {
+            target: targetSocketId,
+            signal,
+            userId: myIdRef.current,
+          });
+        },
+        onStream: (remoteStream) => {
+          console.log("[MEET] Got remote stream from:", targetSocketId,
+            "tracks:", remoteStream.getTracks().map((t) => `${t.kind}:${t.enabled}`));
+        },
+        onClose: () => {
+          console.log("[MEET] Peer closed:", targetSocketId);
+        },
+        onError: (err) => {
+          console.error("[MEET] Peer error:", targetSocketId, err.message);
+        },
+      });
+
+      // If we have an initial signal (we are the receiver), apply it
+      if (initialSignal && !isInitiator) {
+        peer.signal(initialSignal);
+      }
+
+      // Store in ref
+      peersRef.current.set(targetSocketId, {
         peer,
-        userId: String(userId),
+        userId: targetUserId,
         micOn: true,
         cameraOn: true,
-        refreshKey: Date.now()
-      };
+      });
 
-      peersRef.current.push(newPeerObj);
-      setPeers(prev => [...prev, newPeerObj]);
-      
-      // Also broadcast our own current state so the newcomer picks it up
-      if (socketRef.current) {
-        socketRef.current.emit("mic-toggle", roomId, micOn);
-        socketRef.current.emit("camera-toggle", roomId, cameraOn);
+      syncPeersToState();
+    },
+    [syncPeersToState]
+  );
+
+  /** Destroy a peer and remove from tracking */
+  const destroyPeer = useCallback(
+    (socketId) => {
+      const entry = peersRef.current.get(socketId);
+      if (entry) {
+        try { entry.peer.destroy(); } catch (e) { /* ignore */ }
+        peersRef.current.delete(socketId);
+        syncPeersToState();
       }
+    },
+    [syncPeersToState]
+  );
+
+  // ═════════════════════════════════════════════════════════════════════════
+  // JOIN MEETING
+  // ═════════════════════════════════════════════════════════════════════════
+  const joinMeeting = () => {
+    if (!myIdRef.current || !streamRef.current) {
+      console.warn("[MEET] Cannot join: missing user data or stream");
+      return;
+    }
+    if (socketRef.current) {
+      console.warn("[MEET] Already connected, skipping");
+      return;
+    }
+
+    setIsJoined(true);
+
+    const socket = io(SOCKET_URL, {
+      transports: ["websocket", "polling"],
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      timeout: 10000,
+    });
+    socketRef.current = socket;
+
+    // ── Socket Connected ─────────────────────────────────────────────────
+    socket.on("connect", () => {
+      console.log("[MEET] ✅ Socket connected:", socket.id);
+      socket.emit("join-room", roomId, myIdRef.current);
     });
 
-    socketRef.current.on("signal", (payload) => {
-      const myId = String(me?.id || me?._id);
-      if (String(payload.userId) === myId || String(payload.sender) === String(socketRef.current.id)) return;
-      
-      console.log("[MEET] 📡 Received signal from:", payload.sender, "type:", payload.signal?.type || "candidate");
-      const item = peersRef.current.find(p => String(p.peerID) === String(payload.sender));
-      
-      if (item) {
+    socket.on("connect_error", (err) => {
+      console.error("[MEET] ❌ Socket error:", err.message);
+    });
+
+    // ── Reconnection: re-join room and rebuild peers ─────────────────────
+    socket.io.on("reconnect", () => {
+      console.log("[MEET] 🔄 Reconnected, re-joining room");
+      // Destroy stale peers
+      for (const [sid] of peersRef.current) {
+        destroyPeer(sid);
+      }
+      socket.emit("join-room", roomId, myIdRef.current);
+    });
+
+    // ── Room Users (sent to us on join) ──────────────────────────────────
+    // We are the joiner → create initiator peers for each existing user
+    socket.on("room-users", (existingUsers) => {
+      console.log("[MEET] Room has", existingUsers.length, "existing user(s)");
+      for (const user of existingUsers) {
+        createPeer(user.socketId, user.userId, true, null);
+        // Apply their current states
+        const entry = peersRef.current.get(user.socketId);
+        if (entry) {
+          entry.micOn = user.micOn;
+          entry.cameraOn = user.cameraOn;
+        }
+      }
+      syncPeersToState();
+      // Broadcast our own initial state
+      socket.emit("mic-toggle", roomId, micOn);
+      socket.emit("camera-toggle", roomId, cameraOn);
+    });
+
+    // ── User Joined (a new user joined after us) ─────────────────────────
+    // We wait for their signal — they are the initiator
+    socket.on("user-joined", (userId, socketId) => {
+      if (String(userId) === myIdRef.current || socketId === socket.id) return;
+      console.log("[MEET] New user joined:", userId, socketId);
+      // Don't create a peer yet — wait for their signal
+    });
+
+    // ── Signal ───────────────────────────────────────────────────────────
+    socket.on("signal", (payload) => {
+      if (payload.sender === socket.id) return;
+
+      const existing = peersRef.current.get(payload.sender);
+      if (existing) {
+        // Forward signal to existing peer
         try {
-          item.peer.signal(payload.signal);
+          existing.peer.signal(payload.signal);
         } catch (err) {
-          console.error("[MEET] ❌ Error processing signal:", err);
+          console.error("[MEET] Signal error:", err);
         }
       } else {
-        console.log("[MEET] Creating new peer for incoming signal from:", payload.sender);
-        const peer = addPeer(payload.signal, payload.sender, streamRef.current);
-        const newPeerObj = {
-          peerID: String(payload.sender),
-          peer,
-          userId: String(payload.userId),
-          micOn: true,
-          cameraOn: true,
-          refreshKey: Date.now()
-        };
-        peersRef.current.push(newPeerObj);
-        setPeers(prev => [...prev, newPeerObj]);
+        // First signal from this user — create receiver peer
+        console.log("[MEET] Creating receiver peer for:", payload.sender);
+        createPeer(payload.sender, payload.userId, false, payload.signal);
       }
     });
 
-    socketRef.current.on("chat-message", (message) => {
-      setMessages(prev => [...prev, message]);
+    // ── Chat ─────────────────────────────────────────────────────────────
+    socket.on("chat-message", (message) => {
+      setMessages((prev) => [...prev, message]);
     });
 
-    socketRef.current.on("user-disconnected", (socketId) => {
-      const sId = String(socketId);
-      console.log("[MEET] 👤 User disconnected:", sId);
-      const peerObj = peersRef.current.find(p => String(p.peerID) === sId);
-      if (peerObj) {
-        try {
-          peerObj.peer.destroy();
-        } catch (err) {
-          console.error("[MEET] Error destroying peer:", err);
-        }
+    // ── User Disconnected ────────────────────────────────────────────────
+    socket.on("user-disconnected", (socketId) => {
+      console.log("[MEET] User disconnected:", socketId);
+      destroyPeer(socketId);
+    });
+
+    // ── Remote Media Toggles ─────────────────────────────────────────────
+    socket.on("remote-mic-toggle", ({ socketId, micOn: remoteMic }) => {
+      const entry = peersRef.current.get(socketId);
+      if (entry) {
+        entry.micOn = remoteMic;
+        syncPeersToState();
       }
-      peersRef.current = peersRef.current.filter(p => String(p.peerID) !== sId);
-      setPeers(prev => prev.filter(p => String(p.peerID) !== sId));
     });
 
-    socketRef.current.on("remote-screen-share-toggle", ({ socketId, isSharing }) => {
-      console.log("[MEET] 🔄 Remote screen share toggle for:", socketId, "Sharing:", isSharing);
-      setPeers(prev => prev.map(p => p.peerID === socketId ? { ...p, refreshKey: Date.now() } : p));
+    socket.on("remote-camera-toggle", ({ socketId, cameraOn: remoteCam }) => {
+      const entry = peersRef.current.get(socketId);
+      if (entry) {
+        entry.cameraOn = remoteCam;
+        syncPeersToState();
+      }
     });
 
-    socketRef.current.on("remote-mic-toggle", ({ socketId, micOn }) => {
-      setPeers(prev => prev.map(p => p.peerID === socketId ? { ...p, micOn } : p));
-    });
-
-    socketRef.current.on("remote-camera-toggle", ({ socketId, cameraOn }) => {
-      setPeers(prev => prev.map(p => p.peerID === socketId ? { ...p, cameraOn } : p));
+    socket.on("remote-screen-share-toggle", ({ socketId }) => {
+      // Trigger a re-render for the affected peer's video
+      const entry = peersRef.current.get(socketId);
+      if (entry) {
+        entry.refreshKey = Date.now();
+        syncPeersToState();
+      }
     });
   };
 
-  // When joining, the video element remounts into the meeting grid.
-  // setLocalVideoRef fires → bumps videoElMounted → mute-sync useEffect handles it.
-  // No manual re-application needed here.
-
-  const createPeer = (userToSignal, callerID, stream) => {
-    console.log("[MEET] Creating peer (initiator) for:", userToSignal, "with stream tracks:", stream.getTracks().map(t => t.kind + ':' + t.enabled));
-    const peer = new Peer({ initiator: true, trickle: true, stream, config: ICE_SERVERS });
-    
-    peer.on("signal", signal => {
-      console.log("[MEET] 📤 Sending signal to:", userToSignal, "type:", signal?.type || "candidate");
-      socketRef.current.emit("signal", { target: userToSignal, signal, userId: me?.id || me?._id });
-    });
-    
-    peer.on("connect", () => {
-      console.log("[MEET] ✅ Peer connected to:", userToSignal);
-    });
-    
-    peer.on("stream", (remoteStream) => {
-      console.log("[MEET] 🎵 Received remote stream from:", userToSignal, "tracks:", remoteStream.getTracks().map(t => t.kind + ':' + t.enabled));
-    });
-    
-    peer.on("error", (err) => {
-      console.error("[MEET] ❌ Peer error with:", userToSignal, err.message);
-    });
-    
-    peer.on("close", () => {
-      console.log("[MEET] Peer connection closed with:", userToSignal);
-    });
-    
-    return peer;
-  };
-
-  const addPeer = (incomingSignal, callerID, stream) => {
-    console.log("[MEET] Creating peer (receiver) for:", callerID, "with stream tracks:", stream.getTracks().map(t => t.kind + ':' + t.enabled));
-    const peer = new Peer({ initiator: false, trickle: true, stream, config: ICE_SERVERS });
-    
-    peer.on("signal", signal => {
-      console.log("[MEET] 📤 Sending signal to:", callerID, "type:", signal?.type || "candidate");
-      socketRef.current.emit("signal", { target: callerID, signal, userId: me?.id || me?._id });
-    });
-    
-    peer.on("connect", () => {
-      console.log("[MEET] ✅ Peer connected to:", callerID);
-    });
-    
-    peer.on("stream", (remoteStream) => {
-      console.log("[MEET] 🎵 Received remote stream from:", callerID, "tracks:", remoteStream.getTracks().map(t => t.kind + ':' + t.enabled));
-    });
-    
-    peer.on("error", (err) => {
-      console.error("[MEET] ❌ Peer error with:", callerID, err.message);
-    });
-    
-    peer.on("close", () => {
-      console.log("[MEET] Peer connection closed with:", callerID);
-    });
-    
-    peer.signal(incomingSignal);
-    return peer;
-  };
-
+  // ═════════════════════════════════════════════════════════════════════════
+  // CHAT
+  // ═════════════════════════════════════════════════════════════════════════
   const sendMessage = () => {
-    if (chatInput.trim() && socketRef.current) {
-      const msg = {
-        sender: me?.name || "User",
-        text: chatInput,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      };
-      socketRef.current.emit("send-chat-message", roomId, msg);
-      setChatInput("");
-    }
+    if (!chatInput.trim() || !socketRef.current) return;
+    const msg = {
+      sender: me?.name || "User",
+      text: chatInput,
+      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    };
+    socketRef.current.emit("send-chat-message", roomId, msg);
+    setChatInput("");
   };
 
+  // ═════════════════════════════════════════════════════════════════════════
+  // LEAVE
+  // ═════════════════════════════════════════════════════════════════════════
   const leaveMeeting = () => {
-    if (socketRef.current) {
-      socketRef.current.emit("leave-room", roomId);
-      socketRef.current.disconnect();
-    }
-    
-    // Cleanup all peers
-    peersRef.current.forEach(p => {
-      try {
-        p.peer.destroy();
-      } catch (err) {
-        console.error("[MEET] Error destroying peer on leave:", err);
-      }
-    });
-    peersRef.current = [];
-    setPeers([]);
-
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-    }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
-    }
+    socketRef.current?.emit("leave-room", roomId);
+    cleanup();
     navigate(-1);
   };
 
+  // ═════════════════════════════════════════════════════════════════════════
+  // INVITE
+  // ═════════════════════════════════════════════════════════════════════════
   const handleSearchUsers = async (val) => {
     setUserSearch(val);
-    if (val.length < 2) {
-      setSearchResults([]);
-      return;
-    }
+    if (val.length < 2) { setSearchResults([]); return; }
     setIsSearching(true);
     try {
       const results = await meetingsApi.searchInvitees({ search: val });
-      // Filter out people already in meeting.invitees
-      const existingIds = meeting.invitees.map(i => i.id || i._id);
-      setSearchResults(results.filter(u => !existingIds.includes(u.id || u._id)));
-    } catch (err) {
-      console.error("Search failed", err);
-    } finally {
-      setIsSearching(false);
-    }
+      const existingIds = (meeting?.invitees || []).map((i) => i.id || i._id);
+      setSearchResults(results.filter((u) => !existingIds.includes(u.id || u._id)));
+    } catch { /* ignore */ } finally { setIsSearching(false); }
   };
 
   const handleInviteUser = async (user) => {
     try {
-      const updatedInvitees = [...meeting.invitees, user];
-      const inviteeIds = updatedInvitees.map(i => i.id || i._id);
-      await meetingsApi.updateInvitees(roomId, inviteeIds);
-      
-      // Update local state
-      setMeeting(prev => ({ ...prev, invitees: updatedInvitees }));
-      setSearchResults(prev => prev.filter(u => (u.id || u._id) !== (user.id || user._id)));
-      
-      // We could emit a socket event here if we wanted to notify the invited user
-    } catch (err) {
-      console.error("Invite failed", err);
-    }
+      const updatedInvitees = [...(meeting?.invitees || []), user];
+      await meetingsApi.updateInvitees(roomId, updatedInvitees.map((i) => i.id || i._id));
+      setMeeting((prev) => ({ ...prev, invitees: updatedInvitees }));
+      setSearchResults((prev) => prev.filter((u) => (u.id || u._id) !== (user.id || user._id)));
+    } catch (err) { console.error("[MEET] Invite failed:", err); }
   };
 
+  // ═══════════════════════════════════════════════════════════════════════
+  // RENDER: PRE-JOIN LOBBY
+  // ═══════════════════════════════════════════════════════════════════════
   if (!isJoined) {
     return (
       <div className="h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
@@ -589,7 +552,7 @@ const UnifiedMeetingRoom = () => {
               <h1 className="text-4xl font-extrabold text-slate-900 leading-tight">Ready to join?</h1>
               <p className="mt-2 text-slate-500 font-medium">{meeting?.title || "EMS Meeting Room"}</p>
             </div>
-            
+
             <div className="relative group aspect-video bg-slate-900 rounded-3xl overflow-hidden shadow-2xl ring-8 ring-slate-50">
               <video
                 ref={setLocalVideoRef}
@@ -605,7 +568,7 @@ const UnifiedMeetingRoom = () => {
                   </div>
                 </div>
               )}
-              
+
               <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-4">
                 <button
                   onClick={toggleMic}
@@ -624,417 +587,400 @@ const UnifiedMeetingRoom = () => {
           </div>
 
           <div className="flex flex-col gap-8">
-             <div className="p-8 bg-slate-50 rounded-[32px] border border-slate-100 space-y-4 text-center lg:text-left">
-                <div className="flex -space-x-3 justify-center lg:justify-start">
-                    {[1,2,3].map(i => <div key={i} className="w-10 h-10 rounded-full bg-indigo-100 border-4 border-white" />)}
-                </div>
-                <p className="text-slate-600 font-medium">
-                  {me ? "Some other team members are already here" : "Loading your profile..."}
-                </p>
-                <button
-                  onClick={joinMeeting}
-                  disabled={!me || !meeting || !stream}
-                  className={`w-full py-4 rounded-2xl font-bold text-lg transition-all shadow-xl active:scale-95 ${
-                    me && meeting && (stream || !cameraOn)
-                    ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-200" 
+            <div className="p-8 bg-slate-50 rounded-[32px] border border-slate-100 space-y-4 text-center lg:text-left">
+              <div className="flex -space-x-3 justify-center lg:justify-start">
+                {[1, 2, 3].map((i) => <div key={i} className="w-10 h-10 rounded-full bg-indigo-100 border-4 border-white" />)}
+              </div>
+              <p className="text-slate-600 font-medium">
+                {me ? "Some other team members are already here" : "Loading your profile..."}
+              </p>
+              <button
+                onClick={joinMeeting}
+                disabled={!me || !meeting || !stream}
+                className={`w-full py-4 rounded-2xl font-bold text-lg transition-all shadow-xl active:scale-95 ${
+                  me && meeting && stream
+                    ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-200"
                     : "bg-slate-200 text-slate-400 cursor-not-allowed"
-                  }`}
-                >
-                  {me ? (stream ? "Join Meeting Room" : (cameraOn ? "Initializing Camera..." : "Join Without Media")) : "Please Wait..."}
-                </button>
-             </div>
-             
-             <div className="flex items-center gap-2 text-slate-400 justify-center lg:justify-start">
-                <Check size={16} className="text-emerald-500" />
-                <span className="text-sm font-semibold">Automatic HD Quality Enabled</span>
-             </div>
+                }`}
+              >
+                {me ? (stream ? "Join Meeting Room" : "Initializing Camera...") : "Please Wait..."}
+              </button>
+            </div>
+
+            <div className="flex items-center gap-2 text-slate-400 justify-center lg:justify-start">
+              <Check size={16} className="text-emerald-500" />
+              <span className="text-sm font-semibold">Automatic HD Quality Enabled</span>
+            </div>
           </div>
         </div>
       </div>
     );
   }
 
+  // ═══════════════════════════════════════════════════════════════════════
+  // RENDER: MEETING ROOM
+  // ═══════════════════════════════════════════════════════════════════════
+  const totalParticipants = peers.length + 1;
+  // Determine grid columns based on participant count (Google Meet style)
+  const gridCols =
+    totalParticipants <= 1 ? "1fr" :
+    totalParticipants <= 4 ? "repeat(2, 1fr)" :
+    totalParticipants <= 9 ? "repeat(3, 1fr)" :
+    "repeat(4, 1fr)";
+
   return (
-    <div className="h-screen bg-white flex overflow-hidden">
-      {/* Main Content Area */}
+    <div className="h-screen bg-[#202124] flex overflow-hidden">
+      {/* Main Content */}
       <div className="flex-1 flex flex-col relative h-full">
-        {/* Top Header */}
-        <div className="p-6 flex justify-between items-center absolute top-0 left-0 right-0 z-20">
-          <div className="flex items-center gap-3 bg-white/80 backdrop-blur-md px-6 py-3 rounded-2xl border border-slate-100 shadow-sm">
-            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="font-bold text-slate-800 text-sm">{meeting?.title}</span>
-            <span className="text-slate-300 mx-1">|</span>
-            <span className="text-slate-500 font-semibold text-xs tracking-tight uppercase">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+        {/* Top Bar */}
+        <div className="p-4 flex justify-between items-center z-20 bg-[#202124]">
+          <div className="flex items-center gap-3 px-5 py-2.5 rounded-full bg-[#303134]">
+            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="font-semibold text-white text-sm">{meeting?.title}</span>
+            <span className="text-gray-500 mx-1">|</span>
+            <span className="text-gray-400 font-medium text-xs tracking-tight">
+              {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+            </span>
           </div>
 
           <div className="flex gap-2">
-             <button onClick={() => { setIsSidebarOpen(true); setActiveTab("people"); }} className="p-3 bg-white rounded-2xl border border-slate-100 text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
-                <Users size={20} />
-             </button>
-             <button onClick={() => { setIsSidebarOpen(true); setActiveTab("chat"); }} className="p-3 bg-white rounded-2xl border border-slate-100 text-slate-600 hover:bg-slate-50 transition-all shadow-sm">
-                <MessageSquare size={20} />
-             </button>
+            <button
+              onClick={() => { setIsSidebarOpen(true); setActiveTab("people"); }}
+              className="p-2.5 rounded-full bg-[#303134] text-gray-300 hover:bg-[#3c4043] transition-all"
+            >
+              <Users size={20} />
+            </button>
+            <button
+              onClick={() => { setIsSidebarOpen(true); setActiveTab("chat"); }}
+              className="p-2.5 rounded-full bg-[#303134] text-gray-300 hover:bg-[#3c4043] transition-all"
+            >
+              <MessageSquare size={20} />
+            </button>
           </div>
         </div>
 
         {/* Video Grid */}
-        <div className="flex-1 bg-slate-50 p-6 flex items-center justify-center">
-            <div className="w-full h-full max-w-7xl grid gap-4 place-items-center"
-                 style={{ gridTemplateColumns: `repeat(auto-fit, minmax(min(100%, 400px), 1fr))` }}>
-                
-                {/* Local Video */}
-                <div className="relative w-full aspect-video bg-slate-900 rounded-[32px] overflow-hidden shadow-2xl group border-2 border-indigo-500/10">
-                    <video ref={setLocalVideoRef} autoPlay muted playsInline className={`w-full h-full object-cover mirror ${cameraOn ? "" : "invisible"}`} />
-                    {!cameraOn && (
-                        <div className="absolute inset-0 flex items-center justify-center bg-slate-900">
-                            <div className="w-24 h-24 rounded-full bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-4xl font-black">
-                                {me?.name?.charAt(0)}
-                            </div>
-                        </div>
-                    )}
-                    <div className="absolute bottom-6 left-6 flex items-center gap-2 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl text-xs font-bold text-white border border-white/10">
-                        {me?.name} (You)
-                        {!micOn && <MicOff size={14} className="text-red-400" />}
-                    </div>
+        <div className="flex-1 p-3 flex items-center justify-center overflow-hidden">
+          <div
+            className="w-full h-full max-w-[1400px] grid gap-2 place-items-center auto-rows-fr"
+            style={{ gridTemplateColumns: gridCols }}
+          >
+            {/* Local Video Tile */}
+            <div className="relative w-full h-full min-h-0 bg-[#3c4043] rounded-xl overflow-hidden group">
+              <video
+                ref={setLocalVideoRef}
+                autoPlay
+                muted
+                playsInline
+                className={`w-full h-full object-cover mirror ${cameraOn ? "" : "invisible"}`}
+              />
+              {!cameraOn && (
+                <div className="absolute inset-0 flex items-center justify-center bg-[#3c4043]">
+                  <div className="w-20 h-20 rounded-full bg-indigo-600 text-white flex items-center justify-center text-3xl font-bold">
+                    {me?.name?.charAt(0)}
+                  </div>
                 </div>
-
-                {/* Remote Participants */}
-                {peers.map(p => (
-                    <RemoteVideo 
-                      key={p.peerID} 
-                      peer={p.peer} 
-                      userId={p.userId} 
-                      me={me} 
-                      refreshKey={p.refreshKey}
-                      remoteMicOn={p.micOn}
-                      remoteCameraOn={p.cameraOn}
-                    />
-                ))}
+              )}
+              <div className="absolute bottom-3 left-3 flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-semibold text-white">
+                {me?.name} (You)
+                {!micOn && <MicOff size={13} className="text-red-400" />}
+              </div>
             </div>
+
+            {/* Remote Participants */}
+            {peers.map((p) => (
+              <RemoteVideo
+                key={p.socketId}
+                peer={p.peer}
+                userId={p.userId}
+                myId={myIdRef.current}
+                remoteMicOn={p.micOn}
+                remoteCameraOn={p.cameraOn}
+                refreshKey={p.refreshKey}
+              />
+            ))}
+          </div>
         </div>
 
-        {/* Floating Controls Bar */}
-        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 z-20">
-            <div className="bg-slate-900/90 backdrop-blur-3xl px-10 py-5 rounded-[40px] flex items-center gap-8 shadow-2xl border border-white/10">
-                <button
-                  onClick={toggleMic}
-                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${micOn ? "bg-slate-800 text-slate-300 hover:bg-slate-700" : "bg-red-500 text-white shadow-lg shadow-red-500/20"}`}
-                >
-                  {micOn ? <Mic size={22} /> : <MicOff size={22} />}
-                </button>
-                <button
-                  onClick={toggleCamera}
-                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${cameraOn ? "bg-slate-800 text-slate-300 hover:bg-slate-700" : "bg-red-500 text-white shadow-lg shadow-red-500/20"}`}
-                >
-                  {cameraOn ? <Video size={22} /> : <VideoOff size={22} />}
-                </button>
+        {/* Bottom Controls Bar */}
+        <div className="flex justify-center pb-6 pt-2 z-20 bg-[#202124]">
+          <div className="flex items-center gap-4 px-6 py-3 rounded-full bg-[#303134]">
+            <button
+              onClick={toggleMic}
+              className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                micOn ? "bg-[#3c4043] text-white hover:bg-[#4a4d51]" : "bg-red-500 text-white hover:bg-red-600"
+              }`}
+              title={micOn ? "Mute" : "Unmute"}
+            >
+              {micOn ? <Mic size={20} /> : <MicOff size={20} />}
+            </button>
 
-                <div className="w-px h-10 bg-white/10 mx-2" />
+            <button
+              onClick={toggleCamera}
+              className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                cameraOn ? "bg-[#3c4043] text-white hover:bg-[#4a4d51]" : "bg-red-500 text-white hover:bg-red-600"
+              }`}
+              title={cameraOn ? "Turn off camera" : "Turn on camera"}
+            >
+              {cameraOn ? <Video size={20} /> : <VideoOff size={20} />}
+            </button>
 
-                <button 
-                  onClick={toggleScreenShare}
-                  className={`w-14 h-14 rounded-full flex items-center justify-center transition-all ${isScreenSharing ? "bg-indigo-600 text-white shadow-lg shadow-indigo-500/20" : "bg-slate-800 text-slate-300 hover:bg-slate-700"}`}
-                  title={isScreenSharing ? "Stop Sharing" : "Share Screen"}
-                >
-                  <ScreenShare size={22} />
-                </button>
+            <button
+              onClick={toggleScreenShare}
+              className={`w-12 h-12 rounded-full flex items-center justify-center transition-all ${
+                isScreenSharing ? "bg-indigo-600 text-white" : "bg-[#3c4043] text-white hover:bg-[#4a4d51]"
+              }`}
+              title={isScreenSharing ? "Stop sharing" : "Share screen"}
+            >
+              <ScreenShare size={20} />
+            </button>
 
-                <button
-                  onClick={leaveMeeting}
-                  className="w-20 h-14 bg-red-600 hover:bg-red-700 text-white rounded-[28px] flex items-center justify-center transition-all shadow-2xl active:scale-95"
-                >
-                  <PhoneOff size={24} />
-                </button>
-            </div>
+            <div className="w-px h-8 bg-gray-600 mx-1" />
+
+            <button
+              onClick={leaveMeeting}
+              className="px-6 h-12 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-all font-semibold gap-2"
+            >
+              <PhoneOff size={20} />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Sidebar (Chat / People) */}
+      {/* Sidebar */}
       {isSidebarOpen && (
-        <div className="w-[400px] border-l border-slate-100 flex flex-col bg-white animate-in slide-in-from-right duration-300 h-full">
-            <div className="p-6 border-b border-slate-50 flex items-center justify-between bg-slate-50/50">
-               <div className="flex gap-4">
-                  <button 
-                    onClick={() => setActiveTab("chat")}
-                    className={`pb-2 text-sm font-bold transition-all relative ${activeTab === "chat" ? "text-indigo-600" : "text-slate-400 hover:text-slate-600"}`}
-                  >
-                    Chat
-                    {activeTab === "chat" && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full" />}
-                  </button>
-                  <button 
-                    onClick={() => setActiveTab("people")}
-                    className={`pb-2 text-sm font-bold transition-all relative ${activeTab === "people" ? "text-indigo-600" : "text-slate-400 hover:text-slate-600"}`}
-                  >
-                    People
-                    {activeTab === "people" && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-600 rounded-full" />}
-                  </button>
-               </div>
-               <button onClick={() => setIsSidebarOpen(false)} className="p-2 hover:bg-slate-100 rounded-xl transition-all text-slate-400">
-                    <X size={20} />
-               </button>
+        <div className="w-[360px] border-l border-[#3c4043] flex flex-col bg-[#202124] h-full">
+          <div className="p-4 border-b border-[#3c4043] flex items-center justify-between">
+            <div className="flex gap-4">
+              <button
+                onClick={() => setActiveTab("chat")}
+                className={`pb-1 text-sm font-semibold transition-all relative ${activeTab === "chat" ? "text-indigo-400" : "text-gray-500 hover:text-gray-300"}`}
+              >
+                Chat
+                {activeTab === "chat" && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-400 rounded-full" />}
+              </button>
+              <button
+                onClick={() => setActiveTab("people")}
+                className={`pb-1 text-sm font-semibold transition-all relative ${activeTab === "people" ? "text-indigo-400" : "text-gray-500 hover:text-gray-300"}`}
+              >
+                People ({totalParticipants})
+                {activeTab === "people" && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-400 rounded-full" />}
+              </button>
             </div>
+            <button onClick={() => setIsSidebarOpen(false)} className="p-2 hover:bg-[#3c4043] rounded-full transition-all text-gray-400">
+              <X size={18} />
+            </button>
+          </div>
 
-            <div className="flex-1 overflow-y-auto">
-                {activeTab === "chat" ? (
-                   <div className="p-6 space-y-6">
-                      {messages.map((m, i) => (
-                        <div key={i} className="space-y-1">
-                            <div className="flex items-center gap-2">
-                                <span className="text-xs font-bold text-slate-900">{m.sender}</span>
-                                <span className="text-[10px] text-slate-400">{m.time}</span>
+          <div className="flex-1 overflow-y-auto">
+            {activeTab === "chat" ? (
+              <div className="p-4 space-y-4">
+                {messages.map((m, i) => (
+                  <div key={i} className="space-y-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-bold text-white">{m.sender}</span>
+                      <span className="text-[10px] text-gray-500">{m.time}</span>
+                    </div>
+                    <div className="bg-[#303134] p-3 rounded-xl rounded-tl-none text-gray-300 text-sm leading-relaxed">
+                      {m.text}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="p-4 space-y-3">
+                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">In this meeting</div>
+
+                {/* Self */}
+                <div className="flex items-center gap-3 p-3 bg-[#303134] rounded-xl">
+                  <div className="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">
+                    {me?.name?.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-white">{me?.name} (You)</p>
+                    <p className="text-[10px] font-semibold text-indigo-400 uppercase">{me?.role?.replace("_", " ")}</p>
+                  </div>
+                </div>
+
+                {/* Remote participants */}
+                {peers.map((p) => (
+                  <RemoteParticipantInfo key={p.socketId} userId={p.userId} />
+                ))}
+
+                {/* Invite Section */}
+                {(me?.id === meeting?.creatorId?.id || me?.role === "ceo") && (
+                  <div className="pt-6 border-t border-[#3c4043] mt-4 space-y-3">
+                    <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
+                      <UserPlus size={10} /> Invite Team Members
+                    </div>
+                    <div className="relative">
+                      <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                      <input
+                        type="text"
+                        placeholder="Search by name or email..."
+                        value={userSearch}
+                        onChange={(e) => handleSearchUsers(e.target.value)}
+                        className="w-full bg-[#303134] border border-[#3c4043] rounded-xl pl-9 pr-4 py-2.5 text-xs outline-none text-white placeholder-gray-500 focus:border-indigo-500 transition-all font-medium"
+                      />
+                    </div>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
+                      {isSearching ? (
+                        <div className="text-center py-4"><Loader2 size={16} className="animate-spin mx-auto text-indigo-400" /></div>
+                      ) : searchResults.map((user) => (
+                        <div key={user.id || user._id} className="flex items-center justify-between p-2 rounded-xl hover:bg-[#303134] transition-all">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-full bg-[#3c4043] flex items-center justify-center text-[10px] font-bold text-gray-300">
+                              {user.name?.charAt(0)}
                             </div>
-                            <div className="bg-slate-50 p-4 rounded-2xl rounded-tl-none border border-slate-100 text-slate-700 text-sm leading-relaxed">
-                                {m.text}
+                            <div>
+                              <p className="text-xs font-semibold text-white">{user.name}</p>
+                              <p className="text-[9px] text-gray-500 font-medium">{user.role?.replace("_", " ")}</p>
                             </div>
+                          </div>
+                          <button
+                            onClick={() => handleInviteUser(user)}
+                            className="p-1.5 bg-indigo-600/20 text-indigo-400 rounded-lg hover:bg-indigo-600/30 transition-all"
+                          >
+                            <UserPlus size={14} />
+                          </button>
                         </div>
                       ))}
-                   </div>
-                ) : (
-                   <div className="p-6 space-y-4">
-                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Host & Speaker</div>
-                      <div className="flex items-center gap-3 p-3 bg-indigo-50/50 rounded-2xl border border-indigo-100/50">
-                         <div className="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs uppercase">
-                             {me?.name?.charAt(0)}
-                         </div>
-                         <div>
-                            <p className="text-sm font-bold text-slate-900">{me?.name} (You)</p>
-                            <p className="text-[10px] font-bold text-indigo-500 uppercase tracking-tighter">{me?.role?.replace("_", " ")}</p>
-                         </div>
-                      </div>
-
-                      {peers.length > 0 && (
-                        <div className="pt-6 space-y-4">
-                           <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                               <Users size={10} /> Remote Participants
-                           </div>
-                           <div className="space-y-3">
-                               {peers.map(p => (
-                                  <RemoteParticipantInfo key={p.peerID} userId={p.userId} cache={userMetadataCache} />
-                                ))}
-                           </div>
-                        </div>
+                      {!isSearching && userSearch.length >= 2 && searchResults.length === 0 && (
+                        <p className="text-center py-4 text-[10px] text-gray-500 font-medium">No users found</p>
                       )}
-
-                      {/* Invite Section (Visible to Creator or CEO) */}
-                      {(me?.id === meeting?.creatorId?.id || me?.role === 'ceo') && (
-                        <div className="pt-8 border-t border-slate-100 mt-6 space-y-4">
-                           <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 flex items-center gap-2">
-                               <UserPlus size={10} /> Invite Team Members
-                           </div>
-                           
-                           <div className="relative">
-                                <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                                <input 
-                                    type="text"
-                                    placeholder="Search by name or email..."
-                                    value={userSearch}
-                                    onChange={(e) => handleSearchUsers(e.target.value)}
-                                    className="w-full bg-slate-50 border border-slate-100 rounded-xl pl-9 pr-4 py-2.5 text-xs outline-none focus:ring-2 focus:ring-indigo-500/10 focus:border-indigo-500 transition-all font-medium"
-                                />
-                           </div>
-
-                           <div className="space-y-2 max-h-48 overflow-y-auto">
-                               {isSearching ? (
-                                   <div className="text-center py-4"><Loader2 size={16} className="animate-spin mx-auto text-indigo-500" /></div>
-                               ) : searchResults.map(user => (
-                                   <div key={user.id || user._id} className="flex items-center justify-between p-2 rounded-xl hover:bg-slate-50 border border-transparent transition-all">
-                                       <div className="flex items-center gap-2">
-                                           <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600">
-                                               {user.name?.charAt(0)}
-                                           </div>
-                                           <div>
-                                               <p className="text-xs font-bold text-slate-800">{user.name}</p>
-                                               <p className="text-[9px] text-slate-400 font-medium">{user.role?.replace("_", " ")}</p>
-                                           </div>
-                                       </div>
-                                       <button 
-                                          onClick={() => handleInviteUser(user)}
-                                          className="p-1.5 bg-indigo-50 text-indigo-600 rounded-lg hover:bg-indigo-100 transition-all"
-                                          title="Add to meeting"
-                                       >
-                                           <UserPlus size={14} />
-                                       </button>
-                                   </div>
-                               ))}
-                               {!isSearching && userSearch.length >= 2 && searchResults.length === 0 && (
-                                   <p className="text-center py-4 text-[10px] text-slate-400 font-medium">No users found</p>
-                               )}
-                           </div>
-                        </div>
-                      )}
-                   </div>
-                )}
-            </div>
-
-            {activeTab === "chat" && (
-                <div className="p-6 bg-slate-50/50 border-t border-slate-50">
-                    <div className="relative">
-                        <textarea
-                          placeholder="Send a message to everyone"
-                          value={chatInput}
-                          onChange={(e) => setChatInput(e.target.value)}
-                          onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), sendMessage())}
-                          className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-4 text-sm outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all resize-none h-24"
-                        />
-                        <button 
-                          onClick={sendMessage}
-                          className="absolute bottom-4 right-4 p-2 bg-indigo-600 text-white rounded-xl hover:bg-indigo-700 transition-all active:scale-95"
-                        >
-                            <Send size={18} />
-                        </button>
                     </div>
-                </div>
+                  </div>
+                )}
+              </div>
             )}
+          </div>
+
+          {activeTab === "chat" && (
+            <div className="p-4 border-t border-[#3c4043]">
+              <div className="relative">
+                <textarea
+                  placeholder="Send a message to everyone"
+                  value={chatInput}
+                  onChange={(e) => setChatInput(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), sendMessage())}
+                  className="w-full bg-[#303134] border border-[#3c4043] rounded-xl px-4 py-3 text-sm outline-none text-white placeholder-gray-500 focus:border-indigo-500 transition-all resize-none h-20"
+                />
+                <button
+                  onClick={sendMessage}
+                  className="absolute bottom-3 right-3 p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all active:scale-95"
+                >
+                  <Send size={16} />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>
   );
 };
 
-const RemoteParticipantInfo = ({ userId, cache }) => {
-    const [userData, setUserData] = useState(null);
+// ═══════════════════════════════════════════════════════════════════════════════
+// REMOTE PARTICIPANT INFO (People Tab)
+// ═══════════════════════════════════════════════════════════════════════════════
+const RemoteParticipantInfo = ({ userId }) => {
+  const [userData, setUserData] = useState(null);
 
-    useEffect(() => {
-        if (!userId) return;
-        const uId = String(userId);
-        
-        // Check cache first
-        if (cache && cache.current[uId]) {
-            setUserData(cache.current[uId]);
-            return;
-        }
+  useEffect(() => {
+    if (!userId) return;
+    usersApi.getById(String(userId))
+      .then(setUserData)
+      .catch((err) => console.error("[MEET] User fetch error:", err));
+  }, [userId]);
 
-        const fetchUser = async () => {
-            try {
-                const data = await usersApi.getById(uId);
-                setUserData(data);
-                if (cache) cache.current[uId] = data;
-            } catch (err) {
-                console.error("[MEET] Failed to fetch user data for sidebar:", uId, err);
-            }
-        };
-
-        fetchUser();
-    }, [userId, cache]);
-
-    return (
-        <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
-            <div className="w-10 h-10 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-xs uppercase">
-                {userData?.name?.charAt(0) || "?"}
-            </div>
-            <div>
-               <p className="text-sm font-bold text-slate-900">{userData?.name || "Loading..."}</p>
-               <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">{userData?.role?.replace("_", " ") || "PARTICIPANT"}</p>
-            </div>
-        </div>
-    );
+  return (
+    <div className="flex items-center gap-3 p-3 bg-[#303134] rounded-xl">
+      <div className="w-9 h-9 rounded-full bg-[#3c4043] text-gray-300 flex items-center justify-center font-bold text-xs">
+        {userData?.name?.charAt(0) || "?"}
+      </div>
+      <div>
+        <p className="text-sm font-semibold text-white">{userData?.name || "Loading..."}</p>
+        <p className="text-[10px] font-semibold text-gray-500 uppercase">{userData?.role?.replace("_", " ") || "PARTICIPANT"}</p>
+      </div>
+    </div>
+  );
 };
 
-const RemoteVideo = ({ peer, userId, me, refreshKey, remoteMicOn, remoteCameraOn }) => {
-    const videoRef = useRef();
-    const [userData, setUserData] = useState(null);
-    const [hasAudio, setHasAudio] = useState(false);
+// ═══════════════════════════════════════════════════════════════════════════════
+// REMOTE VIDEO TILE
+// ═══════════════════════════════════════════════════════════════════════════════
+const RemoteVideo = ({ peer, userId, myId, remoteMicOn, remoteCameraOn, refreshKey }) => {
+  const videoRef = useRef();
+  const [userData, setUserData] = useState(null);
 
-    useEffect(() => {
-        const el = videoRef.current;
-        if (el && el.srcObject && remoteCameraOn) {
-            console.log("[MEET] 🔄 Forcing srcObject refresh for:", userId);
-            const currentStream = el.srcObject;
-            el.srcObject = null;
-            el.srcObject = currentStream;
-            el.play().catch(() => {});
-        }
-    }, [refreshKey, userId, remoteCameraOn]);
+  // Refresh srcObject when screen share toggles
+  useEffect(() => {
+    const el = videoRef.current;
+    if (el && el.srcObject && remoteCameraOn) {
+      const currentStream = el.srcObject;
+      el.srcObject = null;
+      el.srcObject = currentStream;
+      el.play().catch(() => {});
+    }
+  }, [refreshKey, remoteCameraOn]);
 
-    useEffect(() => {
-        const handleStream = (stream) => {
-            // Safety check: Never play our own audio back to ourselves
-            const myId = String(me?.id || me?._id);
-            const uId = String(userId);
+  // Attach remote stream
+  useEffect(() => {
+    const handleStream = (remoteStream) => {
+      // Safety: never play our own audio back
+      if (String(userId) === String(myId)) {
+        if (videoRef.current) { videoRef.current.muted = true; videoRef.current.volume = 0; }
+        return;
+      }
 
-            if (uId === myId) {
-                console.warn("[MEET] 🛑 Preventing self-audio playback in RemoteVideo for:", uId);
-                if (videoRef.current) {
-                  videoRef.current.muted = true;
-                  videoRef.current.volume = 0;
-                }
-                return;
-            }
-            
-            console.log("[MEET] 🔊 Setting remote stream for user:", uId, "tracks:", stream.getTracks().map(t => `${t.kind}:${t.enabled}`));
-            
-            const audioTracks = stream.getAudioTracks();
-            setHasAudio(audioTracks.length > 0);
-            
-            if (videoRef.current) {
-                videoRef.current.srcObject = stream;
-                
-                // BELT AND SUSPENDERS: Ensure we are NOT playing our own stream
-                // We mute by default and only unmute if we are SURE it's a remote participant
-                videoRef.current.muted = false;
-                videoRef.current.volume = 1.0;
-                
-                const attemptPlay = () => {
-                    if (!videoRef.current) return;
-                    const playPromise = videoRef.current.play();
-                    if (playPromise !== undefined) {
-                      playPromise
-                        .then(() => console.log("[MEET] ✅ Remote video playing for:", uId))
-                        .catch(err => {
-                          console.warn("[MEET] ⚠️ Autoplay blocked for:", uId, err.name);
-                        });
-                    }
-                };
-                attemptPlay();
-            }
-        };
+      if (videoRef.current) {
+        videoRef.current.srcObject = remoteStream;
+        videoRef.current.muted = false;
+        videoRef.current.volume = 1.0;
+        videoRef.current.play().catch(() => {});
+      }
+    };
 
-        // If peer already has a stream, apply it immediately
-        if (peer.streams && peer.streams[0]) {
-            handleStream(peer.streams[0]);
-        }
+    // If peer already has a stream, apply immediately
+    if (peer.streams && peer.streams[0]) {
+      handleStream(peer.streams[0]);
+    }
+    peer.on("stream", handleStream);
 
-        peer.on("stream", handleStream);
+    // Fetch user metadata
+    if (userId && String(userId) !== String(myId)) {
+      usersApi.getById(String(userId))
+        .then(setUserData)
+        .catch(() => {});
+    }
 
-        // Fetch metadata with caching
-        const myId = String(me?.id || me?._id);
-        const uId = String(userId);
+    return () => { peer.off("stream", handleStream); };
+  }, [peer, userId, myId]);
 
-        if (uId && uId !== myId) {
-            usersApi.getById(uId)
-              .then(data => setUserData(data))
-              .catch(err => console.error("[MEET] Failed to fetch remote user metadata:", uId, err));
-        }
+  return (
+    <div className="relative w-full h-full min-h-0 bg-[#3c4043] rounded-xl overflow-hidden group">
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        className={`w-full h-full object-cover ${remoteCameraOn ? "" : "invisible"}`}
+      />
 
-        return () => {
-            peer.off("stream", handleStream);
-        };
-    }, [peer, userId, me]);
-
-    return (
-        <div className="relative w-full aspect-video bg-slate-900 rounded-[32px] overflow-hidden shadow-2xl group border-2 border-transparent hover:border-indigo-500/20 transition-all">
-            <video 
-                ref={videoRef} 
-                autoPlay 
-                playsInline 
-                className={`w-full h-full object-cover ${remoteCameraOn ? "" : "invisible"}`} 
-            />
-            
-            {!remoteCameraOn && (
-                <div className="absolute inset-0 flex items-center justify-center bg-slate-900">
-                    <div className="w-24 h-24 rounded-full bg-slate-800 text-slate-600 flex items-center justify-center text-4xl font-black">
-                        {userData?.name?.charAt(0) || "P"}
-                    </div>
-                </div>
-            )}
-
-            <div className="absolute bottom-6 left-6 flex items-center gap-2 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl text-xs font-bold text-white border border-white/10">
-                <span className={`w-1.5 h-1.5 rounded-full ${remoteCameraOn ? "bg-emerald-500" : "bg-slate-500"}`} />
-                {userData ? `${userData.name} (${userData.role?.replace("_", " ").toUpperCase()})` : "Participant"}
-                {remoteMicOn === false && <MicOff size={14} className="text-red-400 ml-1" />}
-            </div>
+      {!remoteCameraOn && (
+        <div className="absolute inset-0 flex items-center justify-center bg-[#3c4043]">
+          <div className="w-20 h-20 rounded-full bg-slate-700 text-gray-300 flex items-center justify-center text-3xl font-bold">
+            {userData?.name?.charAt(0) || "P"}
+          </div>
         </div>
-    );
+      )}
+
+      <div className="absolute bottom-3 left-3 flex items-center gap-2 bg-black/60 backdrop-blur-sm px-3 py-1.5 rounded-lg text-xs font-semibold text-white">
+        <span className={`w-1.5 h-1.5 rounded-full ${remoteCameraOn ? "bg-emerald-400" : "bg-gray-500"}`} />
+        {userData ? `${userData.name}` : "Participant"}
+        {remoteMicOn === false && <MicOff size={13} className="text-red-400 ml-1" />}
+      </div>
+    </div>
+  );
 };
 
 export default UnifiedMeetingRoom;

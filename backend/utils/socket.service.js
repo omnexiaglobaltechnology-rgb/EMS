@@ -64,6 +64,20 @@ const initSocket = (server) => {
       });
     });
 
+    socket.on("mic-toggle", (roomId, micOn) => {
+      socket.to(roomId).emit("remote-mic-toggle", {
+        socketId: socket.id,
+        micOn
+      });
+    });
+
+    socket.on("camera-toggle", (roomId, cameraOn) => {
+      socket.to(roomId).emit("remote-camera-toggle", {
+        socketId: socket.id,
+        cameraOn
+      });
+    });
+
     socket.on("send-chat-message", (roomId, message) => {
       // Broadcast to everyone in the room EXCEPT the sender
       socket.to(roomId).emit("chat-message", message);

@@ -160,6 +160,9 @@ const UnifiedMeetingRoom = () => {
         track.enabled = nextMicState;
       });
       setMicOn(nextMicState);
+      if (socketRef.current) {
+        socketRef.current.emit("mic-toggle", roomId, nextMicState);
+      }
     }
   };
 
@@ -170,6 +173,9 @@ const UnifiedMeetingRoom = () => {
         track.enabled = nextCameraState;
       });
       setCameraOn(nextCameraState);
+      if (socketRef.current) {
+        socketRef.current.emit("camera-toggle", roomId, nextCameraState);
+      }
     }
   };
 
@@ -285,6 +291,10 @@ const UnifiedMeetingRoom = () => {
     socketRef.current.on("connect", () => {
       console.log("[MEET] ✅ Socket connected:", socketRef.current.id);
       socketRef.current.emit("join-room", roomId, myId);
+      
+      // Broadcast initial state immediately after joining
+      socketRef.current.emit("mic-toggle", roomId, micOn);
+      socketRef.current.emit("camera-toggle", roomId, cameraOn);
     });
 
     socketRef.current.on("connect_error", (err) => {
@@ -304,9 +314,17 @@ const UnifiedMeetingRoom = () => {
       peersRef.current.push({
         peerID: socketId,
         peer,
-        userId: userId
+        userId: userId,
+        micOn: true,
+        cameraOn: true
       });
-      setPeers(prev => [...prev, { peerID: socketId, peer, userId }]);
+      setPeers(prev => [...prev, { peerID: socketId, peer, userId, micOn: true, cameraOn: true }]);
+      
+      // Also broadcast our own current state so the newcomer picks it up
+      if (socketRef.current) {
+        socketRef.current.emit("mic-toggle", roomId, micOn);
+        socketRef.current.emit("camera-toggle", roomId, cameraOn);
+      }
     });
 
     socketRef.current.on("signal", (payload) => {
@@ -325,11 +343,13 @@ const UnifiedMeetingRoom = () => {
         peersRef.current.push({
           peerID: payload.sender,
           peer,
-          userId: payload.userId
-        });
-        setPeers(prev => [...prev, { peerID: payload.sender, peer, userId: payload.userId }]);
-      }
-    });
+          userId: payload.userId,
+        micOn: true,
+        cameraOn: true
+      });
+      setPeers(prev => [...prev, { peerID: payload.sender, peer, userId: payload.userId, micOn: true, cameraOn: true }]);
+    }
+  });
 
     socketRef.current.on("chat-message", (message) => {
       setMessages(prev => [...prev, message]);
@@ -346,9 +366,15 @@ const UnifiedMeetingRoom = () => {
 
     socketRef.current.on("remote-screen-share-toggle", ({ socketId, isSharing }) => {
       console.log("[MEET] 🔄 Remote screen share toggle for:", socketId, "Sharing:", isSharing);
-      // We don't necessarily need to do much here if replaceTrack works,
-      // but we update the peer object state to trigger a re-render of the RemoteVideo component
       setPeers(prev => prev.map(p => p.peerID === socketId ? { ...p, refreshKey: Date.now() } : p));
+    });
+
+    socketRef.current.on("remote-mic-toggle", ({ socketId, micOn }) => {
+      setPeers(prev => prev.map(p => p.peerID === socketId ? { ...p, micOn } : p));
+    });
+
+    socketRef.current.on("remote-camera-toggle", ({ socketId, cameraOn }) => {
+      setPeers(prev => prev.map(p => p.peerID === socketId ? { ...p, cameraOn } : p));
     });
   };
 
@@ -594,7 +620,15 @@ const UnifiedMeetingRoom = () => {
 
                 {/* Remote Participants */}
                 {peers.map(p => (
-                    <RemoteVideo key={p.peerID} peer={p.peer} userId={p.userId} me={me} refreshKey={p.refreshKey} />
+                    <RemoteVideo 
+                      key={p.peerID} 
+                      peer={p.peer} 
+                      userId={p.userId} 
+                      me={me} 
+                      refreshKey={p.refreshKey}
+                      remoteMicOn={p.micOn}
+                      remoteCameraOn={p.cameraOn}
+                    />
                 ))}
             </div>
         </div>
@@ -799,21 +833,21 @@ const RemoteParticipantInfo = ({ userId }) => {
     );
 };
 
-const RemoteVideo = ({ peer, userId, me, refreshKey }) => {
+const RemoteVideo = ({ peer, userId, me, refreshKey, remoteMicOn, remoteCameraOn }) => {
     const videoRef = useRef();
     const [userData, setUserData] = useState(null);
     const [hasAudio, setHasAudio] = useState(false);
 
     useEffect(() => {
         const el = videoRef.current;
-        if (el && el.srcObject) {
+        if (el && el.srcObject && remoteCameraOn) {
             console.log("[MEET] 🔄 Forcing srcObject refresh for:", userId);
             const currentStream = el.srcObject;
             el.srcObject = null;
             el.srcObject = currentStream;
             el.play().catch(() => {});
         }
-    }, [refreshKey, userId]);
+    }, [refreshKey, userId, remoteCameraOn]);
 
     useEffect(() => {
         const handleStream = stream => {
@@ -882,11 +916,21 @@ const RemoteVideo = ({ peer, userId, me, refreshKey }) => {
                 ref={videoRef} 
                 autoPlay 
                 playsInline 
-                className="w-full h-full object-cover" 
+                className={`w-full h-full object-cover ${remoteCameraOn ? "" : "invisible"}`} 
             />
+            
+            {!remoteCameraOn && (
+                <div className="absolute inset-0 flex items-center justify-center bg-slate-900">
+                    <div className="w-24 h-24 rounded-full bg-slate-800 text-slate-600 flex items-center justify-center text-4xl font-black">
+                        {userData?.name?.charAt(0) || "P"}
+                    </div>
+                </div>
+            )}
+
             <div className="absolute bottom-6 left-6 flex items-center gap-2 bg-black/40 backdrop-blur-md px-4 py-2 rounded-xl text-xs font-bold text-white border border-white/10">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span className={`w-1.5 h-1.5 rounded-full ${remoteCameraOn ? "bg-emerald-500" : "bg-slate-500"}`} />
                 {userData ? `${userData.name} (${userData.role?.replace("_", " ").toUpperCase()})` : "Participant"}
+                {remoteMicOn === false && <MicOff size={14} className="text-red-400 ml-1" />}
             </div>
         </div>
     );

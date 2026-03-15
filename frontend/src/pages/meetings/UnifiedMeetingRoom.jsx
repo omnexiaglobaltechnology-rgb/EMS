@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import Peer from "simple-peer/simplepeer.min.js";
@@ -91,16 +91,49 @@ const UnifiedMeetingRoom = () => {
     };
   }, [roomId]);
 
-  // Ref callback for local video — forces mute at the DOM level
-  // React has a known bug where the `muted` JSX prop doesn't always apply
-  // See: https://github.com/facebook/react/issues/10389
-  const setLocalVideoRef = (el) => {
+  // videoElMounted is a counter that bumps every time the local <video> element
+  // mounts/unmounts. This lets the useEffect below react to the DOM element appearing.
+  const [videoElMounted, setVideoElMounted] = useState(0);
+
+  // useCallback keeps the ref callback stable across renders.
+  // When React attaches the element it calls this; we store it and bump the counter.
+  const setLocalVideoRef = useCallback((el) => {
     userVideoRef.current = el;
-    if (el) {
-      el.muted = true;
-      el.volume = 0;
-    }
-  };
+    // Bump counter so the mute-sync useEffect fires
+    setVideoElMounted(n => n + 1);
+  }, []);
+
+  // ─── THE KEY FIX ───────────────────────────────────────────────────────────
+  // Sync stream → local video element + guarantee mute WHENEVER either changes.
+  // requestMedia() is called before the <video> element exists, so we can't
+  // mute inside requestMedia. This effect runs every time stream or the video
+  // element changes, ensuring we never miss the window.
+  useEffect(() => {
+    const el = userVideoRef.current;
+    if (!el || !stream) return;
+
+    // Attach the FULL stream so the audio track is still available for WebRTC.
+    // The element being muted prevents local playback — the track itself is untouched.
+    el.srcObject = stream;
+    el.muted = true;   // property (reliable)
+    el.volume = 0;     // belt + suspenders
+
+    // Some browsers defer applying `muted` after srcObject is set — re-apply
+    const ensureMuted = () => {
+      if (el) { el.muted = true; el.volume = 0; }
+    };
+    // Re-check after play starts
+    el.addEventListener('play', ensureMuted, { once: true });
+    // And once more via timer as an absolute safety net
+    const t = setTimeout(ensureMuted, 500);
+
+    return () => {
+      el.removeEventListener('play', ensureMuted);
+      clearTimeout(t);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stream, videoElMounted]);
+  // ────────────────────────────────────────────────────────────────────────────
 
   const requestMedia = async (audio, video) => {
     try {
@@ -112,16 +145,9 @@ const UnifiedMeetingRoom = () => {
           autoGainControl: true
         } : false) : audio
       });
+      // setStream triggers the mute-sync useEffect above
       setStream(currentStream);
       streamRef.current = currentStream;
-      if (userVideoRef.current) {
-        // Attach the FULL stream (audio+video) to local video element
-        // Audio won't play because the element is muted via ref callback
-        // The audio track stays in the stream so it can be sent to peers
-        userVideoRef.current.srcObject = currentStream;
-        userVideoRef.current.muted = true;
-        userVideoRef.current.volume = 0;
-      }
       return currentStream;
     } catch (err) {
       console.error("[MEET] Media error", err);
@@ -228,14 +254,9 @@ const UnifiedMeetingRoom = () => {
     });
   };
 
-  // Re-apply local stream when joining (since video element is re-mounted)
-  useEffect(() => {
-    if (isJoined && streamRef.current && userVideoRef.current) {
-        userVideoRef.current.srcObject = streamRef.current;
-        userVideoRef.current.muted = true;
-        userVideoRef.current.volume = 0;
-    }
-  }, [isJoined]);
+  // When joining, the video element remounts into the meeting grid.
+  // setLocalVideoRef fires → bumps videoElMounted → mute-sync useEffect handles it.
+  // No manual re-application needed here.
 
   const createPeer = (userToSignal, callerID, stream) => {
     console.log("[MEET] Creating peer (initiator) for:", userToSignal, "with stream tracks:", stream.getTracks().map(t => t.kind + ':' + t.enabled));

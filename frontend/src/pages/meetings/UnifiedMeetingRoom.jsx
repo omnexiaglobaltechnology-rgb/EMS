@@ -142,14 +142,7 @@ const UnifiedMeetingRoom = () => {
         } : false) : audio
       });
 
-      // Ensure initial mute state is applied
-      if (!micOn) {
-        currentStream.getAudioTracks().forEach(track => track.enabled = false);
-      }
-      if (!cameraOn) {
-        currentStream.getVideoTracks().forEach(track => track.enabled = false);
-      }
-
+      console.log("[MEET] 🎥 requestMedia successful. micOn:", micOn, "cameraOn:", cameraOn, "tracks:", currentStream.getTracks().map(t => `${t.kind}:${t.enabled}`));
       setStream(currentStream);
       streamRef.current = currentStream;
       return currentStream;
@@ -436,14 +429,14 @@ const UnifiedMeetingRoom = () => {
                 </p>
                 <button
                   onClick={joinMeeting}
-                  disabled={!me || !meeting}
+                  disabled={!me || !meeting || !stream}
                   className={`w-full py-4 rounded-2xl font-bold text-lg transition-all shadow-xl active:scale-95 ${
-                    me && meeting 
+                    me && meeting && stream
                     ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-200" 
                     : "bg-slate-200 text-slate-400 cursor-not-allowed"
                   }`}
                 >
-                  {me ? "Join Meeting Room" : "Please Wait..."}
+                  {me ? (stream ? "Join Meeting Room" : "Initializing Camera...") : "Please Wait..."}
                 </button>
              </div>
              
@@ -503,7 +496,7 @@ const UnifiedMeetingRoom = () => {
 
                 {/* Remote Participants */}
                 {peers.map(p => (
-                    <RemoteVideo key={p.peerID} peer={p.peer} userId={p.userId} />
+                    <RemoteVideo key={p.peerID} peer={p.peer} userId={p.userId} me={me} />
                 ))}
             </div>
         </div>
@@ -704,7 +697,7 @@ const RemoteParticipantInfo = ({ userId }) => {
     );
 };
 
-const RemoteVideo = ({ peer, userId }) => {
+const RemoteVideo = ({ peer, userId, me }) => {
     const videoRef = useRef();
     const [userData, setUserData] = useState(null);
     const [hasAudio, setHasAudio] = useState(false);
@@ -712,7 +705,8 @@ const RemoteVideo = ({ peer, userId }) => {
     useEffect(() => {
         const handleStream = stream => {
             // Safety check: Never play our own audio back to ourselves
-            if (userId && (userId === (me?.id || me?._id))) {
+            const myId = me?.id || me?._id;
+            if (userId && myId && (userId === myId)) {
                 console.warn("[MEET] 🛑 Preventing self-audio playback in RemoteVideo for:", userId);
                 return;
             }

@@ -59,6 +59,9 @@ const UnifiedMeetingRoom = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
 
+  // Simple local cache for user metadata to avoid redundant API calls
+  const userMetadataCache = useRef({});
+
   // Refs
   const socketRef = useRef();
   const userVideoRef = useRef();
@@ -86,6 +89,17 @@ const UnifiedMeetingRoom = () => {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
       }
+      
+      // Cleanup all peers
+      peersRef.current.forEach(p => {
+        try {
+          p.peer.destroy();
+        } catch (err) {
+          console.error("[MEET] Error destroying peer on unmount:", err);
+        }
+      });
+      peersRef.current = [];
+
       if (socketRef.current) {
         socketRef.current.disconnect();
       }
@@ -192,10 +206,27 @@ const UnifiedMeetingRoom = () => {
         peersRef.current.forEach(({ peer, peerID }) => {
           if (videoTrack && screenTrack) {
             try {
+              // Try to replace track first
               peer.replaceTrack(videoTrack, screenTrack, streamRef.current);
               console.log("[MEET] ✅ Track replaced for peer:", peerID);
             } catch (pErr) {
               console.error("[MEET] ❌ replaceTrack failed for peer:", peerID, pErr);
+              // Fallback: If replaceTrack fails, we might need to remove and add
+              try {
+                peer.removeTrack(videoTrack, streamRef.current);
+                peer.addTrack(screenTrack, streamRef.current);
+                console.log("[MEET] 🔄 Fallback addTrack successful for peer:", peerID);
+              } catch (fErr) {
+                console.error("[MEET] ❌ Fallback track placement failed for peer:", peerID, fErr);
+              }
+            }
+          } else if (screenTrack) {
+            // If we didn't have a video track (camera was off), just add the screen track
+            try {
+              peer.addTrack(screenTrack, streamRef.current);
+              console.log("[MEET] ➕ Screen track added for peer (camera was off):", peerID);
+            } catch (aErr) {
+              console.error("[MEET] ❌ addTrack failed for peer:", peerID, aErr);
             }
           }
         });
@@ -240,12 +271,14 @@ const UnifiedMeetingRoom = () => {
 
     // Replace track back for all peers
     peersRef.current.forEach(({ peer, peerID }) => {
-      if (currentVideoTrack && cameraTrack) {
-        try {
+      try {
+        if (currentVideoTrack && cameraTrack) {
           peer.replaceTrack(currentVideoTrack, cameraTrack, streamRef.current);
-        } catch (pErr) {
-          console.error("[MEET] ❌ replaceTrack (revert) failed for peer:", peerID, pErr);
+        } else if (cameraTrack) {
+          peer.addTrack(cameraTrack, streamRef.current);
         }
+      } catch (pErr) {
+        console.error("[MEET] ❌ replace/add track (revert) failed for peer:", peerID, pErr);
       }
     });
 
@@ -275,6 +308,11 @@ const UnifiedMeetingRoom = () => {
 
     if (!streamRef.current) {
       console.error("[MEET] No media stream available! Cannot join without camera/mic.");
+      return;
+    }
+
+    if (socketRef.current) {
+      console.warn("[MEET] Socket already connected, skipping joinMeeting");
       return;
     }
 
@@ -311,14 +349,18 @@ const UnifiedMeetingRoom = () => {
       }
 
       const peer = createPeer(socketId, socketRef.current.id, streamRef.current);
-      peersRef.current.push({
+      
+      const newPeerObj = {
         peerID: socketId,
         peer,
         userId: userId,
-        micOn: true,
-        cameraOn: true
-      });
-      setPeers(prev => [...prev, { peerID: socketId, peer, userId, micOn: true, cameraOn: true }]);
+        micOn: true, // Will be updated by remote-mic-toggle broadcast
+        cameraOn: true,
+        refreshKey: Date.now()
+      };
+
+      peersRef.current.push(newPeerObj);
+      setPeers(prev => [...prev, newPeerObj]);
       
       // Also broadcast our own current state so the newcomer picks it up
       if (socketRef.current) {
@@ -340,16 +382,18 @@ const UnifiedMeetingRoom = () => {
       } else {
         console.log("[MEET] Creating new peer for incoming signal from:", payload.sender);
         const peer = addPeer(payload.signal, payload.sender, streamRef.current);
-        peersRef.current.push({
+        const newPeerObj = {
           peerID: payload.sender,
           peer,
           userId: payload.userId,
-        micOn: true,
-        cameraOn: true
-      });
-      setPeers(prev => [...prev, { peerID: payload.sender, peer, userId: payload.userId, micOn: true, cameraOn: true }]);
-    }
-  });
+          micOn: true,
+          cameraOn: true,
+          refreshKey: Date.now()
+        };
+        peersRef.current.push(newPeerObj);
+        setPeers(prev => [...prev, newPeerObj]);
+      }
+    });
 
     socketRef.current.on("chat-message", (message) => {
       setMessages(prev => [...prev, message]);
@@ -358,10 +402,15 @@ const UnifiedMeetingRoom = () => {
     socketRef.current.on("user-disconnected", (socketId) => {
       console.log("[MEET] 👤 User disconnected:", socketId);
       const peerObj = peersRef.current.find(p => p.peerID === socketId);
-      if (peerObj) peerObj.peer.destroy();
-      const remainingPeers = peersRef.current.filter(p => p.peerID !== socketId);
-      peersRef.current = remainingPeers;
-      setPeers(remainingPeers);
+      if (peerObj) {
+        try {
+          peerObj.peer.destroy();
+        } catch (err) {
+          console.error("[MEET] Error destroying peer:", err);
+        }
+      }
+      peersRef.current = peersRef.current.filter(p => p.peerID !== socketId);
+      setPeers(prev => prev.filter(p => p.peerID !== socketId));
     });
 
     socketRef.current.on("remote-screen-share-toggle", ({ socketId, isSharing }) => {
@@ -456,11 +505,23 @@ const UnifiedMeetingRoom = () => {
       socketRef.current.emit("leave-room", roomId);
       socketRef.current.disconnect();
     }
+    
+    // Cleanup all peers
+    peersRef.current.forEach(p => {
+      try {
+        p.peer.destroy();
+      } catch (err) {
+        console.error("[MEET] Error destroying peer on leave:", err);
+      }
+    });
+    peersRef.current = [];
+    setPeers([]);
+
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
-      if (stream._rawStream) {
-        stream._rawStream.getTracks().forEach(track => track.stop());
-      }
+    }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
     }
     navigate(-1);
   };
@@ -555,12 +616,12 @@ const UnifiedMeetingRoom = () => {
                   onClick={joinMeeting}
                   disabled={!me || !meeting || !stream}
                   className={`w-full py-4 rounded-2xl font-bold text-lg transition-all shadow-xl active:scale-95 ${
-                    me && meeting && stream
+                    me && meeting && (stream || !cameraOn)
                     ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-200" 
                     : "bg-slate-200 text-slate-400 cursor-not-allowed"
                   }`}
                 >
-                  {me ? (stream ? "Join Meeting Room" : "Initializing Camera...") : "Please Wait..."}
+                  {me ? (stream ? "Join Meeting Room" : (cameraOn ? "Initializing Camera..." : "Join Without Media")) : "Please Wait..."}
                 </button>
              </div>
              
@@ -729,7 +790,7 @@ const UnifiedMeetingRoom = () => {
                            </div>
                            <div className="space-y-3">
                                {peers.map(p => (
-                                  <RemoteParticipantInfo key={p.peerID} userId={p.userId} />
+                                  <RemoteParticipantInfo key={p.peerID} userId={p.userId} cache={userMetadataCache} />
                                 ))}
                            </div>
                         </div>
@@ -811,14 +872,30 @@ const UnifiedMeetingRoom = () => {
   );
 };
 
-const RemoteParticipantInfo = ({ userId }) => {
+const RemoteParticipantInfo = ({ userId, cache }) => {
     const [userData, setUserData] = useState(null);
 
     useEffect(() => {
-        if (userId) {
-            usersApi.getById(userId).then(data => setUserData(data)).catch(() => {});
+        if (!userId) return;
+        
+        // Check cache first
+        if (cache && cache.current[userId]) {
+            setUserData(cache.current[userId]);
+            return;
         }
-    }, [userId]);
+
+        const fetchUser = async () => {
+            try {
+                const data = await usersApi.getById(userId);
+                setUserData(data);
+                if (cache) cache.current[userId] = data;
+            } catch (err) {
+                console.error("[MEET] Failed to fetch user data for sidebar:", userId, err);
+            }
+        };
+
+        fetchUser();
+    }, [userId, cache]);
 
     return (
         <div className="flex items-center gap-3 p-3 bg-slate-50 rounded-2xl border border-slate-100">
@@ -850,7 +927,7 @@ const RemoteVideo = ({ peer, userId, me, refreshKey, remoteMicOn, remoteCameraOn
     }, [refreshKey, userId, remoteCameraOn]);
 
     useEffect(() => {
-        const handleStream = stream => {
+        const handleStream = (stream) => {
             // Safety check: Never play our own audio back to ourselves
             const myId = me?.id || me?._id;
             if (userId && myId && (userId === myId)) {
@@ -862,31 +939,21 @@ const RemoteVideo = ({ peer, userId, me, refreshKey, remoteMicOn, remoteCameraOn
             
             const audioTracks = stream.getAudioTracks();
             setHasAudio(audioTracks.length > 0);
-            console.log("[MEET] Remote audio tracks:", audioTracks.length, audioTracks.map(t => `enabled:${t.enabled}, muted:${t.muted}, readyState:${t.readyState}`));
             
             if (videoRef.current) {
-                // Assign the FULL stream (audio + video) to the remote video element
                 videoRef.current.srcObject = stream;
                 videoRef.current.volume = 1.0;
-                videoRef.current.muted = false; // Explicitly ensure remote video is NOT muted
+                videoRef.current.muted = false;
                 
-                // Explicitly attempt playback to handle browser autoplay policies
                 const attemptPlay = () => {
                     if (!videoRef.current) return;
                     const playPromise = videoRef.current.play();
                     if (playPromise !== undefined) {
-                        playPromise
-                            .then(() => console.log("[MEET] ✅ Remote video playing with audio for:", userId))
-                            .catch(err => {
-                                console.warn("[MEET] ⚠️ Autoplay blocked, retrying in 500ms...", err.name);
-                                setTimeout(() => {
-                                    if (videoRef.current) {
-                                        videoRef.current.play()
-                                            .then(() => console.log("[MEET] ✅ Remote video playing on retry"))
-                                            .catch(e => console.error("[MEET] ❌ Remote play failed after retry:", e.name));
-                                    }
-                                }, 500);
-                            });
+                      playPromise
+                        .then(() => console.log("[MEET] ✅ Remote video playing for:", userId))
+                        .catch(err => {
+                          console.warn("[MEET] ⚠️ Autoplay blocked for:", userId, err.name);
+                        });
                     }
                 };
                 attemptPlay();
@@ -900,15 +967,18 @@ const RemoteVideo = ({ peer, userId, me, refreshKey, remoteMicOn, remoteCameraOn
 
         peer.on("stream", handleStream);
 
-        // Try to fetch metadata
-        if (userId) {
-            usersApi.getById(userId).then(data => setUserData(data)).catch(() => {});
+        // Fetch metadata with caching
+        const myId = me?.id || me?._id;
+        if (userId && userId !== myId) {
+            usersApi.getById(userId)
+              .then(data => setUserData(data))
+              .catch(err => console.error("[MEET] Failed to fetch remote user metadata:", userId, err));
         }
 
         return () => {
             peer.off("stream", handleStream);
         };
-    }, [peer, userId]);
+    }, [peer, userId, me]);
 
     return (
         <div className="relative w-full aspect-video bg-slate-900 rounded-[32px] overflow-hidden shadow-2xl group border-2 border-transparent hover:border-indigo-500/20 transition-all">

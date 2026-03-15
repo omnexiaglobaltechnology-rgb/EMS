@@ -103,34 +103,30 @@ const UnifiedMeetingRoom = () => {
     setVideoElMounted(n => n + 1);
   }, []);
 
-  // ─── THE KEY FIX ───────────────────────────────────────────────────────────
-  // Sync stream → local video element + guarantee mute WHENEVER either changes.
-  // requestMedia() is called before the <video> element exists, so we can't
-  // mute inside requestMedia. This effect runs every time stream or the video
-  // element changes, ensuring we never miss the window.
+  // ─── DEFINITIVE ECHO FIX ───────────────────────────────────────────────────
+  // Give the local <video> element a VIDEO-ONLY MediaStream (zero audio tracks).
+  // It is physically impossible to play back audio that doesn't exist in the stream.
+  // Previous mute/volume=0 approaches failed because browsers and React can
+  // un-mute elements during re-renders or autoPlay. This approach needs no muting.
+  //
+  // The FULL stream (audio + video) stays in streamRef.current and is passed to
+  // WebRTC peers — so remote participants still hear you normally.
   useEffect(() => {
     const el = userVideoRef.current;
     if (!el || !stream) return;
 
-    // Attach the FULL stream so the audio track is still available for WebRTC.
-    // The element being muted prevents local playback — the track itself is untouched.
-    el.srcObject = stream;
-    el.muted = true;   // property (reliable)
-    el.volume = 0;     // belt + suspenders
+    // Create a preview stream with ONLY the video track(s) — no audio at all
+    const videoOnlyStream = new MediaStream(stream.getVideoTracks());
+    el.srcObject = videoOnlyStream;
+    // Still mark muted as belt-and-suspenders, but the zero-audio-track
+    // approach is what actually makes this bulletproof
+    el.muted = true;
+    el.volume = 0;
 
-    // Some browsers defer applying `muted` after srcObject is set — re-apply
-    const ensureMuted = () => {
-      if (el) { el.muted = true; el.volume = 0; }
-    };
-    // Re-check after play starts
-    el.addEventListener('play', ensureMuted, { once: true });
-    // And once more via timer as an absolute safety net
-    const t = setTimeout(ensureMuted, 500);
-
-    return () => {
-      el.removeEventListener('play', ensureMuted);
-      clearTimeout(t);
-    };
+    console.log(
+      '[MEET] Local preview: video-only stream, tracks:',
+      videoOnlyStream.getTracks().map(t => t.kind)
+    );
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [stream, videoElMounted]);
   // ────────────────────────────────────────────────────────────────────────────

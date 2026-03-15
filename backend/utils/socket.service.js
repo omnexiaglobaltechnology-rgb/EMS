@@ -52,12 +52,18 @@ const initSocket = (server) => {
     });
 
     socket.on("send-chat-message", (roomId, message) => {
-      io.to(roomId).emit("chat-message", message);
+      // Broadcast to everyone in the room EXCEPT the sender
+      socket.to(roomId).emit("chat-message", message);
+      // Also send to sender so they see their own message
+      socket.emit("chat-message", message);
     });
 
     socket.on("disconnect", () => {
       console.log("Client disconnected:", socket.id);
-      io.emit("user-disconnected", socket.id);
+      // Notify only rooms this socket was part of (not ALL sockets globally)
+      socket.rooms.forEach(roomId => {
+        socket.to(roomId).emit("user-disconnected", socket.id);
+      });
     });
   });
 

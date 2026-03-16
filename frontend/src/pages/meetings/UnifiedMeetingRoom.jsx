@@ -582,12 +582,12 @@ const UnifiedMeetingRoom = () => {
   // ═══════════════════════════════════════════════════════════════════════
   if (!isJoined) {
     return (
-      <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-4">
-        <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center bg-white p-6 sm:p-8 lg:p-12 rounded-3xl lg:rounded-[48px] shadow-2xl shadow-indigo-100/50 border border-slate-100">
+      <div className="min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
+        <div className="max-w-5xl w-full grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center glass-dark p-6 sm:p-8 lg:p-12 rounded-3xl lg:rounded-[3rem] shadow-2xl border border-white/30 relative z-10">
           <div className="space-y-6 lg:space-y-8">
             <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 leading-tight">Ready to join?</h1>
-              <p className="mt-2 text-slate-500 font-medium text-sm sm:text-base">{meeting?.title || "EMS Meeting Room"}</p>
+              <h1 className="text-2xl sm:text-3xl lg:text-5xl font-black text-white leading-tight tracking-tighter uppercase">Ready to <span className="text-[#00d4ff] blue-glow">Join?</span></h1>
+              <p className="mt-2 text-white/40 font-bold uppercase tracking-widest text-xs">{meeting?.title || "EMS Meeting Room"}</p>
             </div>
 
             <div className="relative group aspect-video bg-slate-900 rounded-2xl lg:rounded-3xl overflow-hidden shadow-2xl ring-4 lg:ring-8 ring-slate-50">
@@ -606,10 +606,10 @@ const UnifiedMeetingRoom = () => {
                 </div>
               )}
               <div className="absolute bottom-4 sm:bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-3 sm:gap-4">
-                <button onClick={toggleMic} className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl transition-all shadow-xl ${micOn ? "bg-white/10 backdrop-blur-md text-white hover:bg-white/20" : "bg-red-500 text-white hover:bg-red-600"}`}>
+                <button onClick={toggleMic} className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl transition-all shadow-xl backdrop-blur-3xl ${micOn ? "bg-white/10 text-white hover:bg-white/20 border border-white/20" : "bg-red-500/50 text-white hover:bg-red-600/50 border border-red-500/30"}`}>
                   {micOn ? <Mic size={20} /> : <MicOff size={20} />}
                 </button>
-                <button onClick={toggleCamera} className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl transition-all shadow-xl ${cameraOn ? "bg-white/10 backdrop-blur-md text-white hover:bg-white/20" : "bg-red-500 text-white hover:bg-red-600"}`}>
+                <button onClick={toggleCamera} className={`p-3 sm:p-4 rounded-xl sm:rounded-2xl transition-all shadow-xl backdrop-blur-3xl ${cameraOn ? "bg-white/10 text-white hover:bg-white/20 border border-white/20" : "bg-red-500/50 text-white hover:bg-red-600/50 border border-red-500/30"}`}>
                   {cameraOn ? <Video size={20} /> : <VideoOff size={20} />}
                 </button>
               </div>
@@ -617,28 +617,24 @@ const UnifiedMeetingRoom = () => {
           </div>
 
           <div className="flex flex-col gap-6 lg:gap-8">
-            <div className="p-6 lg:p-8 bg-slate-50 rounded-2xl lg:rounded-[32px] border border-slate-100 space-y-4 text-center lg:text-left">
+            <div className="p-6 lg:p-8 bg-white/5 rounded-2xl lg:rounded-[2rem] border border-white/10 space-y-6 text-center lg:text-left backdrop-blur-xl">
               <div className="flex -space-x-3 justify-center lg:justify-start">
-                {[1, 2, 3].map((i) => <div key={i} className="w-10 h-10 rounded-full bg-indigo-100 border-4 border-white" />)}
+                {[1, 2, 3].map((i) => <div key={i} className="w-10 h-10 rounded-full bg-blue-500/20 border-2 border-white/30" />)}
               </div>
-              <p className="text-slate-600 font-medium text-sm sm:text-base">
-                {me ? "Some other team members are already here" : "Loading your profile..."}
+              <p className="text-white/60 font-medium text-sm sm:text-base italic">
+                {me ? "Team members are waiting for your entry..." : "Syncing credentials..."}
               </p>
               <button
                 onClick={joinMeeting}
                 disabled={!me || !meeting || !stream}
-                className={`w-full py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg transition-all shadow-xl active:scale-95 ${
-                  me && meeting && stream
-                    ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-200"
-                    : "bg-slate-200 text-slate-400 cursor-not-allowed"
-                }`}
+                className={`w-full py-3 sm:py-5 rounded-xl sm:rounded-2xl font-black text-xs uppercase tracking-[0.2em] transition-all blue-button active:scale-95 disabled:opacity-50`}
               >
-                {me ? (stream ? "Join Meeting Room" : "Initializing Camera...") : "Please Wait..."}
+                {me ? (stream ? "Authorize Entry" : "Initializing Link...") : "Please Wait..."}
               </button>
             </div>
-            <div className="flex items-center gap-2 text-slate-400 justify-center lg:justify-start">
-              <Check size={16} className="text-emerald-500" />
-              <span className="text-sm font-semibold">Automatic HD Quality Enabled</span>
+            <div className="flex items-center gap-2 text-white/30 justify-center lg:justify-start">
+              <Check size={16} className="text-[#00d4ff] blue-glow" />
+              <span className="text-[10px] font-black uppercase tracking-widest">Neural Encryption Active</span>
             </div>
           </div>
         </div>
@@ -708,25 +704,25 @@ const UnifiedMeetingRoom = () => {
   };
 
   return (
-    <div className="h-dvh bg-[#202124] flex flex-col sm:flex-row overflow-hidden">
+    <div className="h-dvh flex flex-col sm:flex-row overflow-hidden relative">
       {/* Main Content */}
       <div className="flex-1 flex flex-col relative h-full min-w-0">
         {/* Top Bar */}
-        <div className="px-3 py-2 sm:p-4 flex justify-between items-center z-20 bg-[#202124] shrink-0">
-          <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2 sm:py-2.5 rounded-full bg-[#303134] min-w-0">
-            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0" />
-            <span className="font-semibold text-white text-xs sm:text-sm truncate">{meeting?.title}</span>
-            <span className="text-gray-500 mx-0.5 sm:mx-1 hidden sm:inline">|</span>
-            <span className="text-gray-400 font-medium text-[10px] sm:text-xs tracking-tight hidden sm:inline">
+        <div className="px-3 py-2 sm:p-6 flex justify-between items-center z-20 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-4 px-4 sm:px-6 py-2 sm:py-3 rounded-2xl glass-dark border border-white/10 min-w-0">
+            <div className="w-2 h-2 rounded-full bg-[#00d4ff] blue-glow animate-pulse shrink-0" />
+            <span className="font-black text-white text-[10px] sm:text-xs uppercase tracking-widest truncate">{meeting?.title}</span>
+            <span className="text-white/20 mx-1 hidden sm:inline">|</span>
+            <span className="text-white/40 font-black text-[10px] tracking-widest hidden sm:inline">
               {new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
             </span>
           </div>
 
-          <div className="flex gap-1.5 sm:gap-2 shrink-0">
-            <button onClick={() => { setIsSidebarOpen(true); setActiveTab("people"); }} className="p-2 sm:p-2.5 rounded-full bg-[#303134] text-gray-300 hover:bg-[#3c4043] transition-all">
+          <div className="flex gap-2 shrink-0">
+            <button onClick={() => { setIsSidebarOpen(true); setActiveTab("people"); }} className="p-3 rounded-2xl glass-dark text-[#00d4ff] hover:bg-white/10 transition-all border border-white/10 blue-glow shadow-lg shadow-blue-500/10">
               <Users size={18} />
             </button>
-            <button onClick={() => { setIsSidebarOpen(true); setActiveTab("chat"); }} className="p-2 sm:p-2.5 rounded-full bg-[#303134] text-gray-300 hover:bg-[#3c4043] transition-all">
+            <button onClick={() => { setIsSidebarOpen(true); setActiveTab("chat"); }} className="p-3 rounded-2xl glass-dark text-[#00d4ff] hover:bg-white/10 transition-all border border-white/10 blue-glow shadow-lg shadow-blue-500/10">
               <MessageSquare size={18} />
             </button>
           </div>
@@ -767,20 +763,20 @@ const UnifiedMeetingRoom = () => {
         </div>
 
         {/* Bottom Controls Bar */}
-        <div className="flex justify-center pb-3 sm:pb-6 pt-1 sm:pt-2 z-20 bg-[#202124] shrink-0">
-          <div className="flex items-center gap-2 sm:gap-4 px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-[#303134]">
-            <button onClick={toggleMic} className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all ${micOn ? "bg-[#3c4043] text-white hover:bg-[#4a4d51]" : "bg-red-500 text-white hover:bg-red-600"}`} title={micOn ? "Mute" : "Unmute"}>
-              {micOn ? <Mic size={18} /> : <MicOff size={18} />}
+        <div className="flex justify-center pb-6 sm:pb-8 pt-2 sm:pt-4 z-20 shrink-0">
+          <div className="flex items-center gap-2 sm:gap-4 px-6 sm:px-8 py-3 sm:py-4 rounded-3xl glass-dark border border-white/20 shadow-2xl">
+            <button onClick={toggleMic} className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${micOn ? "bg-white/5 text-white hover:bg-white/10 border border-white/10" : "bg-red-500/50 text-white hover:bg-red-600/50 border border-red-500/30"}`} title={micOn ? "Mute" : "Unmute"}>
+              {micOn ? <Mic size={20} /> : <MicOff size={20} />}
             </button>
-            <button onClick={toggleCamera} className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all ${cameraOn ? "bg-[#3c4043] text-white hover:bg-[#4a4d51]" : "bg-red-500 text-white hover:bg-red-600"}`} title={cameraOn ? "Turn off camera" : "Turn on camera"}>
-              {cameraOn ? <Video size={18} /> : <VideoOff size={18} />}
+            <button onClick={toggleCamera} className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${cameraOn ? "bg-white/5 text-white hover:bg-white/10 border border-white/10" : "bg-red-500/50 text-white hover:bg-red-600/50 border border-red-500/30"}`} title={cameraOn ? "Turn off camera" : "Turn on camera"}>
+              {cameraOn ? <Video size={20} /> : <VideoOff size={20} />}
             </button>
-            <button onClick={toggleScreenShare} className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center transition-all ${isScreenSharing ? "bg-indigo-600 text-white" : "bg-[#3c4043] text-white hover:bg-[#4a4d51]"}`} title={isScreenSharing ? "Stop sharing" : "Share screen"}>
-              <ScreenShare size={18} />
+            <button onClick={toggleScreenShare} className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-all ${isScreenSharing ? "bg-[#00d4ff]/20 text-[#00d4ff] blue-glow border border-[#00d4ff]/30 shadow-lg shadow-blue-500/20" : "bg-white/5 text-white hover:bg-white/10 border border-white/10"}`} title={isScreenSharing ? "Stop sharing" : "Share screen"}>
+              <ScreenShare size={20} />
             </button>
             <div className="w-px h-6 sm:h-8 bg-gray-600 mx-0.5 sm:mx-1" />
-            <button onClick={leaveMeeting} className="px-4 sm:px-6 h-10 sm:h-12 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center transition-all font-semibold gap-2">
-              <PhoneOff size={18} />
+            <button onClick={leaveMeeting} className="px-8 h-12 bg-red-500/80 hover:bg-red-600 text-white rounded-2xl flex items-center justify-center transition-all font-black text-[10px] uppercase tracking-[0.2em] gap-3 shadow-lg shadow-red-500/20 active:scale-95">
+              <PhoneOff size={18} /> Terminate
             </button>
           </div>
         </div>
@@ -788,19 +784,19 @@ const UnifiedMeetingRoom = () => {
 
       {/* Sidebar */}
       {isSidebarOpen && (
-        <div className="fixed inset-0 sm:static sm:w-[360px] border-l border-[#3c4043] flex flex-col bg-[#202124] z-30 sm:z-auto h-full">
-          <div className="p-3 sm:p-4 border-b border-[#3c4043] flex items-center justify-between">
-            <div className="flex gap-4">
-              <button onClick={() => setActiveTab("chat")} className={`pb-1 text-sm font-semibold transition-all relative ${activeTab === "chat" ? "text-indigo-400" : "text-gray-500 hover:text-gray-300"}`}>
+        <div className="fixed inset-0 sm:static sm:w-[380px] border-l border-white/10 flex flex-col glass-dark backdrop-blur-3xl z-30 sm:z-auto h-full shadow-2xl">
+          <div className="p-6 border-b border-white/10 flex items-center justify-between">
+            <div className="flex gap-6">
+              <button onClick={() => setActiveTab("chat")} className={`pb-2 text-[10px] font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === "chat" ? "text-[#00d4ff] blue-glow" : "text-white/40 hover:text-white"}`}>
                 Chat
-                {activeTab === "chat" && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-400 rounded-full" />}
+                {activeTab === "chat" && <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-[#00d4ff] rounded-full shadow-[0_0_10px_rgba(0,212,255,1)]" />}
               </button>
-              <button onClick={() => setActiveTab("people")} className={`pb-1 text-sm font-semibold transition-all relative ${activeTab === "people" ? "text-indigo-400" : "text-gray-500 hover:text-gray-300"}`}>
-                People ({totalParticipants})
-                {activeTab === "people" && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-400 rounded-full" />}
+              <button onClick={() => setActiveTab("people")} className={`pb-2 text-[10px] font-black uppercase tracking-[0.2em] transition-all relative ${activeTab === "people" ? "text-[#00d4ff] blue-glow" : "text-white/40 hover:text-white"}`}>
+                Fleet ({totalParticipants})
+                {activeTab === "people" && <div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-[#00d4ff] rounded-full shadow-[0_0_10px_rgba(0,212,255,1)]" />}
               </button>
             </div>
-            <button onClick={() => setIsSidebarOpen(false)} className="p-2 hover:bg-[#3c4043] rounded-full transition-all text-gray-400">
+            <button onClick={() => setIsSidebarOpen(false)} className="p-2 hover:bg-white/10 rounded-xl transition-all text-white/40 hover:text-white">
               <X size={18} />
             </button>
           </div>
@@ -811,21 +807,21 @@ const UnifiedMeetingRoom = () => {
                 {messages.map((m, i) => (
                   <div key={i} className="space-y-1">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-bold text-white">{m.sender}</span>
-                      <span className="text-[10px] text-gray-500">{m.time}</span>
+                      <span className="text-[10px] font-black uppercase tracking-widest text-[#00d4ff] blue-glow">{m.sender}</span>
+                      <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">{m.time}</span>
                     </div>
-                    <div className="bg-[#303134] p-3 rounded-xl rounded-tl-none text-gray-300 text-sm leading-relaxed">{m.text}</div>
+                    <div className="bg-white/5 border border-white/10 p-3 rounded-2xl rounded-tl-none text-white/80 text-xs leading-relaxed backdrop-blur-md">{m.text}</div>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="p-3 sm:p-4 space-y-3">
-                <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">In this meeting</div>
-                <div className="flex items-center gap-3 p-3 bg-[#303134] rounded-xl">
-                  <div className="w-9 h-9 rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">{me?.name?.charAt(0)}</div>
+                <div className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] mb-4">Neural Fleet Connectivity</div>
+                <div className="flex items-center gap-4 p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#00d4ff] to-blue-600 text-[10px] font-black uppercase text-white shadow-lg shadow-blue-500/20">{me?.name?.charAt(0)}</div>
                   <div>
-                    <p className="text-sm font-semibold text-white">{me?.name} (You)</p>
-                    <p className="text-[10px] font-semibold text-indigo-400 uppercase">{me?.role?.replace("_", " ")}</p>
+                    <p className="text-xs font-black uppercase tracking-tighter text-white">{me?.name} (You)</p>
+                    <p className="text-[9px] font-black text-[#00d4ff] uppercase tracking-widest blue-glow mt-0.5">{me?.role?.replace("_", " ")}</p>
                   </div>
                 </div>
                 {peers.map((p) => (
@@ -833,13 +829,13 @@ const UnifiedMeetingRoom = () => {
                 ))}
 
                 {(me?.id === meeting?.creatorId?.id || me?.role === "ceo") && (
-                  <div className="pt-6 border-t border-[#3c4043] mt-4 space-y-3">
-                    <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest flex items-center gap-2">
-                      <UserPlus size={10} /> Invite Team Members
+                  <div className="pt-6 border-t border-white/10 mt-6 space-y-4">
+                    <div className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em] flex items-center gap-2">
+                      <UserPlus size={12} className="text-[#00d4ff]" /> Expand Network
                     </div>
-                    <div className="relative">
-                      <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                      <input type="text" placeholder="Search by name or email..." value={userSearch} onChange={(e) => handleSearchUsers(e.target.value)} className="w-full bg-[#303134] border border-[#3c4043] rounded-xl pl-9 pr-4 py-2.5 text-xs outline-none text-white placeholder-gray-500 focus:border-indigo-500 transition-all font-medium" />
+                    <div className="relative group">
+                      <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-[#00d4ff] transition-colors" />
+                      <input type="text" placeholder="Search by name or identity..." value={userSearch} onChange={(e) => handleSearchUsers(e.target.value)} className="w-full bg-white/5 border border-white/10 rounded-2xl pl-10 pr-4 py-3 text-[10px] uppercase font-black tracking-widest outline-none text-white placeholder:text-white/20 focus:border-[#00d4ff] focus:ring-1 focus:ring-[#00d4ff]/20 transition-all" />
                     </div>
                     <div className="space-y-2 max-h-48 overflow-y-auto">
                       {isSearching ? (
@@ -869,10 +865,10 @@ const UnifiedMeetingRoom = () => {
           </div>
 
           {activeTab === "chat" && (
-            <div className="p-3 sm:p-4 border-t border-[#3c4043]">
+            <div className="p-4 border-t border-white/10">
               <div className="relative">
-                <textarea placeholder="Send a message to everyone" value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), sendMessage())} className="w-full bg-[#303134] border border-[#3c4043] rounded-xl px-4 py-3 text-sm outline-none text-white placeholder-gray-500 focus:border-indigo-500 transition-all resize-none h-16 sm:h-20" />
-                <button onClick={sendMessage} className="absolute bottom-3 right-3 p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all active:scale-95">
+                <textarea placeholder="Transmit message to all peers..." value={chatInput} onChange={(e) => setChatInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), sendMessage())} className="w-full bg-white/5 border border-white/10 rounded-2xl px-5 py-4 text-xs font-bold outline-none text-white placeholder:text-white/20 focus:border-[#00d4ff] transition-all resize-none h-24 custom-scrollbar" />
+                <button onClick={sendMessage} className="absolute bottom-4 right-4 p-2.5 bg-[#00d4ff]/20 text-[#00d4ff] rounded-xl hover:bg-[#00d4ff]/30 transition-all blue-glow border border-[#00d4ff]/20 active:scale-95 shadow-lg shadow-blue-500/10">
                   <Send size={16} />
                 </button>
               </div>
@@ -889,7 +885,7 @@ const UnifiedMeetingRoom = () => {
 // ═══════════════════════════════════════════════════════════════════════════════
 const LocalVideoTile = ({ videoRef, cameraOn, micOn, name, isPinned, isSpotlight, onPin, isScreenSharing }) => {
   return (
-    <div className={`relative w-full h-full min-h-[100px] bg-[#3c4043] rounded-lg sm:rounded-xl overflow-hidden group ${isPinned ? "ring-2 ring-indigo-500" : ""}`}>
+    <div className={`relative w-full h-full min-h-[100px] bg-slate-900/40 rounded-2xl overflow-hidden group border border-white/10 transition-all duration-500 ${isPinned ? "ring-2 ring-[#00d4ff] shadow-[0_0_30px_rgba(0,212,255,0.3)]" : ""}`}>
       <video
         ref={videoRef}
         autoPlay
@@ -898,17 +894,17 @@ const LocalVideoTile = ({ videoRef, cameraOn, micOn, name, isPinned, isSpotlight
         className={`w-full h-full object-cover ${isScreenSharing ? "" : "mirror"} ${cameraOn || isScreenSharing ? "" : "invisible"}`}
       />
       {!cameraOn && !isScreenSharing && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[#3c4043]">
-          <div className={`rounded-full bg-indigo-600 text-white flex items-center justify-center font-bold ${isSpotlight ? "w-24 h-24 text-4xl" : "w-14 h-14 sm:w-20 sm:h-20 text-xl sm:text-3xl"}`}>
+        <div className="absolute inset-0 flex items-center justify-center bg-[#020617]/80 backdrop-blur-3xl">
+          <div className={`rounded-xl bg-gradient-to-br from-[#00d4ff] to-blue-600 text-white flex items-center justify-center font-black shadow-2xl shadow-blue-500/20 ${isSpotlight ? "w-24 h-24 text-4xl" : "w-14 h-14 sm:w-20 sm:h-20 text-xl sm:text-3xl"}`}>
             {name?.charAt(0)}
           </div>
         </div>
       )}
       {/* Name badge */}
-      <div className="absolute bottom-2 sm:bottom-3 left-2 sm:left-3 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-semibold text-white">
-        {isScreenSharing && <ScreenShare size={11} className="text-indigo-400" />}
+      <div className="absolute bottom-3 left-3 flex items-center gap-2 bg-slate-900/60 backdrop-blur-xl px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-white border border-white/10">
+        {isScreenSharing && <ScreenShare size={12} className="text-[#00d4ff] blue-glow" />}
         {name} (You)
-        {!micOn && <MicOff size={11} className="text-red-400" />}
+        {!micOn && <MicOff size={12} className="text-red-400" />}
       </div>
       {/* Pin button — visible on hover */}
       <button
@@ -936,11 +932,11 @@ const RemoteParticipantInfo = ({ userId }) => {
   }, [userId]);
 
   return (
-    <div className="flex items-center gap-3 p-3 bg-[#303134] rounded-xl">
-      <div className="w-9 h-9 rounded-full bg-[#3c4043] text-gray-300 flex items-center justify-center font-bold text-xs">{userData?.name?.charAt(0) || "?"}</div>
+    <div className="flex items-center gap-4 p-4 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-md">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/10 border border-white/10 text-white/40 flex items-center justify-center font-black text-[10px]">{userData?.name?.charAt(0) || "?"}</div>
       <div>
-        <p className="text-sm font-semibold text-white">{userData?.name || "Loading..."}</p>
-        <p className="text-[10px] font-semibold text-gray-500 uppercase">{userData?.role?.replace("_", " ") || "PARTICIPANT"}</p>
+        <p className="text-xs font-black uppercase tracking-tighter text-white">{userData?.name || "Loading..."}</p>
+        <p className="text-[9px] font-black text-white/40 uppercase tracking-widest mt-0.5">{userData?.role?.replace("_", " ") || "PARTICIPANT"}</p>
       </div>
     </div>
   );
@@ -1022,27 +1018,27 @@ const RemoteVideo = ({ peer, userId, myId, remoteMicOn, remoteCameraOn, refreshK
       />
 
       {(!remoteCameraOn || !hasStream) && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[#3c4043]">
-          <div className={`rounded-full bg-slate-700 text-gray-300 flex items-center justify-center font-bold ${isSpotlight ? "w-24 h-24 text-4xl" : "w-14 h-14 sm:w-20 sm:h-20 text-xl sm:text-3xl"}`}>
+        <div className="absolute inset-0 flex items-center justify-center bg-[#020617]/80 backdrop-blur-3xl">
+          <div className={`rounded-xl bg-white/5 border border-white/10 text-white/40 flex items-center justify-center font-black ${isSpotlight ? "w-24 h-24 text-4xl" : "w-14 h-14 sm:w-20 sm:h-20 text-xl sm:text-3xl"}`}>
             {userData?.name?.charAt(0) || "P"}
           </div>
         </div>
       )}
 
       {!hasStream && (
-        <div className="absolute top-2 right-2">
-          <div className="flex items-center gap-1.5 bg-black/50 px-2 py-1 rounded-md">
-            <Loader2 size={10} className="animate-spin text-yellow-400" />
-            <span className="text-[9px] text-yellow-400 font-medium">Connecting...</span>
+        <div className="absolute top-4 right-4 animate-in fade-in zoom-in duration-500">
+          <div className="flex items-center gap-2 bg-[#00d4ff]/10 backdrop-blur-xl px-4 py-2 rounded-xl border border-[#00d4ff]/20">
+            <Loader2 size={12} className="animate-spin text-[#00d4ff] blue-glow" />
+            <span className="text-[10px] text-[#00d4ff] blue-glow font-black uppercase tracking-widest text-[9px]">Handshaking</span>
           </div>
         </div>
       )}
 
       {/* Name badge */}
-      <div className="absolute bottom-2 sm:bottom-3 left-2 sm:left-3 flex items-center gap-1.5 bg-black/60 backdrop-blur-sm px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-semibold text-white">
-        <span className={`w-1.5 h-1.5 rounded-full ${hasStream ? "bg-emerald-400" : "bg-yellow-400 animate-pulse"}`} />
+      <div className="absolute bottom-3 left-3 flex items-center gap-2 bg-slate-900/60 backdrop-blur-xl px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest text-white border border-white/10">
+        <span className={`w-1.5 h-1.5 rounded-full ${hasStream ? "bg-[#00d4ff] blue-glow shadow-[0_0_10px_rgba(0,212,255,1)]" : "bg-yellow-400 animate-pulse"}`} />
         {userData ? `${userData.name}` : "Participant"}
-        {remoteMicOn === false && <MicOff size={11} className="text-red-400 ml-1" />}
+        {remoteMicOn === false && <MicOff size={12} className="text-red-400 ml-1" />}
       </div>
 
       {/* Pin button — visible on hover */}

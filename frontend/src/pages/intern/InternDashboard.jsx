@@ -168,69 +168,48 @@ const InternDashboard = () => {
       {/* Stats Cards */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         {/* 1. Assigned Tasks */}
-        <Link to="/intern/my-tasks">
+      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <Link to="/intern/my-tasks" className="transition-transform active:scale-95">
           <StatCard
             title="Assigned Tasks"
             value={String(stats.assignedTasks)}
-            subtitle="Active tasks pending"
-            icon={<CheckSquare />}
-            bg="bg-indigo-50"
-            iconBg="bg-indigo-100 text-indigo-600"
-            border="border-indigo-200"
+            subtitle="Processing..."
+            icon={<CheckSquare size={20} />}
           />
         </Link>
 
-        {/* 2. Pending Submissions */}
-        <Link to="/intern/submissions">
+        <Link to="/intern/submissions" className="transition-transform active:scale-95">
           <StatCard
             title="Submissions"
             value={String(stats.pendingSubmissions).padStart(2, "0")}
-            icon={<Folder />}
-            subtitle="Awaiting review"
-            bg="bg-sky-50"
-            iconBg="bg-sky-100 text-sky-600"
-            border="border-sky-200"
+            icon={<Folder size={20} />}
+            subtitle="Pending Sync"
           />
         </Link>
 
-        {/* 3. Meetings */}
-        <Link to="/intern/meetings">
+        <Link to="/intern/meetings" className="transition-transform active:scale-95">
           <StatCard
-            title="Meetings"
+            title="Neural Link"
             value={String(stats.meetings).padStart(2, "0")}
-            icon={<Calendar />}
-            subtitle="Scheduled for today"
-            bg="bg-emerald-50"
-            iconBg="bg-emerald-100 text-emerald-600"
-            border="border-emerald-200"
+            icon={<Calendar size={20} />}
+            subtitle="Secure Meetings"
           />
         </Link>
 
-        {/* 4. DAILY WORK HOURS */}
-        <div className="cursor-default">
-          <StatCard
-            title="Worked Today"
-            value={stats.workedToday}
-            subtitle="Daily Goal: 8h"
-            icon={<Timer />}
-            bg="bg-yellow-50"
-            iconBg="bg-yellow-100 text-yellow-600"
-            border="border-yellow-200"
-          />
-        </div>
+        <StatCard
+          title="Daily Uptime"
+          value={stats.workedToday}
+          subtitle="Goal achieved: 65%"
+          icon={<Timer size={20} />}
+        />
 
-        {/* 5. WEEKLY WORK HOURS */}
-        <div className="cursor-default">
-          <StatCard
-            title="Worked This Week"
-            value={stats.workedThisWeek}
-            subtitle="Weekly Goal: 40h"
-            icon={<BarChart3 />}
-            bg="bg-purple-50"
-            iconBg="bg-purple-100 text-purple-600"
-            border="border-purple-200"
-          />
-        </div>
+        <StatCard
+          title="Weekly Stream"
+          value={stats.workedThisWeek}
+          subtitle="Network average"
+          icon={<BarChart3 size={20} />}
+        />
+      </div>
       </div>
 
       {/* Optional: Visual Time Progress Bar Section */}
@@ -242,12 +221,12 @@ const InternDashboard = () => {
           {/* Daily Progress */}
           <div>
             <div className="flex justify-between mb-2 text-sm font-medium">
-              <span className="text-slate-600">Daily Progress</span>
-              <span className="text-indigo-600">{dailyProgress}%</span>
+              <span className="text-white/60">Daily Progress</span>
+              <span className="text-[#00d4ff] blue-glow">{dailyProgress}%</span>
             </div>
-            <div className="w-full bg-slate-100 rounded-full h-2.5">
+            <div className="w-full bg-white/5 rounded-full h-2.5 overflow-hidden border border-white/10">
               <div
-                className="bg-indigo-600 h-2.5 rounded-full"
+                className="bg-[#00d4ff] h-full rounded-full blue-glow shadow-[0_0_10px_rgba(0,212,255,1)]"
                 style={{ width: `${Math.min(dailyProgress, 100)}%` }}
               ></div>
             </div>
@@ -256,12 +235,12 @@ const InternDashboard = () => {
           {/* Weekly Progress */}
           <div>
             <div className="flex justify-between mb-2 text-sm font-medium">
-              <span className="text-slate-600">Weekly Progress (Week 02)</span>
-              <span className="text-emerald-600">{weeklyProgress}%</span>
+              <span className="text-white/60">Weekly Progress</span>
+              <span className="text-[#00d4ff] blue-glow">{weeklyProgress}%</span>
             </div>
-            <div className="w-full bg-slate-100 rounded-full h-2.5">
+            <div className="w-full bg-white/5 rounded-full h-2.5 overflow-hidden border border-white/10">
               <div
-                className="bg-emerald-600 h-2.5 rounded-full"
+                className="bg-[#00d4ff] h-full rounded-full blue-glow shadow-[0_0_10px_rgba(0,212,255,1)]"
                 style={{ width: `${Math.min(weeklyProgress, 100)}%` }}
               ></div>
             </div>

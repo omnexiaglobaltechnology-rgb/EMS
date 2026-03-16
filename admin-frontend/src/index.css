@@ -1,8 +1,54 @@
+@import "tailwindcss";
+
+:root {
+    --glass-background: rgba(255, 255, 255, 0.1);
+    --glass-background-dark: rgba(15, 23, 42, 0.4);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-border-dark: rgba(255, 255, 255, 0.1);
+    --glass-blur: blur(12px);
+    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: linear-gradient(-45deg, #0f172a, #1e293b, #312e81, #1e1b4b);
+    background-size: 400% 400%;
+    animation: gradient 15s ease infinite;
+    color: #f8fafc;
+    font-family: 'Inter', sans-serif;
+}
+
+@keyframes gradient {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.glass {
+    background: var(--glass-background);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+}
+
+.glass-dark {
+    background: var(--glass-background-dark);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border-dark);
+    box-shadow: var(--glass-shadow);
+}
+
 /* Custom layout for fixed sidebar and topbar */
 .main-content {
     position: relative;
-    background: #f8fafc;
+    background: transparent;
     min-height: 100vh;
     overflow-x: auto;
 }
-@import "tailwindcss";
+
+.card-glass {
+    @apply glass rounded-xl p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl;
+}

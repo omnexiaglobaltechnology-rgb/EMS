@@ -19,36 +19,38 @@ const Sidebar = () => {
 
   return (
     <aside
-      className="w-64 bg-[#090E1A] text-white min-h-screen flex flex-col fixed left-0 top-0 h-screen z-40 shadow-lg"
+      className="w-64 glass-dark text-white min-h-screen flex flex-col fixed left-0 top-0 h-screen z-40"
       style={{ width: 256 }}
     >
       {/* ---------------- USER INFO SECTION ---------------- */}
-      <div className="flex items-center gap-3 px-4 py-6 mb-2 text-left text-white border-b border-gray-300/30">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-500 text-sm font-semibold uppercase">
+      <div className="flex items-center gap-3 px-4 py-8 mb-2 text-left text-white border-b border-white/10">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-500/80 backdrop-blur-md text-sm font-semibold uppercase shadow-lg border border-white/20">
           {name?.substring(0, 2) || "UN"}
         </div>
         <div className="leading-tight overflow-hidden">
           {/* User's Name */}
-          <p className="text-sm font-semibold truncate">
+          <p className="text-sm font-bold tracking-tight truncate">
             {name || "User Name"}
           </p>
 
           {/* Position / Department Name */}
-          <p className="text-xs text-slate-300 capitalize truncate">
+          <p className="text-xs text-white/60 capitalize truncate">
             {position || role}
           </p>
         </div>
       </div>
 
       {/* ---------------- NAVIGATION LINKS ---------------- */}
-      <div className="flex-1 px-3 overflow-y-auto">
+      <div className="flex-1 px-3 overflow-y-auto space-y-1">
         {MENU[role]?.map((item) => (
           <NavLink
             key={item}
             to={`/${role}/${item}`}
             className={({ isActive }) =>
-              `block px-3 ps-5 py-2 my-2 font-semibold rounded-lg capitalize transition-colors duration-150 ${
-                isActive ? "bg-[#10192D] text-blue-500" : "hover:bg-[#10192D]"
+              `group flex items-center px-4 py-3 font-medium rounded-xl capitalize transition-all duration-200 ${
+                isActive 
+                  ? "bg-white/15 text-indigo-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]" 
+                  : "text-white/70 hover:bg-white/5 hover:text-white"
               }`
             }
             end
@@ -59,12 +61,14 @@ const Sidebar = () => {
       </div>
 
       {/* ---------------- LOGOUT BUTTON ---------------- */}
-      <button
-        onClick={() => dispatch(logout())}
-        className="text-red-500 font-semibold py-4 w-full bg-transparent hover:bg-red-900/20 transition-colors duration-150 border-t border-[#2d3748] mt-auto cursor-pointer"
-      >
-        Log Out
-      </button>
+      <div className="p-4 border-t border-white/10">
+        <button
+          onClick={() => dispatch(logout())}
+          className="flex items-center justify-center gap-2 text-red-400 font-semibold py-3 w-full rounded-xl bg-red-500/10 hover:bg-red-500/20 transition-all duration-200 cursor-pointer border border-red-500/20"
+        >
+          Log Out
+        </button>
+      </div>
     </aside>
   );
 };

@@ -87,8 +87,8 @@ const Topbar = () => {
 
   return (
     <header
-      className="h-14 bg-white shadow flex justify-between px-6 items-center fixed left-64 top-0 right-0 z-30"
-      style={{ height: 56 }}
+      className="h-16 glass m-4 rounded-2xl flex justify-between px-6 items-center fixed left-64 top-0 right-0 z-30 transition-all duration-300"
+      style={{ height: 64, left: 256 + 16, width: `calc(100% - ${256 + 32}px)` }}
     >
       <span className="font-semibold">Enterprise Management System</span>
 
@@ -107,13 +107,13 @@ const Topbar = () => {
         </button>
 
         {isOpen && (
-          <div className="absolute right-0 mt-2 w-96 rounded-lg border border-gray-200 bg-white shadow-xl z-50 overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-              <p className="font-semibold">Notifications</p>
+          <div className="absolute right-0 mt-4 w-96 rounded-2xl glass-dark shadow-2xl z-50 overflow-hidden border border-white/10 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+              <p className="font-semibold text-white">Notifications</p>
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAllRead}
-                  className="text-xs text-indigo-600 hover:text-indigo-700"
+                  className="text-xs text-indigo-400 hover:text-indigo-300 font-medium"
                 >
                   Mark all read
                 </button>
@@ -130,19 +130,19 @@ const Topbar = () => {
                   <button
                     key={notification.id}
                     onClick={() => handleNotificationClick(notification)}
-                    className={`w-full text-left px-4 py-3 border-b border-gray-100 hover:bg-gray-50 ${
-                      notification.isRead ? "bg-white" : "bg-indigo-50"
+                    className={`w-full text-left px-4 py-3 border-b border-white/5 hover:bg-white/5 transition-colors ${
+                      notification.isRead ? "text-white/70" : "bg-white/10 text-white"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">
+                        <p className="text-sm font-medium truncate">
                           {notification.title}
                         </p>
-                        <p className="text-xs text-gray-600 mt-1 line-clamp-2">
+                        <p className="text-xs text-white/60 mt-1 line-clamp-2">
                           {notification.message}
                         </p>
-                        <p className="text-[11px] text-gray-400 mt-1">
+                        <p className="text-[11px] text-white/40 mt-1">
                           {formatTimestamp(notification.timestamp)}
                         </p>
                       </div>

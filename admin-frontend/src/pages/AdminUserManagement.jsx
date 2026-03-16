@@ -88,26 +88,26 @@ const AdminUserManagement = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900">User Management</h1>
-          <p className="text-slate-500">Manage {activeTab}s and their hierarchy</p>
+          <h1 className="text-3xl font-bold tracking-tight text-white">User Management</h1>
+          <p className="text-white/60 font-medium">Manage {activeTab}s and their hierarchy</p>
         </div>
 
         <div className="flex items-center gap-3 w-full md:w-auto">
           <form onSubmit={handleSearch} className="relative flex-1 md:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} />
             <input
               type="text"
               placeholder="Search users..."
-              className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all placeholder:text-white/20"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </form>
           <button
             onClick={() => setShowAdd(true)}
-            className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-white text-sm font-medium hover:bg-slate-800 transition-colors shadow-sm"
+            className="flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-2.5 text-white text-sm font-bold hover:bg-indigo-500 transition-all shadow-lg hover:shadow-indigo-500/25 active:scale-95"
           >
-            <Plus size={16} />
+            <Plus size={18} />
             Add User
           </button>
         </div>
@@ -122,23 +122,23 @@ const AdminUserManagement = () => {
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 rounded-lg bg-slate-100 p-1 w-fit">
+      <div className="flex gap-1 rounded-xl bg-white/5 p-1.5 w-fit border border-white/10 backdrop-blur-md">
         <button
           onClick={() => setActiveTab("employee")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+          className={`flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-bold transition-all ${
             activeTab === "employee"
-              ? "bg-white text-slate-900 shadow-sm"
-              : "text-slate-500 hover:text-slate-700"
+              ? "bg-white/15 text-white shadow-[0_1px_1px_rgba(255,255,255,0.1)]"
+              : "text-white/50 hover:text-white"
           }`}
         >
           <Users size={16} /> Employees
         </button>
         <button
           onClick={() => setActiveTab("intern")}
-          className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
+          className={`flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-bold transition-all ${
             activeTab === "intern"
-              ? "bg-white text-slate-900 shadow-sm"
-              : "text-slate-500 hover:text-slate-700"
+              ? "bg-white/15 text-white shadow-[0_1px_1px_rgba(255,255,255,0.1)]"
+              : "text-white/50 hover:text-white"
           }`}
         >
           <GraduationCap size={16} /> Interns
@@ -146,89 +146,90 @@ const AdminUserManagement = () => {
       </div>
 
       {/* Users Table */}
-      <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+      <div className="rounded-3xl border border-white/10 bg-white/5 overflow-hidden shadow-2xl backdrop-blur-md">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
-            <thead className="text-slate-500 bg-slate-50 border-b border-slate-200">
+          <table className="w-full text-sm text-left border-collapse">
+            <thead className="text-white/40 bg-white/5 uppercase tracking-widest text-[10px] font-black">
               <tr>
-                <th className="p-4 font-semibold">User / ID</th>
-                <th className="p-4 font-semibold">Department</th>
-                <th className="p-4 font-semibold">Supervisor</th>
-                <th className="p-4 font-semibold">Role</th>
-                <th className="p-4 font-semibold text-right">Actions</th>
+                <th className="p-6">User / ID</th>
+                <th className="p-6">Department</th>
+                <th className="p-6">Supervisor</th>
+                <th className="p-6">Role</th>
+                <th className="p-6 text-right">Actions</th>
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-white/5">
               {loading ? (
                 <tr>
-                  <td colSpan="5" className="p-12 text-center text-slate-400">
-                    <Loader className="mx-auto mb-2 h-8 w-8 animate-spin" />
-                    <p>Loading {activeTab}s...</p>
+                  <td colSpan="5" className="p-20 text-center text-white/30">
+                    <Loader className="mx-auto mb-4 h-10 w-10 animate-spin text-indigo-400" />
+                    <p className="font-medium">Loading {activeTab}s...</p>
                   </td>
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="p-12 text-center text-slate-400">
-                    No {activeTab}s found matching your criteria.
+                  <td colSpan="5" className="p-20 text-center text-white/20">
+                    <p className="text-lg font-bold">No {activeTab}s found</p>
+                    <p className="text-sm italic mt-1 text-white/10">Try a different search term</p>
                   </td>
                 </tr>
               ) : (
                 users.map((u) => (
-                  <tr key={u.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="p-4">
-                      <div className="font-semibold text-slate-900">{u.name || "N/A"}</div>
-                      <div className="text-xs text-slate-500 font-mono">{u.username || u.email}</div>
+                  <tr key={u.id} className="hover:bg-white/5 transition-colors group">
+                    <td className="p-6">
+                      <div className="font-bold text-white text-base">{u.name || "N/A"}</div>
+                      <div className="text-xs text-white/40 font-mono mt-0.5 tracking-tight">{u.username || u.email}</div>
                     </td>
-                    <td className="p-4">
+                    <td className="p-6 text-white/80">
                       {u.department ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
+                        <span className="inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 backdrop-blur-md">
                           {u.department.name}
                         </span>
                       ) : (
-                        <span className="text-slate-400">Not Assigned</span>
+                        <span className="text-white/20 italic">Not Assigned</span>
                       )}
                     </td>
-                    <td className="p-4">
+                    <td className="p-6">
                       {u.reportsTo ? (
                         <div>
-                          <div className="font-medium text-slate-700">{u.reportsTo.name}</div>
-                          <div className="text-[10px] text-slate-400 uppercase tracking-wider">
+                          <div className="font-bold text-white/90">{u.reportsTo.name}</div>
+                          <div className="text-[10px] text-white/30 uppercase font-black tracking-widest mt-0.5">
                             {u.reportsTo.role?.replace(/_/g, " ")}
                           </div>
                         </div>
                       ) : (
-                        <span className="text-slate-400">—</span>
+                        <span className="text-white/10">—</span>
                       )}
                     </td>
-                    <td className="p-4">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize bg-slate-100 text-slate-600 border border-slate-200">
+                    <td className="p-6">
+                      <span className="inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-white/5 text-white/60 border border-white/10">
                         {u.role?.replace(/_/g, " ")}
                       </span>
                     </td>
 
-                    <td className="p-4 text-right relative">
+                    <td className="p-6 text-right relative">
                       <button
                         onClick={() => setOpenMenuId(openMenuId === u.id ? null : u.id)}
-                        className="p-1.5 hover:bg-slate-200 rounded-lg transition-colors text-slate-400"
+                        className="p-2 hover:bg-white/10 rounded-xl transition-all text-white/40 hover:text-white"
                       >
-                        <MoreVertical size={18} />
+                        <MoreVertical size={20} />
                       </button>
 
                       {openMenuId === u.id && (
-                        <div className="absolute right-4 mt-2 w-48 rounded-lg border border-slate-200 bg-white z-20 shadow-xl py-1 animate-in fade-in zoom-in-95 duration-100 origin-top-right">
+                        <div className="absolute right-6 mt-2 w-52 rounded-2xl glass-dark z-20 shadow-2xl py-2 animate-in fade-in zoom-in-95 duration-150 origin-top-right border border-white/10">
                           <button
                             onClick={() => {
                               setShowPasswordModal(u.id);
                               setOpenMenuId(null);
                             }}
-                            className="flex items-center gap-2 w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 font-medium"
+                            className="flex items-center gap-3 w-full px-5 py-3 text-left text-xs font-bold text-white/70 hover:bg-white/10 hover:text-white transition-all uppercase tracking-wider"
                           >
                             <Key size={14} /> Reset Password
                           </button>
                           <button
                             onClick={() => deleteUser(u.id)}
-                            className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 font-medium"
+                            className="flex items-center gap-3 w-full px-5 py-3 text-left text-xs font-bold text-red-400 hover:bg-red-500/10 transition-all uppercase tracking-wider"
                           >
                             Delete User
                           </button>
@@ -258,37 +259,37 @@ const AdminUserManagement = () => {
 
       {/* Password Change Modal */}
       {showPasswordModal && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-          <div className="w-full max-w-sm rounded-xl bg-white p-6 space-y-4 shadow-2xl">
-            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-              <Key size={18} className="text-indigo-600" /> Reset User Password
+        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="w-full max-w-sm rounded-3xl glass-dark p-8 space-y-6 shadow-2xl border border-white/10">
+            <h2 className="text-xl font-bold text-white flex items-center gap-3">
+              <Key size={20} className="text-indigo-400" /> Reset Password
             </h2>
-            <div className="space-y-1">
-              <label className="text-sm font-medium text-slate-700">New Password</label>
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-wider text-white/50 ml-1">New Password</label>
               <input
                 type="password"
-                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
+                className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white placeholder:text-white/20 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Enter new secure password"
+                placeholder="Enter new password"
                 autoFocus
               />
             </div>
-            <div className="flex justify-end gap-3 pt-4 text-sm font-medium">
+            <div className="flex justify-end gap-3 pt-4">
               <button
                 onClick={() => {
                   setShowPasswordModal(null);
                   setNewPassword("");
                 }}
-                className="rounded-lg border border-slate-300 px-4 py-2 hover:bg-slate-50 transition-colors"
+                className="rounded-xl px-5 py-2.5 text-sm font-bold text-white/60 hover:text-white hover:bg-white/5 transition-all"
               >
                 Cancel
               </button>
               <button
                 onClick={handleChangePassword}
-                className="rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 transition-colors shadow-sm"
+                className="rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-indigo-500 transition-all shadow-lg active:scale-95"
               >
-                Update Password
+                Update
               </button>
             </div>
           </div>

@@ -108,16 +108,16 @@ const UserModal = ({ title, user, onClose, onSave }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-      <div className="w-full max-w-lg rounded-xl bg-white p-6 space-y-4 max-h-[90vh] overflow-y-auto">
-        <h2 className="text-xl font-bold text-slate-900">{title}</h2>
+    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300">
+      <div className="w-full max-w-lg rounded-3xl glass-dark p-8 space-y-6 max-h-[90vh] overflow-y-auto border border-white/10 shadow-2xl">
+        <h2 className="text-2xl font-bold text-white tracking-tight">{title}</h2>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Name */}
-          <div className="space-y-1">
-            <label className="text-sm font-medium text-slate-700">Full Name</label>
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-white/50 ml-1">Full Name</label>
             <input
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
+              className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white placeholder:text-white/20 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="John Doe"
@@ -125,21 +125,21 @@ const UserModal = ({ title, user, onClose, onSave }) => {
           </div>
 
           {/* Username */}
-          <div className="space-y-1">
-            <label className="text-sm font-medium text-slate-700">Username / Unique ID</label>
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-white/50 ml-1">Username / ID</label>
             <input
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
+              className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white placeholder:text-white/20 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
               value={form.username}
               onChange={(e) => setForm({ ...form, username: e.target.value })}
-              placeholder="EMP001 or johndoe"
+              placeholder="EMP001"
             />
           </div>
 
           {/* Email */}
-          <div className="space-y-1">
-            <label className="text-sm font-medium text-slate-700">Email Address</label>
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-white/50 ml-1">Email Address</label>
             <input
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
+              className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white placeholder:text-white/20 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               placeholder="john@owms.com"
@@ -147,13 +147,13 @@ const UserModal = ({ title, user, onClose, onSave }) => {
           </div>
 
           {/* Password (only for new users) */}
-          <div className="space-y-1">
-            <label className="text-sm font-medium text-slate-700">
-              {isNewUser ? "Initial Password" : "Reset Password (optional)"}
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-white/50 ml-1">
+              {isNewUser ? "Initial Password" : "Reset Password"}
             </label>
             <input
               type="password"
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
+              className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white placeholder:text-white/20 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               placeholder="Min 8 chars"
@@ -161,31 +161,31 @@ const UserModal = ({ title, user, onClose, onSave }) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* User Type */}
-          <div className="space-y-1">
-            <label className="text-sm font-medium text-slate-700">User Track</label>
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-white/50 ml-1">User Track</label>
             <select
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm capitalize focus:ring-2 focus:ring-indigo-500"
+              className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white capitalize focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none"
               value={form.userType}
               onChange={(e) => setForm({ ...form, userType: e.target.value })}
             >
               {USER_TYPE_OPTIONS.map((t) => (
-                <option key={t} value={t}>{t}</option>
+                <option key={t} value={t} className="bg-slate-900">{t}</option>
               ))}
             </select>
           </div>
 
           {/* Role */}
-          <div className="space-y-1">
-            <label className="text-sm font-medium text-slate-700">Role</label>
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-white/50 ml-1">Role</label>
             <select
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm capitalize focus:ring-2 focus:ring-indigo-500"
+              className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white capitalize focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none"
               value={form.role}
               onChange={(e) => setForm({ ...form, role: e.target.value })}
             >
               {ROLE_OPTIONS.map((r) => (
-                <option key={r} value={r}>
+                <option key={r} value={r} className="bg-slate-900">
                   {r.replace(/_/g, " ")}
                 </option>
               ))}
@@ -193,21 +193,21 @@ const UserModal = ({ title, user, onClose, onSave }) => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Department */}
-          <div className="space-y-1">
-            <label className="text-sm font-medium text-slate-700">
-              Department {loadingDepts && "(Loading...)"}
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-white/50 ml-1">
+              Department {loadingDepts && "..."}
             </label>
             <select
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 disabled:bg-slate-50 disabled:text-slate-500"
+              className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none disabled:opacity-30"
               value={form.departmentId}
               onChange={(e) => setForm({ ...form, departmentId: e.target.value })}
               disabled={loadingDepts || form.role === 'ceo'}
             >
-              <option value="">{form.role === 'ceo' ? "No Department Assigned" : "Select Department"}</option>
+              <option value="" className="bg-slate-900">{form.role === 'ceo' ? "None" : "Select Dept"}</option>
               {departments.map((d) => (
-                <option key={d.id || d._id} value={d.id || d._id}>
+                <option key={d.id || d._id} value={d.id || d._id} className="bg-slate-900">
                   {d.name}
                 </option>
               ))}
@@ -215,19 +215,19 @@ const UserModal = ({ title, user, onClose, onSave }) => {
           </div>
 
           {/* Reports To */}
-          <div className="space-y-1">
-            <label className="text-sm font-medium text-slate-700">
-              Reports To {loadingReportsTo && "(Loading...)"}
+          <div className="space-y-2">
+            <label className="text-xs font-bold uppercase tracking-wider text-white/50 ml-1">
+              Reports To {loadingReportsTo && "..."}
             </label>
             <select
-              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 disabled:bg-slate-50 disabled:text-slate-500"
+              className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none disabled:opacity-30"
               value={form.reportsTo}
               onChange={(e) => setForm({ ...form, reportsTo: e.target.value })}
               disabled={loadingReportsTo || form.role === 'ceo' || (!form.departmentId && !['cto', 'cfo', 'coo', 'manager', 'manager_intern'].includes(form.role))}
             >
-              <option value="">{form.role === 'ceo' ? "Top Level (CEO)" : "Select Supervisor (Optional)"}</option>
+              <option value="" className="bg-slate-900">{form.role === 'ceo' ? "CEO (Top)" : "Select Supervisor"}</option>
               {reportsToOptions.map((u) => (
-                <option key={u.id || u._id} value={u.id || u._id}>
+                <option key={u.id || u._id} value={u.id || u._id} className="bg-slate-900">
                   {u.name} ({u.role.replace(/_/g, " ")})
                 </option>
               ))}
@@ -236,16 +236,16 @@ const UserModal = ({ title, user, onClose, onSave }) => {
         </div>
 
         {/* Actions */}
-        <div className="flex justify-end gap-3 pt-4 font-medium text-sm">
+        <div className="flex justify-end gap-4 pt-6">
           <button
             onClick={onClose}
-            className="rounded-lg border border-slate-300 px-4 py-2 hover:bg-slate-50 transition-colors"
+            className="rounded-xl px-6 py-3 text-sm font-bold text-white/70 hover:text-white hover:bg-white/5 transition-all"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 transition-colors shadow-sm"
+            className="rounded-xl bg-indigo-600 px-8 py-3 text-sm font-bold text-white hover:bg-indigo-500 transition-all shadow-lg hover:shadow-indigo-500/25 active:scale-95"
           >
             {isNewUser ? "Create User" : "Update User"}
           </button>

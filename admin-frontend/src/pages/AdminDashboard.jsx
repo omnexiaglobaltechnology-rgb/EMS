@@ -239,8 +239,8 @@ const AdminDashboard = () => {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold">Admin Dashboard</h1>
-        <p className="text-slate-500">System overview and management.</p>
+        <h1 className="text-3xl font-bold tracking-tight text-white">Admin Dashboard</h1>
+        <p className="text-white/60 font-medium">System overview and management.</p>
       </div>
 
       {/* Error Message */}
@@ -256,17 +256,17 @@ const AdminDashboard = () => {
         {stats.map((item) => (
           <div
             key={item.title}
-            className="rounded-xl border border-gray-300 bg-white p-6 flex justify-between items-start"
+            className="card-glass flex justify-between items-start"
           >
             <div>
-              <p className="text-sm text-slate-500">{item.title}</p>
-              <h2 className="text-3xl font-bold mt-1">{item.value}</h2>
+              <p className="text-sm font-medium text-white/60">{item.title}</p>
+              <h2 className="text-4xl font-bold mt-1 text-white">{item.value}</h2>
               {item.change && (
-                <p className="text-green-600 text-sm mt-1">{item.change}</p>
+                <p className="text-emerald-400 text-sm mt-1 font-semibold">{item.change}</p>
               )}
             </div>
 
-            <div className="rounded-lg bg-indigo-600 p-3 text-white">
+            <div className="rounded-2xl bg-indigo-500/80 p-3 text-white shadow-lg backdrop-blur-md border border-white/20">
               <item.icon size={22} />
             </div>
           </div>
@@ -276,40 +276,40 @@ const AdminDashboard = () => {
       {/* Bottom Sections */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent User Activity */}
-        <div className="rounded-xl border border-gray-300 bg-white p-6">
-          <h2 className="text-lg font-semibold mb-4">Recent User Activity</h2>
+        <div className="card-glass">
+          <h2 className="text-xl font-bold mb-6 text-white border-b border-white/10 pb-4">Recent User Activity</h2>
 
-          <div className="space-y-3">
+          <div className="space-y-4">
             {recentActivity.length > 0 ? (
               recentActivity.map((a, i) => (
                 <div
                   key={i}
-                  className="flex justify-between items-center rounded-lg bg-slate-50 px-4 py-3"
+                  className="flex justify-between items-center rounded-xl bg-white/5 border border-white/10 px-4 py-3 hover:bg-white/10 transition-colors"
                 >
-                  <span className="text-sm">{a.text}</span>
-                  <span className="text-xs text-slate-500">{a.time}</span>
+                  <span className="text-sm font-medium text-white/90">{a.text}</span>
+                  <span className="text-xs text-white/40">{a.time}</span>
                 </div>
               ))
             ) : (
-              <p className="text-gray-500 text-sm">No recent activity</p>
+              <p className="text-white/40 text-sm italic">No recent activity</p>
             )}
           </div>
         </div>
 
         {/* System Status */}
-        <div className="rounded-xl border border-gray-300 bg-white p-6">
-          <h2 className="text-lg font-semibold mb-4">System Status</h2>
+        <div className="card-glass">
+          <h2 className="text-xl font-bold mb-6 text-white border-b border-white/10 pb-4">System Status</h2>
 
           <div className="space-y-4">
             {systemStatus.map((s) => (
               <div
                 key={s.label}
-                className="flex justify-between items-center rounded-lg bg-slate-50 px-4 py-3"
+                className="flex justify-between items-center rounded-xl bg-white/5 border border-white/10 px-4 py-3 hover:bg-white/10 transition-colors"
               >
-                <span className="font-medium">{s.label}</span>
+                <span className="font-semibold text-white/90">{s.label}</span>
 
-                <span className="flex items-center gap-2 text-green-600 text-sm">
-                  <span className="h-2 w-2 rounded-full bg-green-600" />
+                <span className="flex items-center gap-2 text-emerald-400 text-sm font-bold">
+                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
                   {s.status}
                 </span>
               </div>

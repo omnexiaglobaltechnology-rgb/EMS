@@ -75,6 +75,10 @@ const UnifiedMeetingRoom = () => {
   const myIdRef = useRef(null);
   // Keep track of mic state in ref for use inside stopScreenShare
   const micOnRef = useRef(true);
+  // Guard against double-invocation of stopScreenShare
+  const stoppingShareRef = useRef(false);
+  // The original stream that peers were created with (for replaceTrack)
+  const peerStreamRef = useRef(null);
 
   // Keep micOnRef in sync
   useEffect(() => { micOnRef.current = micOn; }, [micOn]);
@@ -200,15 +204,17 @@ const UnifiedMeetingRoom = () => {
         const screenStream = await navigator.mediaDevices.getDisplayMedia({ video: true });
         const screenTrack = screenStream.getVideoTracks()[0];
         const oldVideoTrack = streamRef.current?.getVideoTracks()[0];
+        // Save the stream object that peers know about for replaceTrack
+        const theStream = peerStreamRef.current || streamRef.current;
 
         // Replace camera track with screen track on all peers
         for (const [, entry] of peersRef.current) {
           try {
             if (oldVideoTrack && screenTrack) {
-              entry.peer.replaceTrack(oldVideoTrack, screenTrack, streamRef.current);
+              entry.peer.replaceTrack(oldVideoTrack, screenTrack, theStream);
             }
           } catch (err) {
-            console.error("[MEET] replaceTrack failed:", err);
+            console.error("[MEET] replaceTrack start failed:", err);
           }
         }
 
@@ -220,10 +226,11 @@ const UnifiedMeetingRoom = () => {
         streamRef.current.addTrack(screenTrack);
         setStream(new MediaStream(streamRef.current.getTracks()));
 
+        // onended: browser "Stop sharing" button fires this
         screenTrack.onended = () => stopScreenShare();
 
         setIsScreenSharing(true);
-        // Auto-pin our own screen share
+        stoppingShareRef.current = false;
         setPinnedId("local");
         socketRef.current?.emit("screen-share-toggle", roomId, true);
       } catch (err) {
@@ -235,36 +242,48 @@ const UnifiedMeetingRoom = () => {
   };
 
   /**
-   * FIXED: Stop screen share and restore camera.
-   * The old version called requestMedia() which overwrote streamRef.current
-   * BEFORE replaceTrack could use the screen track. Now we:
-   * 1. Grab the current screen track from the stream
-   * 2. Get a new camera track directly (without updating streamRef)
-   * 3. Call replaceTrack(screenTrack → cameraTrack) on all peers
-   * 4. THEN update the local stream
+   * Stop screen share and restore camera.
+   * Uses stoppingShareRef to prevent double invocation
+   * (user click calls this, which stops track, which fires onended, which calls this again).
+   * Uses peerStreamRef to pass the exact same stream object to replaceTrack.
    */
   const stopScreenShare = async () => {
-    const screenTrack = streamRef.current?.getVideoTracks()[0];
-    const oldStream = streamRef.current;
+    // Guard: prevent double invocation
+    if (stoppingShareRef.current) {
+      console.log("[MEET] stopScreenShare already in progress, skipping");
+      return;
+    }
+    stoppingShareRef.current = true;
 
-    // 1. Get a fresh camera track WITHOUT calling requestMedia (which would overwrite streamRef)
+    const screenTrack = streamRef.current?.getVideoTracks()[0];
+    // The stream object that peers were given (for simple-peer _senderMap lookup)
+    const theStream = peerStreamRef.current || streamRef.current;
+
+    // Remove the onended handler FIRST to prevent re-entry
+    if (screenTrack) {
+      screenTrack.onended = null;
+    }
+
+    // 1. Get a fresh camera track (video only — keep existing audio track)
     let cameraTrack;
     try {
       const camStream = await navigator.mediaDevices.getUserMedia({
         video: { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 24 } },
-        audio: false, // We keep the existing audio track
+        audio: false,
       });
       cameraTrack = camStream.getVideoTracks()[0];
+      console.log("[MEET] Got new camera track:", cameraTrack.id, "enabled:", cameraTrack.enabled);
     } catch (err) {
       console.error("[MEET] Failed to get camera after screen share:", err);
+      stoppingShareRef.current = false;
       return;
     }
 
-    // 2. Replace screen track → camera track on ALL peers (using the OLD stream ref)
+    // 2. Replace screen→camera on ALL peers using the ORIGINAL stream reference
     for (const [, entry] of peersRef.current) {
       try {
         if (screenTrack && cameraTrack) {
-          entry.peer.replaceTrack(screenTrack, cameraTrack, oldStream);
+          entry.peer.replaceTrack(screenTrack, cameraTrack, theStream);
           console.log("[MEET] ✅ Replaced screen→camera for peer");
         }
       } catch (err) {
@@ -272,21 +291,21 @@ const UnifiedMeetingRoom = () => {
       }
     }
 
-    // 3. NOW stop and swap tracks in the local stream
+    // 3. Stop screen track and update local stream
     if (screenTrack) {
       screenTrack.stop();
-      oldStream.removeTrack(screenTrack);
+      streamRef.current.removeTrack(screenTrack);
     }
-    oldStream.addTrack(cameraTrack);
+    streamRef.current.addTrack(cameraTrack);
 
-    // 4. Update React state — create a new MediaStream reference to trigger re-render
-    const updatedStream = new MediaStream(oldStream.getTracks());
+    // 4. Trigger re-render with new MediaStream ref
+    const updatedStream = new MediaStream(streamRef.current.getTracks());
     streamRef.current = updatedStream;
     setStream(updatedStream);
 
     setIsScreenSharing(false);
     setCameraOn(true);
-    setPinnedId(null); // Unpin when stopping share
+    setPinnedId(null);
     socketRef.current?.emit("screen-share-toggle", roomId, false);
     socketRef.current?.emit("camera-toggle", roomId, true);
 
@@ -324,6 +343,10 @@ const UnifiedMeetingRoom = () => {
       }
 
       const localStreamId = streamRef.current.id;
+      // Store the stream object that peers use, for replaceTrack later
+      if (!peerStreamRef.current) {
+        peerStreamRef.current = streamRef.current;
+      }
       console.log(`[MEET] Creating peer for ${targetSocketId} (initiator=${isInitiator})`);
 
       const peer = new Peer({
@@ -712,18 +735,20 @@ const UnifiedMeetingRoom = () => {
         {/* Video Area */}
         <div className="flex-1 p-1.5 sm:p-3 flex flex-col overflow-hidden min-h-0">
           {isPinned && pinnedTile ? (
-            /* ─── SPOTLIGHT LAYOUT: Pinned tile large + filmstrip ─── */
-            <div className="flex-1 flex flex-col gap-1.5 sm:gap-2 min-h-0">
-              {/* Spotlight (pinned tile) */}
-              <div className="flex-1 min-h-0">
-                {renderTile(pinnedTile, true)}
+            /* ─── SPOTLIGHT LAYOUT: Pinned tile fullscreen + filmstrip ─── */
+            <div className="w-full h-full flex flex-col gap-1.5 sm:gap-2">
+              {/* Spotlight — takes all remaining height */}
+              <div className="relative flex-1 min-h-0 w-full">
+                <div className="absolute inset-0">
+                  {renderTile(pinnedTile, true)}
+                </div>
               </div>
 
-              {/* Filmstrip (other participants) */}
+              {/* Filmstrip — fixed height strip at bottom */}
               {filmstripTiles.length > 0 && (
-                <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-1 shrink-0" style={{ height: isMobile ? "100px" : "140px" }}>
+                <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-1 shrink-0" style={{ height: isMobile ? "90px" : "130px" }}>
                   {filmstripTiles.map(tile => (
-                    <div key={tile.id} className="shrink-0" style={{ width: isMobile ? "130px" : "200px", height: "100%" }}>
+                    <div key={tile.id} className="shrink-0 h-full" style={{ width: isMobile ? "120px" : "180px" }}>
                       {renderTile(tile, false)}
                     </div>
                   ))}

@@ -69,24 +69,10 @@ const InternMeetingRoom = () => {
 
   const [videoElMounted, setVideoElMounted] = useState(0);
 
-  const setLocalVideoRef = useCallback((el) => {
-    userVideoRef.current = el;
-    setVideoElMounted(n => n + 1);
-  }, []);
-
-  useEffect(() => {
-    const el = userVideoRef.current;
-    if (!el || !stream) return;
-    const videoOnlyStream = new MediaStream(stream.getVideoTracks());
-    el.srcObject = videoOnlyStream;
-    el.muted = true;
-    el.volume = 0;
-  }, [stream, videoElMounted]);
-
   const requestMedia = async (audio, video) => {
     try {
       const currentStream = await navigator.mediaDevices.getUserMedia({ 
-        video, 
+        video: typeof video === 'boolean' ? (video ? { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 24 } } : false) : video, 
         audio: typeof audio === 'boolean' ? (audio ? {
           echoCancellation: true,
           noiseSuppression: true,
@@ -110,6 +96,21 @@ const InternMeetingRoom = () => {
       return null;
     }
   };
+
+  const setLocalVideoRef = useCallback((el) => {
+    userVideoRef.current = el;
+    setVideoElMounted(n => n + 1);
+  }, []);
+
+  useEffect(() => {
+    const el = userVideoRef.current;
+    if (!el || !stream) return;
+    const videoOnlyStream = new MediaStream(stream.getVideoTracks());
+    el.srcObject = videoOnlyStream;
+    el.muted = true;
+    el.volume = 0;
+  }, [stream, videoElMounted]);
+
 
   const toggleMic = () => {
     if (streamRef.current) {

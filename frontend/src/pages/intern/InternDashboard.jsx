@@ -22,7 +22,7 @@ import { tasksApi, submissionsApi } from "../../utils/api";
  * upcoming meetings, and work hour progress.
  */
 const InternDashboard = () => {
-  const { id: internId } = useSelector((state) => state.auth);
+  const { id: internId, name } = useSelector((state) => state.auth);
 
   const [stats, setStats] = useState({
     assignedTasks: 0,
@@ -166,8 +166,6 @@ const InternDashboard = () => {
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        {/* 1. Assigned Tasks */}
       <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <Link to="/intern/my-tasks" className="transition-transform active:scale-95">
           <StatCard
@@ -209,7 +207,6 @@ const InternDashboard = () => {
           subtitle="Network average"
           icon={<BarChart3 size={20} />}
         />
-      </div>
       </div>
 
       {/* Optional: Visual Time Progress Bar Section */}

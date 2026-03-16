@@ -201,12 +201,12 @@ const CtoAnalytics = () => {
             <ResponsiveContainer width={250} height={250}>
               <PieChart>
                 <Pie
-                  data={meetingEfficiencyData}
+                  data={metrics.meetingEfficiencyData}
                   innerRadius={70}
                   outerRadius={100}
                   dataKey="value"
                 >
-                  {meetingEfficiencyData.map((_, i) => (
+                  {metrics.meetingEfficiencyData.map((_, i) => (
                     <Cell key={i} fill={COLORS[i]} />
                   ))}
                 </Pie>

@@ -57,12 +57,56 @@ const TlMeetingRoom = () => {
       } catch (err) {
         console.error("Failed to fetch meeting", err);
       }
+    };
 
-      // Initial Media Request for Pre-join preview
-      await requestMedia({ audio: true, video: true });
+    /**
+     * Acquires the media stream (camera and/or microphone).
+     * @param {object} constraints - Requested media types
+     * @returns {Promise<MediaStream|null>} The acquired stream or null
+     */
+    const requestMedia = async ({ audio = true, video = true } = {}) => {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        setMediaError("Media devices are not supported in this browser.");
+        setMicOn(false);
+        setCameraOn(false);
+        return null;
+      }
+
+      try {
+        const currentStream = await navigator.mediaDevices.getUserMedia({
+          audio,
+          video,
+        });
+
+        // Ensure initial mute state is applied
+        if (!micOn) {
+          currentStream.getAudioTracks().forEach(track => track.enabled = false);
+        }
+        if (!cameraOn) {
+          currentStream.getVideoTracks().forEach(track => track.enabled = false);
+        }
+
+        stopCurrentStream();
+        streamRef.current = currentStream;
+
+        setMicOn(currentStream.getAudioTracks().length > 0);
+        setCameraOn(currentStream.getVideoTracks().length > 0);
+        setMediaError("");
+        return currentStream;
+      } catch (error) {
+        setMediaError(
+          "Camera/Microphone permission is blocked. Please allow access in browser site settings.",
+        );
+        setMicOn(false);
+        setCameraOn(false);
+        return null;
+      }
     };
 
     init();
+
+    // Initial Media Request for Pre-join preview
+    requestMedia({ audio: true, video: true });
 
     return () => {
       if (streamRef.current) {
@@ -84,49 +128,6 @@ const TlMeetingRoom = () => {
     }
   };
 
-  /**
-   * Acquires the media stream (camera and/or microphone).
-   * @param {object} constraints - Requested media types
-   * @returns {Promise<MediaStream|null>} The acquired stream or null
-   */
-  const requestMedia = async ({ audio = true, video = true } = {}) => {
-    if (!navigator.mediaDevices?.getUserMedia) {
-      setMediaError("Media devices are not supported in this browser.");
-      setMicOn(false);
-      setCameraOn(false);
-      return null;
-    }
-
-    try {
-      const currentStream = await navigator.mediaDevices.getUserMedia({
-        audio,
-        video,
-      });
-
-      // Ensure initial mute state is applied
-      if (!micOn) {
-        currentStream.getAudioTracks().forEach(track => track.enabled = false);
-      }
-      if (!cameraOn) {
-        currentStream.getVideoTracks().forEach(track => track.enabled = false);
-      }
-
-      stopCurrentStream();
-      streamRef.current = currentStream;
-
-      setMicOn(currentStream.getAudioTracks().length > 0);
-      setCameraOn(currentStream.getVideoTracks().length > 0);
-      setMediaError("");
-      return currentStream;
-    } catch (error) {
-      setMediaError(
-        "Camera/Microphone permission is blocked. Please allow access in browser site settings.",
-      );
-      setMicOn(false);
-      setCameraOn(false);
-      return null;
-    }
-  };
 
   /**
    * Toggles the hardware microphone status.

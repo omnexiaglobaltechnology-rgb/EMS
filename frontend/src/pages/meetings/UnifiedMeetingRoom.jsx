@@ -138,25 +138,7 @@ const UnifiedMeetingRoom = () => {
   // ═════════════════════════════════════════════════════════════════════════
   // LOCAL VIDEO PREVIEW (ECHO-PROOF)
   // ═════════════════════════════════════════════════════════════════════════
-  const [videoElMounted, setVideoElMounted] = useState(0);
-  const setLocalVideoRef = useCallback((el) => {
-    userVideoRef.current = el;
-    setVideoElMounted((n) => n + 1);
-  }, []);
-
-  useEffect(() => {
-    const el = userVideoRef.current;
-    if (!el || !stream) return;
-
-    const videoOnlyStream = new MediaStream(stream.getVideoTracks());
-    el.srcObject = videoOnlyStream;
-    el.muted = true;
-    el.volume = 0;
-  }, [stream, videoElMounted]);
-
-  // ═════════════════════════════════════════════════════════════════════════
-  // MEDIA MANAGEMENT
-  // ═════════════════════════════════════════════════════════════════════════
+  // ─── MEDIA MANAGEMENT ──────────────────────────────────────────────────────
   const requestMedia = async (audio, video) => {
     try {
       const constraints = {
@@ -178,6 +160,23 @@ const UnifiedMeetingRoom = () => {
       return null;
     }
   };
+
+  const [videoElMounted, setVideoElMounted] = useState(0);
+  const setLocalVideoRef = useCallback((el) => {
+    userVideoRef.current = el;
+    setVideoElMounted((n) => n + 1);
+  }, []);
+
+  useEffect(() => {
+    const el = userVideoRef.current;
+    if (!el || !stream) return;
+
+    const videoOnlyStream = new MediaStream(stream.getVideoTracks());
+    el.srcObject = videoOnlyStream;
+    el.muted = true;
+    el.volume = 0;
+  }, [stream, videoElMounted]);
+
 
   const toggleMic = () => {
     if (!streamRef.current) return;

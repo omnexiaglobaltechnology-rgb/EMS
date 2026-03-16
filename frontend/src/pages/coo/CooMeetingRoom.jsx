@@ -84,9 +84,48 @@ const CooMeetingRoom = () => {
       } catch (err) {
         console.error("Failed to fetch meeting", err);
       }
-      await requestMedia({ audio: true, video: true });
     };
+
+    const requestMedia = async ({ audio = true, video = true } = {}) => {
+      if (!navigator.mediaDevices?.getUserMedia) {
+        setMediaError("Media devices are not supported in this browser.");
+        setMicOn(false);
+        setCameraOn(false);
+        return null;
+      }
+
+      try {
+        const currentStream = await navigator.mediaDevices.getUserMedia({
+          audio,
+          video,
+        });
+
+        if (!micOn) {
+          currentStream.getAudioTracks().forEach(track => track.enabled = false);
+        }
+        if (!cameraOn) {
+          currentStream.getVideoTracks().forEach(track => track.enabled = false);
+        }
+
+        stopCurrentStream();
+        streamRef.current = currentStream;
+
+        setMicOn(currentStream.getAudioTracks().length > 0);
+        setCameraOn(currentStream.getVideoTracks().length > 0);
+        setMediaError("");
+        return currentStream;
+      } catch (error) {
+        setMediaError(
+          "Camera/Microphone permission is blocked. Please allow access in browser site settings.",
+        );
+        setMicOn(false);
+        setCameraOn(false);
+        return null;
+      }
+    };
+
     init();
+    requestMedia({ audio: true, video: true });
 
     return () => {
       if (streamRef.current) {
@@ -95,43 +134,6 @@ const CooMeetingRoom = () => {
     };
   }, [id]);
 
-  const requestMedia = async ({ audio = true, video = true } = {}) => {
-    if (!navigator.mediaDevices?.getUserMedia) {
-      setMediaError("Media devices are not supported in this browser.");
-      setMicOn(false);
-      setCameraOn(false);
-      return null;
-    }
-
-    try {
-      const currentStream = await navigator.mediaDevices.getUserMedia({
-        audio,
-        video,
-      });
-
-      if (!micOn) {
-        currentStream.getAudioTracks().forEach(track => track.enabled = false);
-      }
-      if (!cameraOn) {
-        currentStream.getVideoTracks().forEach(track => track.enabled = false);
-      }
-
-      stopCurrentStream();
-      streamRef.current = currentStream;
-
-      setMicOn(currentStream.getAudioTracks().length > 0);
-      setCameraOn(currentStream.getVideoTracks().length > 0);
-      setMediaError("");
-      return currentStream;
-    } catch (error) {
-      setMediaError(
-        "Camera/Microphone permission is blocked. Please allow access in browser site settings.",
-      );
-      setMicOn(false);
-      setCameraOn(false);
-      return null;
-    }
-  };
 
   const toggleMic = () => {
     if (streamRef.current) {

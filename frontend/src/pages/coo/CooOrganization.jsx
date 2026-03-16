@@ -45,7 +45,7 @@ const COLORS = ["#4f46e5", "#e2e8f0"];
  * Supplemental operational intelligence dashboard tailored towards logistics,
  * budgetary spending rates, and SLA adherence trends for the COO.
  */
-const CooAnalytics = () => {
+const CooOrganization = () => {
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       {/* HEADER */}
@@ -223,4 +223,4 @@ const CooAnalytics = () => {
   );
 };
 
-export default CooAnalytics;
+export default CooOrganization;

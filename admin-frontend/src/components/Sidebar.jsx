@@ -23,8 +23,8 @@ const Sidebar = () => {
       style={{ width: 256 }}
     >
       {/* ---------------- USER INFO SECTION ---------------- */}
-      <div className="flex items-center gap-3 px-4 py-8 mb-2 text-left text-white border-b border-white/10">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-indigo-500/80 backdrop-blur-md text-sm font-semibold uppercase shadow-lg border border-white/20">
+      <div className="flex items-center gap-4 px-5 py-10 mb-2 text-left text-white border-b border-white/5">
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/5 backdrop-blur-2xl text-lg font-black cyan-glow shadow-[0_0_20px_rgba(0,251,255,0.2)] border border-white/20">
           {name?.substring(0, 2) || "UN"}
         </div>
         <div className="leading-tight overflow-hidden">
@@ -41,16 +41,16 @@ const Sidebar = () => {
       </div>
 
       {/* ---------------- NAVIGATION LINKS ---------------- */}
-      <div className="flex-1 px-3 overflow-y-auto space-y-1">
+      <div className="flex-1 px-4 overflow-y-auto space-y-2 mt-4">
         {MENU[role]?.map((item) => (
           <NavLink
             key={item}
             to={`/${role}/${item}`}
             className={({ isActive }) =>
-              `group flex items-center px-4 py-3 font-medium rounded-xl capitalize transition-all duration-200 ${
+              `group flex items-center px-4 py-3.5 font-bold rounded-2xl capitalize transition-all duration-300 tracking-wide ${
                 isActive 
-                  ? "bg-white/15 text-indigo-300 shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]" 
-                  : "text-white/70 hover:bg-white/5 hover:text-white"
+                  ? "bg-white/10 text-[#00fbff] shadow-[0_0_15px_rgba(0,251,255,0.15)] border border-white/10 cyan-glow" 
+                  : "text-white/40 hover:bg-white/5 hover:text-white border border-transparent"
               }`
             }
             end

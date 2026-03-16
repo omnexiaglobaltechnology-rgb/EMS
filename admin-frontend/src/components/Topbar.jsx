@@ -87,20 +87,22 @@ const Topbar = () => {
 
   return (
     <header
-      className="h-16 glass m-4 rounded-2xl flex justify-between px-6 items-center fixed left-64 top-0 right-0 z-30 transition-all duration-300"
-      style={{ height: 64, left: 256 + 16, width: `calc(100% - ${256 + 32}px)` }}
+      className="h-20 glass m-6 rounded-3xl flex justify-between px-8 items-center fixed left-64 top-0 right-0 z-30 border border-white/10"
+      style={{ left: 256 + 24, width: `calc(100% - ${256 + 48}px)` }}
     >
-      <span className="font-semibold">Enterprise Management System</span>
+      <span className="font-black text-white uppercase tracking-widest text-xs opacity-80">
+        Administrative <span className="text-[#00fbff] cyan-glow">Command Console</span>
+      </span>
 
       <div className="relative">
         <button
           onClick={() => setIsOpen((prev) => !prev)}
-          className="relative text-gray-600 cursor-pointer border border-gray-400 rounded-sm p-1"
+          className="relative text-white/60 cursor-pointer border border-white/10 bg-white/5 rounded-xl p-2.5 hover:bg-white/10 hover:text-[#00fbff] transition-all duration-300"
           title="Notifications"
         >
-          <BellIcon />
+          <BellIcon size={20} />
           {unreadCount > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] rounded-full min-w-5 h-5 px-1 flex items-center justify-center font-semibold">
+            <span className="absolute -top-1.5 -right-1.5 bg-[#00fbff] text-slate-900 text-[10px] rounded-full min-w-5 h-5 px-1 flex items-center justify-center font-black shadow-[0_0_15px_rgba(0,251,255,0.6)]">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
@@ -147,7 +149,7 @@ const Topbar = () => {
                         </p>
                       </div>
                       {!notification.isRead && (
-                        <span className="mt-1 h-2 w-2 rounded-full bg-indigo-500" />
+                        <span className="mt-1 h-2 w-2 rounded-full bg-[#00fbff] shadow-[0_0_8px_rgba(0,251,255,0.8)]" />
                       )}
                     </div>
                   </button>

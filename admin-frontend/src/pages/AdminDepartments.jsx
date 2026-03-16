@@ -101,10 +101,10 @@ const AdminDepartments = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
+      <div className="flex items-center justify-center py-24">
         <div className="text-center">
-          <Loader className="mx-auto mb-4 h-10 w-10 animate-spin text-indigo-400" />
-          <p className="text-white/40 text-sm font-bold uppercase tracking-widest">Loading departments...</p>
+          <Loader className="mx-auto mb-6 h-12 w-12 animate-spin text-[#00fbff] cyan-glow" />
+          <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.3em]">Synchronizing Infrastructure...</p>
         </div>
       </div>
     );
@@ -124,10 +124,10 @@ const AdminDepartments = () => {
         </div>
         <button
           onClick={openAdd}
-          className="flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-white text-sm font-bold hover:bg-indigo-500 transition-all shadow-lg hover:shadow-indigo-500/25 active:scale-95"
+          className="flex items-center gap-3 rounded-xl cyan-button px-8 py-3.5 text-xs font-black uppercase tracking-[0.2em] active:scale-95"
         >
-          <Plus size={18} />
-          Add Department
+          <Plus size={18} strokeWidth={3} />
+          Initialize Dept
         </button>
       </div>
 
@@ -145,10 +145,10 @@ const AdminDepartments = () => {
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-6 py-2 rounded-lg text-sm font-bold capitalize transition-all ${
+            className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
               activeTab === tab
-                ? "bg-white/15 text-white shadow-[0_1px_1px_rgba(255,255,255,0.1)]"
-                : "text-white/50 hover:text-white"
+                ? "bg-white/10 text-[#00fbff] shadow-[0_0_15px_rgba(0,251,255,0.2)] border border-white/10 cyan-glow"
+                : "text-white/40 hover:text-white"
             }`}
           >
             {tab}s
@@ -165,11 +165,11 @@ const AdminDepartments = () => {
           >
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="font-bold text-xl text-white group-hover:text-indigo-400 transition-colors">
+                <h3 className="font-black text-2xl text-white group-hover:text-[#00fbff] transition-all duration-500 tracking-tighter">
                   {dept.name}
                 </h3>
-                <span className="text-[10px] font-black text-white/30 uppercase tracking-[0.2em]">
-                  {dept.type} TRACK
+                <span className="text-[10px] font-black text-[#00fbff] uppercase tracking-[0.2em] cyan-glow mt-1 block">
+                  {dept.type} PROTOCOL
                 </span>
               </div>
               <div className="flex gap-2">
@@ -266,9 +266,9 @@ const AdminDepartments = () => {
               </button>
               <button
                 onClick={handleSave}
-                className="rounded-xl bg-indigo-600 px-8 py-3 text-sm font-bold text-white hover:bg-indigo-500 transition-all shadow-lg active:scale-95"
+                className="rounded-2xl cyan-button px-10 py-4 text-xs font-black uppercase tracking-[0.2em] active:scale-95"
               >
-                {editDept ? "Save Changes" : "Create Dept"}
+                {editDept ? "Commit Changes" : "Initialize Link"}
               </button>
             </div>
           </div>

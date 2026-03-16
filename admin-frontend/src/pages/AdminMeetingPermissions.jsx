@@ -96,10 +96,10 @@ const AdminMeetingPermissions = () => {
         {/* Creation Rights */}
         <div className="card-glass p-8 space-y-6">
           <div className="flex items-center gap-4">
-            <div className="bg-white/5 p-3 rounded-2xl text-indigo-400 border border-white/10 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
-              <Users size={24} />
+            <div className="bg-white/5 p-4 rounded-3xl text-[#00fbff] border border-white/10 shadow-[0_0_20px_rgba(0,251,255,0.2)] cyan-glow">
+              <Users size={32} strokeWidth={2.5} />
             </div>
-            <h2 className="text-xl font-bold text-white">Creation Rights</h2>
+            <h2 className="text-2xl font-black text-white tracking-tighter uppercase">Creation <span className="text-[#00fbff] cyan-glow">Rights</span></h2>
           </div>
           <p className="text-xs text-white/40 font-bold uppercase tracking-widest leading-relaxed">
             Authorized roles for scheduling
@@ -107,10 +107,10 @@ const AdminMeetingPermissions = () => {
           <div className="space-y-3">
             {roles.map(role => (
               <label key={role.id} className="flex items-center justify-between p-4 rounded-2xl border border-white/5 bg-white/2 hover:bg-white/5 hover:border-white/10 transition-all cursor-pointer group">
-                <span className="text-sm font-bold text-white group-hover:text-indigo-400 transition-colors">{role.label}</span>
+                <span className="text-xs font-black text-white/80 uppercase tracking-widest group-hover:text-[#00fbff] transition-all duration-500">{role.label}</span>
                 <input
                   type="checkbox"
-                  className="w-5 h-5 rounded-lg border-white/10 bg-white/5 text-indigo-600 focus:ring-offset-0 focus:ring-2 focus:ring-indigo-500 cursor-pointer transition-all"
+                  className="w-6 h-6 rounded-xl border border-white/10 bg-white/5 text-[#00fbff] focus:ring-offset-0 focus:ring-2 focus:ring-[#00fbff] cursor-pointer transition-all shadow-inner"
                   checked={config.allowedRoles.includes(role.id)}
                   onChange={() => handleToggleRole(role.id, "allowedRoles")}
                 />
@@ -150,10 +150,10 @@ const AdminMeetingPermissions = () => {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-3 rounded-2xl bg-indigo-600 px-10 py-4 text-white font-black uppercase tracking-widest text-xs hover:bg-indigo-500 transition-all shadow-xl hover:shadow-indigo-600/25 active:scale-95 disabled:opacity-50"
+          className="flex items-center gap-4 rounded-2xl cyan-button px-12 py-5 font-black uppercase tracking-[0.2em] text-xs active:scale-95 disabled:opacity-50 shadow-2xl"
         >
-          {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save size={18} />}
-          {saving ? "Updating..." : "Persist Changes"}
+          {saving ? <Loader2 className="h-5 w-5 animate-spin text-[#00fbff]" /> : <Save size={20} strokeWidth={3} />}
+          {saving ? "Synchronizing..." : "Authorize Permissions"}
         </button>
       </div>
     </div>

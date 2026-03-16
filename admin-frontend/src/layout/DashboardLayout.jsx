@@ -4,7 +4,7 @@ import { Outlet } from "react-router-dom";
 
 // Fixed dimensions used to offset the main content area
 const SIDEBAR_WIDTH = 256;
-const TOPBAR_HEIGHT = 80; // 64 (h-16) + 16 (m-4)
+const TOPBAR_HEIGHT = 120; // h-20 (80px) + m-6 (24px) + margin offset
 
 /**
  * DashboardLayout component serves as the primary wrapper for authenticated pages.

@@ -1,28 +1,29 @@
 @import "tailwindcss";
 
 :root {
-    --glass-background: rgba(255, 255, 255, 0.1);
-    --glass-background-dark: rgba(15, 23, 42, 0.4);
-    --glass-border: rgba(255, 255, 255, 0.2);
-    --glass-border-dark: rgba(255, 255, 255, 0.1);
-    --glass-blur: blur(12px);
-    --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    --glass-background: rgba(255, 255, 255, 0.05);
+    --glass-background-dark: rgba(15, 23, 42, 0.3);
+    --glass-border: rgba(255, 255, 255, 0.15);
+    --glass-border-dark: rgba(255, 255, 255, 0.08);
+    --glass-blur: blur(20px);
+    --glass-shadow: 0 20px 50px rgba(76, 29, 149, 0.3); /* Soft purple shadow */
+    --electric-cyan: #00fbff;
 }
 
 body {
     margin: 0;
     min-height: 100vh;
-    background: linear-gradient(-45deg, #0f172a, #1e293b, #312e81, #1e1b4b);
-    background-size: 400% 400%;
-    animation: gradient 15s ease infinite;
-    color: #f8fafc;
+    background-color: #0f172a;
+    background-image: 
+        radial-gradient(at 0% 0%, rgba(30, 27, 75, 0.6) 0, transparent 50%),
+        radial-gradient(at 50% 0%, rgba(49, 46, 129, 0.6) 0, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(30, 64, 175, 0.6) 0, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(67, 56, 202, 0.6) 0, transparent 50%),
+        radial-gradient(at 0% 100%, rgba(76, 29, 149, 0.6) 0, transparent 50%),
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+    background-attachment: fixed;
+    color: #ffffff;
     font-family: 'Inter', sans-serif;
-}
-
-@keyframes gradient {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
 }
 
 .glass {
@@ -41,19 +42,46 @@ body {
     box-shadow: var(--glass-shadow);
 }
 
-/* Custom layout for fixed sidebar and topbar */
-.main-content {
-    position: relative;
-    background: transparent;
-    min-height: 100vh;
-    overflow-x: auto;
-}
-
 .card-glass {
     background: var(--glass-background);
     backdrop-filter: var(--glass-blur);
     -webkit-backdrop-filter: var(--glass-blur);
     border: 1px solid var(--glass-border);
     box-shadow: var(--glass-shadow);
-    @apply rounded-[2rem] p-8 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl;
+    border-radius: 2.5rem;
+    padding: 2rem;
+    transition: all 500ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-glass:hover {
+    transform: scale(1.01);
+    box-shadow: 0 25px 60px rgba(76, 29, 149, 0.4);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+.cyan-glow {
+    color: var(--electric-cyan);
+    text-shadow: 0 0 15px rgba(0, 251, 255, 0.5);
+}
+
+.cyan-button {
+    background: rgba(0, 251, 255, 0.05);
+    border: 1px solid rgba(0, 251, 255, 0.2);
+    color: var(--electric-cyan);
+    transition: all 300ms cubic-bezier(0.4, 0, 0.2, 1);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+}
+
+.cyan-button:hover {
+    background: rgba(0, 251, 255, 0.15);
+    border-color: rgba(0, 251, 255, 0.5);
+    box-shadow: 0 0 30px rgba(0, 251, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.cyan-button:active {
+    transform: translateY(0) scale(0.98);
 }

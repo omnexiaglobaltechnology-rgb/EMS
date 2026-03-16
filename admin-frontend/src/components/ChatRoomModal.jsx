@@ -162,18 +162,18 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
 
   const getRoleBadgeColor = (role) => {
     const colors = {
-      ceo: "bg-purple-100 text-purple-700",
-      cto: "bg-blue-100 text-blue-700",
-      cfo: "bg-green-100 text-green-700",
-      coo: "bg-orange-100 text-orange-700",
-      admin: "bg-red-100 text-red-700",
-      manager: "bg-amber-100 text-amber-700",
-      manager_intern: "bg-amber-50 text-amber-600",
-      team_lead: "bg-cyan-100 text-cyan-700",
-      team_lead_intern: "bg-cyan-50 text-cyan-600",
-      intern: "bg-gray-100 text-gray-600",
+      ceo: "bg-purple-500/10 text-purple-400 border-purple-500/20",
+      cto: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+      cfo: "bg-green-500/10 text-green-400 border-green-500/20",
+      coo: "bg-orange-500/10 text-orange-400 border-orange-500/20",
+      admin: "bg-red-500/10 text-red-400 border-red-500/20",
+      manager: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+      manager_intern: "bg-amber-500/5 text-amber-300 border-amber-500/10",
+      team_lead: "bg-cyan-500/10 text-[#00fbff] border-cyan-500/20 shadow-[0_0_10px_rgba(0,251,255,0.2)]",
+      team_lead_intern: "bg-cyan-500/5 text-cyan-300 border-cyan-500/10",
+      intern: "bg-white/5 text-white/40 border-white/10",
     };
-    return colors[role] || "bg-gray-100 text-gray-600";
+    return colors[role] || "bg-white/5 text-white/40 border-white/10";
   };
 
   const handleSubmit = async (e) => {
@@ -208,14 +208,14 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
     <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300">
       <div className="w-full max-w-2xl rounded-3xl glass-dark shadow-2xl flex flex-col max-h-[90vh] border border-white/10 overflow-hidden">
         {/* Header */}
-        <div className="px-8 py-6 border-b border-white/10 bg-white/5">
-          <h2 className="text-2xl font-bold text-white tracking-tight">
-            {isEditMode ? "Edit Chat Room" : "Create Chat Room"}
+        <div className="px-10 py-8 border-b border-white/5 bg-white/2">
+          <h2 className="text-3xl font-black text-white tracking-tighter uppercase">
+            {isEditMode ? "Modify Chat" : "Generate Chat"} <span className="text-[#00fbff] cyan-glow">Stream</span>
           </h2>
-          <p className="text-sm text-white/50 mt-1 font-medium">
+          <p className="text-[10px] text-white/40 mt-2 font-black uppercase tracking-[0.2em]">
             {isEditMode
-              ? "Update room details and manage participants"
-              : "Set up a new chat room and select participants by department"}
+              ? "Updating link parameters and member access"
+              : "Initializing new communication protocol and entity mapping"}
           </p>
         </div>
 
@@ -223,13 +223,13 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
           {/* Scrollable body */}
           <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
             {/* Room Name */}
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-white/50 ml-1">
-                Room Name
+            <div className="space-y-2 group">
+              <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00fbff] transition-colors">
+                Link Identifier
               </label>
               <input
                 required
-                className="w-full rounded-2xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white placeholder:text-white/20 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                className="w-full rounded-2xl bg-white/5 border border-white/10 px-5 py-4 text-sm text-white placeholder:text-white/10 focus:ring-2 focus:ring-[#00fbff] outline-none transition-all shadow-inner"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="e.g. Project Alpha Discussion"
@@ -238,12 +238,12 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
 
             {/* Type + Department row */}
             <div className="grid grid-cols-2 gap-5">
-              <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-white/50 ml-1">
-                  Type
+              <div className="space-y-2 group">
+                <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00fbff] transition-colors">
+                  Protocol Type
                 </label>
                 <select
-                  className="w-full rounded-2xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white capitalize focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none"
+                  className="w-full rounded-2xl bg-white/5 border border-white/10 px-5 py-4 text-sm text-white capitalize focus:ring-2 focus:ring-[#00fbff] outline-none transition-all appearance-none shadow-inner"
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value })}
                 >
@@ -280,12 +280,12 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
             {/* User Picker Section */}
             <div className="space-y-4 pt-4">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-bold text-white flex items-center gap-2">
-                  <Users size={18} className="text-indigo-400" />
-                  Select Participants
+                <label className="text-[10px] font-black uppercase tracking-widest text-white flex items-center gap-3">
+                  <Users size={18} className="text-[#00fbff] cyan-glow" strokeWidth={3} />
+                  Authorize Entities
                 </label>
-                <span className="text-xs font-bold text-indigo-300 bg-indigo-500/10 px-3 py-1.5 rounded-full border border-indigo-500/20 backdrop-blur-md">
-                  {selectedUserIds.size} selected
+                <span className="text-[10px] font-black text-[#00fbff] bg-cyan-500/10 px-4 py-2 rounded-full border border-cyan-500/20 backdrop-blur-3xl shadow-[0_0_15px_rgba(0,251,255,0.1)] cyan-glow">
+                  {selectedUserIds.size} Linked
                 </span>
               </div>
 
@@ -316,11 +316,11 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
                     <Search size={10} />
                     Search Users
                   </label>
-                  <div className="relative">
+                  <div className="relative group">
                     <input
                       type="text"
                       placeholder="Name, email..."
-                      className="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-xs text-white placeholder:text-white/20 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                      className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-xs text-white placeholder:text-white/10 focus:ring-2 focus:ring-[#00fbff] outline-none transition-all"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -374,14 +374,14 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
                               }}
                               className={`w-5 h-5 rounded-lg border flex items-center justify-center shrink-0 transition-all ${
                                 allSelected
-                                  ? "bg-indigo-600 border-indigo-600 shadow-lg shadow-indigo-600/20"
+                                  ? "bg-[#00fbff] border-[#00fbff] shadow-[0_0_15px_rgba(0,251,255,0.4)]"
                                   : someSelected
-                                  ? "bg-indigo-500/40 border-indigo-500/50"
+                                  ? "bg-cyan-500/40 border-cyan-500/50"
                                   : "border-white/20 hover:border-white/40"
                               }`}
                             >
                               {(allSelected || someSelected) && (
-                                <Check size={12} className="text-white" />
+                                <Check size={12} className="text-slate-900 font-black" />
                               )}
                             </button>
 
@@ -456,26 +456,26 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
           </div>
 
           {/* Footer */}
-          <div className="px-8 py-6 border-t border-white/10 flex justify-end gap-4 bg-white/5">
+          <div className="px-10 py-8 border-t border-white/5 flex justify-end gap-6 bg-white/2">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl px-6 py-3 text-sm font-bold text-white/60 hover:text-white hover:bg-white/5 transition-all"
+              className="rounded-xl px-8 py-3.5 text-xs font-black uppercase tracking-[0.2em] text-white/40 hover:text-white hover:bg-white/5 transition-all"
             >
-              Cancel
+              Abort
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="rounded-xl bg-indigo-600 px-8 py-3 text-sm font-bold text-white hover:bg-indigo-500 transition-all shadow-lg hover:shadow-indigo-500/25 active:scale-95 disabled:opacity-50"
+              className="rounded-2xl cyan-button px-12 py-4 text-xs font-black uppercase tracking-[0.2em] active:scale-95 disabled:opacity-50"
             >
               {loading
                 ? isEditMode
-                  ? "Saving..."
-                  : "Creating..."
+                  ? "Saving Link..."
+                  : "Generating link..."
                 : isEditMode
-                ? "Save Changes"
-                : "Create Room"}
+                ? "Commit Changes"
+                : "Initialize Link"}
             </button>
           </div>
         </form>

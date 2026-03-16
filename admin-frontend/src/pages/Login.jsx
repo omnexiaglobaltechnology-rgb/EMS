@@ -59,7 +59,7 @@ const Login = () => {
               <img src="/assets/logo.png" alt="OMNEXIA Logo" className="w-full max-w-sm h-auto relative z-10 drop-shadow-[0_10px_30px_rgba(255,255,255,0.1)] mx-auto" />
               <div className="mt-12 space-y-3 relative z-10">
                 <h2 className="text-4xl font-black text-white tracking-tighter uppercase">Omnexia</h2>
-                <div className="h-1 w-20 bg-indigo-500 mx-auto rounded-full shadow-[0_0_15px_rgba(99,102,241,0.8)]"></div>
+                <div className="h-1 w-20 bg-[#00fbff] mx-auto rounded-full shadow-[0_0_15px_rgba(0,251,255,1)]"></div>
                 <p className="text-white/40 font-bold uppercase tracking-[0.3em] text-[10px] mt-2">Administrative Command</p>
               </div>
            </div>
@@ -72,7 +72,7 @@ const Login = () => {
         <div className="flex-1 p-10 lg:p-20 flex flex-col justify-center relative overflow-hidden">
           <div className="max-w-sm mx-auto w-full relative z-10">
             <div className="text-center mb-12">
-              <div className="inline-flex items-center justify-center px-4 py-1.5 bg-indigo-500/10 text-indigo-300 rounded-full mb-6 text-[10px] font-black uppercase tracking-[0.2em] border border-indigo-500/20 backdrop-blur-md">
+              <div className="inline-flex items-center justify-center px-5 py-2 bg-cyan-500/10 text-[#00fbff] rounded-full mb-6 text-[10px] font-black uppercase tracking-[0.2em] border border-cyan-500/20 backdrop-blur-3xl cyan-glow">
                  Secure Admin Entry
               </div>
               <h1 className="text-6xl font-black text-white tracking-tighter">Welcome</h1>
@@ -93,7 +93,7 @@ const Login = () => {
                   Cloud Identity
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-1 flex items-center pointer-events-none text-white/20 group-focus-within:text-indigo-400 transition-colors">
+                  <div className="absolute inset-y-0 left-0 pl-1 flex items-center pointer-events-none text-white/20 group-focus-within:text-[#00fbff] transition-colors">
                     <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.206" />
                     </svg>
@@ -104,7 +104,7 @@ const Login = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="admin@omnexia.in"
                     autoComplete="email"
-                    className="w-full bg-transparent border-b-2 border-white/10 pl-10 pb-3 text-white placeholder-white/10 transition-all focus:outline-none focus:border-indigo-500 text-sm font-bold tracking-wide"
+                    className="w-full bg-transparent border-b-2 border-white/10 pl-10 pb-3 text-white placeholder-white/10 transition-all focus:outline-none focus:border-[#00fbff] text-sm font-bold tracking-wide"
                     required
                   />
                 </div>
@@ -115,7 +115,7 @@ const Login = () => {
                   Secure Key
                 </label>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-1 flex items-center pointer-events-none text-white/20 group-focus-within:text-indigo-400 transition-colors">
+                  <div className="absolute inset-y-0 left-0 pl-1 flex items-center pointer-events-none text-white/20 group-focus-within:text-[#00fbff] transition-colors">
                     <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                     </svg>
@@ -126,13 +126,13 @@ const Login = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
                     autoComplete="current-password"
-                    className="w-full bg-transparent border-b-2 border-white/10 pl-10 pb-3 text-white placeholder-white/10 transition-all focus:outline-none focus:border-indigo-500 text-sm font-bold tracking-wide"
+                    className="w-full bg-transparent border-b-2 border-white/10 pl-10 pb-3 text-white placeholder-white/10 transition-all focus:outline-none focus:border-[#00fbff] text-sm font-bold tracking-wide"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 px-2 flex items-center text-white/20 hover:text-indigo-400 transition-colors"
+                    className="absolute inset-y-0 right-0 px-2 flex items-center text-white/20 hover:text-[#00fbff] transition-colors"
                   >
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
@@ -142,10 +142,10 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-indigo-600 py-5 rounded-2xl text-white font-black uppercase tracking-[0.2em] shadow-[0_15px_40px_-5px_rgba(79,70,229,0.4)] hover:bg-indigo-500 hover:shadow-indigo-500/40 hover:-translate-y-1 active:translate-y-0 transition-all duration-300 disabled:bg-white/10 disabled:shadow-none mt-6 text-xs flex items-center justify-center gap-3"
+                className="w-full cyan-button py-5 rounded-2xl font-black uppercase tracking-[0.2em] mt-6 text-xs flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
               >
                 {loading ? (
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-[#00fbff] rounded-full animate-spin"></div>
                 ) : (
                   <>Authorize Entry <ArrowRight size={16} /></>
                 )}

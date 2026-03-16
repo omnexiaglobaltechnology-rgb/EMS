@@ -252,22 +252,22 @@ const AdminDashboard = () => {
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {stats.map((item) => (
           <div
             key={item.title}
-            className="card-glass flex justify-between items-start"
+            className="card-glass flex justify-between items-start group"
           >
             <div>
-              <p className="text-sm font-medium text-white/60">{item.title}</p>
-              <h2 className="text-4xl font-bold mt-1 text-white">{item.value}</h2>
+              <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">{item.title}</p>
+              <h2 className="text-5xl font-black mt-2 text-white tracking-tighter">{item.value}</h2>
               {item.change && (
-                <p className="text-emerald-400 text-sm mt-1 font-semibold">{item.change}</p>
+                <p className="text-[#00fbff] text-[10px] mt-2 font-black uppercase tracking-widest cyan-glow">{item.change}</p>
               )}
             </div>
 
-            <div className="rounded-2xl bg-indigo-500/80 p-3 text-white shadow-lg backdrop-blur-md border border-white/20">
-              <item.icon size={22} />
+            <div className="rounded-2xl bg-white/5 p-4 text-[#00fbff] border border-white/10 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_20px_rgba(0,251,255,0.1)]">
+              <item.icon size={26} strokeWidth={2.5} />
             </div>
           </div>
         ))}
@@ -298,18 +298,20 @@ const AdminDashboard = () => {
 
         {/* System Status */}
         <div className="card-glass">
-          <h2 className="text-xl font-bold mb-6 text-white border-b border-white/10 pb-4">System Status</h2>
+          <h2 className="text-xl font-black mb-8 text-white border-b border-white/5 pb-4 uppercase tracking-tighter">
+            System <span className="text-[#00fbff] cyan-glow">Status</span>
+          </h2>
 
           <div className="space-y-4">
             {systemStatus.map((s) => (
               <div
                 key={s.label}
-                className="flex justify-between items-center rounded-xl bg-white/5 border border-white/10 px-4 py-3 hover:bg-white/10 transition-colors"
+                className="flex justify-between items-center rounded-2xl bg-white/2 border border-white/5 px-5 py-4 hover:bg-white/5 transition-all duration-300"
               >
-                <span className="font-semibold text-white/90">{s.label}</span>
+                <span className="font-bold text-white/80 tracking-wide uppercase text-[10px] tracking-[0.1em]">{s.label}</span>
 
-                <span className="flex items-center gap-2 text-emerald-400 text-sm font-bold">
-                  <span className="h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.5)]" />
+                <span className="flex items-center gap-2 text-[#00fbff] text-[10px] font-black uppercase tracking-widest cyan-glow">
+                  <span className="h-2 w-2 rounded-full bg-[#00fbff] shadow-[0_0_10px_rgba(0,251,255,1)] animate-pulse" />
                   {s.status}
                 </span>
               </div>

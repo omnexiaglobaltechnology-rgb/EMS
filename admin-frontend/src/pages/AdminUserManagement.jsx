@@ -105,9 +105,9 @@ const AdminUserManagement = () => {
           </form>
           <button
             onClick={() => setShowAdd(true)}
-            className="flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-2.5 text-white text-sm font-bold hover:bg-indigo-500 transition-all shadow-lg hover:shadow-indigo-500/25 active:scale-95"
+            className="flex items-center gap-3 rounded-xl cyan-button px-6 py-2.5 text-xs font-black uppercase tracking-widest active:scale-95"
           >
-            <Plus size={18} />
+            <Plus size={18} strokeWidth={3} />
             Add User
           </button>
         </div>
@@ -125,20 +125,20 @@ const AdminUserManagement = () => {
       <div className="flex gap-1 rounded-xl bg-white/5 p-1.5 w-fit border border-white/10 backdrop-blur-md">
         <button
           onClick={() => setActiveTab("employee")}
-          className={`flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-bold transition-all ${
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
             activeTab === "employee"
-              ? "bg-white/15 text-white shadow-[0_1px_1px_rgba(255,255,255,0.1)]"
-              : "text-white/50 hover:text-white"
+              ? "bg-white/10 text-[#00fbff] shadow-[0_0_15px_rgba(0,251,255,0.2)] border border-white/10 cyan-glow"
+              : "text-white/40 hover:text-white"
           }`}
         >
           <Users size={16} /> Employees
         </button>
         <button
           onClick={() => setActiveTab("intern")}
-          className={`flex items-center gap-2 px-6 py-2 rounded-lg text-sm font-bold transition-all ${
+          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
             activeTab === "intern"
-              ? "bg-white/15 text-white shadow-[0_1px_1px_rgba(255,255,255,0.1)]"
-              : "text-white/50 hover:text-white"
+              ? "bg-white/10 text-[#00fbff] shadow-[0_0_15px_rgba(0,251,255,0.2)] border border-white/10 cyan-glow"
+              : "text-white/40 hover:text-white"
           }`}
         >
           <GraduationCap size={16} /> Interns
@@ -163,8 +163,8 @@ const AdminUserManagement = () => {
               {loading ? (
                 <tr>
                   <td colSpan="5" className="p-20 text-center text-white/30">
-                    <Loader className="mx-auto mb-4 h-10 w-10 animate-spin text-indigo-400" />
-                    <p className="font-medium">Loading {activeTab}s...</p>
+                    <Loader className="mx-auto mb-4 h-10 w-10 animate-spin text-[#00fbff] cyan-glow" />
+                    <p className="font-bold uppercase tracking-widest text-[10px]">Synchronizing {activeTab}s...</p>
                   </td>
                 </tr>
               ) : users.length === 0 ? (
@@ -183,18 +183,18 @@ const AdminUserManagement = () => {
                     </td>
                     <td className="p-6 text-white/80">
                       {u.department ? (
-                        <span className="inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 backdrop-blur-md">
+                        <span className="inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-cyan-500/10 text-[#00fbff] border border-cyan-500/20 backdrop-blur-md cyan-glow">
                           {u.department.name}
                         </span>
                       ) : (
-                        <span className="text-white/20 italic">Not Assigned</span>
+                        <span className="text-white/20 italic uppercase text-[10px] font-black">Not Assigned</span>
                       )}
                     </td>
                     <td className="p-6">
                       {u.reportsTo ? (
                         <div>
-                          <div className="font-bold text-white/90">{u.reportsTo.name}</div>
-                          <div className="text-[10px] text-white/30 uppercase font-black tracking-widest mt-0.5">
+                          <div className="font-black text-white text-sm uppercase tracking-tight">{u.reportsTo.name}</div>
+                          <div className="text-[10px] text-[#00fbff] uppercase font-black tracking-widest mt-0.5 cyan-glow">
                             {u.reportsTo.role?.replace(/_/g, " ")}
                           </div>
                         </div>
@@ -202,8 +202,8 @@ const AdminUserManagement = () => {
                         <span className="text-white/10">—</span>
                       )}
                     </td>
-                    <td className="p-6">
-                      <span className="inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-white/5 text-white/60 border border-white/10">
+                    <td className="p-6 text-right">
+                      <span className="inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-white/5 text-white/40 border border-white/10">
                         {u.role?.replace(/_/g, " ")}
                       </span>
                     </td>
@@ -223,13 +223,13 @@ const AdminUserManagement = () => {
                               setShowPasswordModal(u.id);
                               setOpenMenuId(null);
                             }}
-                            className="flex items-center gap-3 w-full px-5 py-3 text-left text-xs font-bold text-white/70 hover:bg-white/10 hover:text-white transition-all uppercase tracking-wider"
+                            className="flex items-center gap-3 w-full px-5 py-3 text-left text-[10px] font-black text-white/70 hover:bg-white/10 hover:text-[#00fbff] transition-all uppercase tracking-[0.2em] cyan-glow"
                           >
-                            <Key size={14} /> Reset Password
+                            <Key size={14} strokeWidth={3} /> Reset Password
                           </button>
                           <button
                             onClick={() => deleteUser(u.id)}
-                            className="flex items-center gap-3 w-full px-5 py-3 text-left text-xs font-bold text-red-400 hover:bg-red-500/10 transition-all uppercase tracking-wider"
+                            className="flex items-center gap-3 w-full px-5 py-3 text-left text-[10px] font-black text-red-400 hover:bg-red-500/10 transition-all uppercase tracking-[0.2em]"
                           >
                             Delete User
                           </button>
@@ -261,8 +261,8 @@ const AdminUserManagement = () => {
       {showPasswordModal && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300">
           <div className="w-full max-w-sm rounded-3xl glass-dark p-8 space-y-6 shadow-2xl border border-white/10">
-            <h2 className="text-xl font-bold text-white flex items-center gap-3">
-              <Key size={20} className="text-indigo-400" /> Reset Password
+            <h2 className="text-xl font-black text-white flex items-center gap-4 uppercase tracking-tighter">
+              <Key size={22} className="text-[#00fbff] cyan-glow" strokeWidth={3} /> Reset Security Access
             </h2>
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase tracking-wider text-white/50 ml-1">New Password</label>
@@ -287,9 +287,9 @@ const AdminUserManagement = () => {
               </button>
               <button
                 onClick={handleChangePassword}
-                className="rounded-xl bg-indigo-600 px-6 py-2.5 text-sm font-bold text-white hover:bg-indigo-500 transition-all shadow-lg active:scale-95"
+                className="rounded-xl cyan-button px-8 py-3 text-[10px] font-black uppercase tracking-widest active:scale-95"
               >
-                Update
+                Refactor
               </button>
             </div>
           </div>

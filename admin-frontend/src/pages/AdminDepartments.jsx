@@ -103,7 +103,7 @@ const AdminDepartments = () => {
     return (
       <div className="flex items-center justify-center py-24">
         <div className="text-center">
-          <Loader className="mx-auto mb-6 h-12 w-12 animate-spin text-[#00fbff] cyan-glow" />
+          <Loader className="mx-auto mb-6 h-12 w-12 animate-spin text-[#00ff9f] emerald-glow" />
           <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.3em]">Synchronizing Infrastructure...</p>
         </div>
       </div>
@@ -124,7 +124,7 @@ const AdminDepartments = () => {
         </div>
         <button
           onClick={openAdd}
-          className="flex items-center gap-3 rounded-xl cyan-button px-8 py-3.5 text-xs font-black uppercase tracking-[0.2em] active:scale-95"
+          className="flex items-center gap-3 rounded-xl emerald-button px-8 py-3.5 text-xs font-black uppercase tracking-[0.2em] active:scale-95"
         >
           <Plus size={18} strokeWidth={3} />
           Initialize Dept
@@ -147,7 +147,7 @@ const AdminDepartments = () => {
             onClick={() => setActiveTab(tab)}
             className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
               activeTab === tab
-                ? "bg-white/40 text-[#00fbff] shadow-[0_0_15px_rgba(0,251,255,0.2)] border border-white/30 cyan-glow"
+                ? "bg-white/40 text-[#00ff9f] shadow-[0_0_15px_rgba(0,255,159,0.2)] border border-white/30 emerald-glow"
                 : "text-white/40 hover:text-white"
             }`}
           >
@@ -165,10 +165,10 @@ const AdminDepartments = () => {
           >
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="font-black text-2xl text-white group-hover:text-[#00fbff] transition-all duration-500 tracking-tighter">
+                <h3 className="font-black text-2xl text-white group-hover:text-[#00ff9f] transition-all duration-500 tracking-tighter">
                   {dept.name}
                 </h3>
-                <span className="text-[10px] font-black text-[#00fbff] uppercase tracking-[0.2em] cyan-glow mt-1 block">
+                <span className="text-[10px] font-black text-[#00ff9f] uppercase tracking-[0.2em] emerald-glow mt-1 block">
                   {dept.type} PROTOCOL
                 </span>
               </div>
@@ -231,7 +231,7 @@ const AdminDepartments = () => {
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-white/40 ml-1">Track</label>
                 <select
-                  className="w-full rounded-xl bg-white/30 border border-white/30 px-4 py-3 text-sm text-white focus:ring-2 focus:ring-[#00fbff] outline-none transition-all appearance-none cursor-pointer"
+                  className="w-full rounded-xl bg-white/30 border border-white/30 px-4 py-3 text-sm text-white focus:ring-2 focus:ring-[#00ff9f] outline-none transition-all appearance-none cursor-pointer"
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value })}
                 >
@@ -266,7 +266,7 @@ const AdminDepartments = () => {
               </button>
               <button
                 onClick={handleSave}
-                className="rounded-2xl cyan-button px-10 py-4 text-xs font-black uppercase tracking-[0.2em] active:scale-95"
+                className="rounded-2xl emerald-button px-10 py-4 text-xs font-black uppercase tracking-[0.2em] active:scale-95"
               >
                 {editDept ? "Commit Changes" : "Initialize Link"}
               </button>

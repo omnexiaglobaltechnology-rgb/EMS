@@ -45,8 +45,8 @@ const Login = () => {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
       {/* Decorative Background Circles - enhanced for glass effect */}
-      <div className="absolute top-[10%] left-[10%] w-[30rem] h-[30rem] bg-indigo-500/20 rounded-full blur-[120px] animate-pulse"></div>
-      <div className="absolute bottom-[10%] right-[10%] w-[40rem] h-[40rem] bg-indigo-600/10 rounded-full blur-[150px] animate-pulse delay-700"></div>
+      <div className="absolute top-[10%] left-[10%] w-[30rem] h-[30rem] bg-emerald-500/20 rounded-full blur-[120px] animate-pulse"></div>
+      <div className="absolute bottom-[10%] right-[10%] w-[40rem] h-[40rem] bg-emerald-600/10 rounded-full blur-[150px] animate-pulse delay-700"></div>
 
       {/* Main Card Container - GLASS VERSION */}
       <div className="w-full max-w-5xl glass-dark rounded-[3rem] overflow-hidden shadow-[0_40px_100px_-15px_rgba(0,0,0,0.5)] flex flex-col md:flex-row min-h-[650px] relative z-10 border border-white/30">
@@ -72,7 +72,7 @@ const Login = () => {
         <div className="flex-1 p-10 lg:p-20 flex flex-col justify-center relative overflow-hidden">
           <div className="max-w-sm mx-auto w-full relative z-10">
             <div className="text-center mb-12">
-              <div className="inline-flex items-center justify-center px-5 py-2 bg-cyan-500/30 text-[#00fbff] rounded-full mb-6 text-[10px] font-black uppercase tracking-[0.2em] border border-cyan-500/30 backdrop-blur-3xl cyan-glow">
+              <div className="inline-flex items-center justify-center px-5 py-2 bg-emerald-500/30 text-[#00ff9f] rounded-full mb-6 text-[10px] font-black uppercase tracking-[0.2em] border border-emerald-500/30 backdrop-blur-3xl emerald-glow">
                  Secure Admin Entry
               </div>
               <h1 className="text-6xl font-black text-white tracking-tighter">Welcome</h1>
@@ -104,7 +104,7 @@ const Login = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="admin@omnexia.in"
                     autoComplete="email"
-                    className="w-full bg-transparent border-b-2 border-white/30 pl-10 pb-3 text-white placeholder-white/30 transition-all focus:outline-none focus:border-[#00fbff] text-sm font-bold tracking-wide"
+                    className="w-full bg-transparent border-b-2 border-white/30 pl-10 pb-3 text-white placeholder-white/30 transition-all focus:outline-none focus:border-[#00ff9f] text-sm font-bold tracking-wide"
                     required
                   />
                 </div>
@@ -126,13 +126,13 @@ const Login = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
                     autoComplete="current-password"
-                    className="w-full bg-transparent border-b-2 border-white/30 pl-10 pb-3 text-white placeholder-white/30 transition-all focus:outline-none focus:border-[#00fbff] text-sm font-bold tracking-wide"
+                    className="w-full bg-transparent border-b-2 border-white/30 pl-10 pb-3 text-white placeholder-white/30 transition-all focus:outline-none focus:border-[#00ff9f] text-sm font-bold tracking-wide"
                     required
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute inset-y-0 right-0 px-2 flex items-center text-white/20 hover:text-[#00fbff] transition-colors"
+                    className="absolute inset-y-0 right-0 px-2 flex items-center text-white/20 hover:text-[#00ff9f] transition-colors"
                   >
                     {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                   </button>
@@ -142,10 +142,10 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full cyan-button py-5 rounded-2xl font-black uppercase tracking-[0.2em] mt-6 text-xs flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
+                className="w-full emerald-button py-5 rounded-2xl font-black uppercase tracking-[0.2em] mt-6 text-xs flex items-center justify-center gap-3 active:scale-95 disabled:opacity-50"
               >
                 {loading ? (
-                  <div className="w-5 h-5 border-2 border-white/30 border-t-[#00fbff] rounded-full animate-spin"></div>
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-[#00ff9f] rounded-full animate-spin"></div>
                 ) : (
                   <>Authorize Entry <ArrowRight size={16} /></>
                 )}
@@ -154,7 +154,7 @@ const Login = () => {
           </div>
           
           {/* Subtle Ambient Glow */}
-          <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-indigo-600/10 rounded-full blur-[80px]"></div>
+          <div className="absolute -bottom-20 -right-20 w-64 h-64 bg-emerald-600/10 rounded-full blur-[80px]"></div>
         </div>
       </div>
     </div>

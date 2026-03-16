@@ -50,8 +50,8 @@ const AdminSettings = () => {
         {/* General Settings */}
         <div className="card-glass p-8 space-y-6">
           <h2 className="text-xl font-black text-white flex items-center gap-4 uppercase tracking-tighter">
-            <div className="w-1.5 h-6 bg-[#00fbff] rounded-full cyan-glow"></div>
-            General <span className="text-[#00fbff] cyan-glow">Configuration</span>
+            <div className="w-1.5 h-6 bg-[#00ff9f] rounded-full emerald-glow"></div>
+            General <span className="text-[#00ff9f] emerald-glow">Configuration</span>
           </h2>
 
           <div className="grid md:grid-cols-2 gap-6">
@@ -61,7 +61,7 @@ const AdminSettings = () => {
                 type="text"
                 value={settings.companyName}
                 onChange={(e) => handleChange("companyName", e.target.value)}
-                className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00fbff] outline-none transition-all shadow-inner"
+                className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00ff9f] outline-none transition-all shadow-inner"
               />
             </div>
 
@@ -71,7 +71,7 @@ const AdminSettings = () => {
                 type="email"
                 value={settings.supportEmail}
                 onChange={(e) => handleChange("supportEmail", e.target.value)}
-                className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00fbff] outline-none transition-all shadow-inner"
+                className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00ff9f] outline-none transition-all shadow-inner"
               />
             </div>
           </div>
@@ -97,7 +97,7 @@ const AdminSettings = () => {
                   handleChange("twoFactorAuth", !settings.twoFactorAuth)
                 }
                 className={`relative inline-flex h-8 w-14 items-center rounded-full transition-all duration-500 ${
-                  settings.twoFactorAuth ? "bg-[#00fbff] shadow-[0_0_20px_rgba(0,251,255,0.6)]" : "bg-white/30"
+                  settings.twoFactorAuth ? "bg-[#00ff9f] shadow-[0_0_20px_rgba(0,255,159,0.6)]" : "bg-white/30"
                 }`}
               >
                 <span
@@ -122,7 +122,7 @@ const AdminSettings = () => {
                   handleChange("sessionTimeout", !settings.sessionTimeout)
                 }
                 className={`relative inline-flex h-7 w-12 items-center rounded-full transition-all duration-300 ${
-                  settings.sessionTimeout ? "bg-indigo-600 shadow-[0_0_15px_rgba(79,70,229,0.4)]" : "bg-white/30"
+                  settings.sessionTimeout ? "bg-emerald-600 shadow-[0_0_15px_rgba(0,255,159,0.4)]" : "bg-white/30"
                 }`}
               >
                 <span
@@ -140,7 +140,7 @@ const AdminSettings = () => {
       <div className="flex justify-end pt-4">
         <button
           onClick={handleSave}
-          className="rounded-2xl cyan-button px-12 py-5 font-black uppercase tracking-[0.2em] text-xs active:scale-95 shadow-2xl"
+          className="rounded-2xl emerald-button px-12 py-5 font-black uppercase tracking-[0.2em] text-xs active:scale-95 shadow-2xl"
         >
           Commit System Update
         </button>

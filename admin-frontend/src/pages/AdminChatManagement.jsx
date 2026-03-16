@@ -64,7 +64,7 @@ const AdminChatManagement = () => {
         </div>
         <button
           onClick={() => { setEditingRoom(null); setShowModal(true); }}
-          className="flex items-center gap-3 rounded-xl cyan-button px-8 py-3.5 text-xs font-black uppercase tracking-[0.2em] active:scale-95 shadow-2xl"
+          className="flex items-center gap-3 rounded-xl emerald-button px-8 py-3.5 text-xs font-black uppercase tracking-[0.2em] active:scale-95 shadow-2xl"
         >
           <Plus size={18} strokeWidth={3} />
           Generate Room
@@ -74,7 +74,7 @@ const AdminChatManagement = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
           <div className="col-span-full py-24 text-center glass rounded-[3rem] border border-white/30 bg-white/30">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00fbff] cyan-glow mx-auto mb-6"></div>
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00ff9f] emerald-glow mx-auto mb-6"></div>
             <p className="font-black uppercase tracking-[0.3em] text-[10px] text-white/40">Synchronizing Data Streams...</p>
           </div>
         ) : rooms.length === 0 ? (
@@ -83,7 +83,7 @@ const AdminChatManagement = () => {
             <p className="text-white/20 text-lg font-black uppercase tracking-[0.2em]">Silence Detected</p>
             <button
               onClick={() => { setEditingRoom(null); setShowModal(true); }}
-              className="mt-6 text-[#00fbff] text-[10px] font-black uppercase tracking-[0.3em] hover:cyan-glow transition-all"
+              className="mt-6 text-[#00ff9f] text-[10px] font-black uppercase tracking-[0.3em] hover:emerald-glow transition-all"
             >
               Initialize First Link
             </button>
@@ -93,18 +93,18 @@ const AdminChatManagement = () => {
             <div key={room._id} className="card-glass p-6 flex flex-col justify-between group hover:border-white/30 transition-all duration-300">
               <div>
                 <div className="flex items-center justify-between mb-6">
-                  <div className="p-4 bg-white/30 rounded-2xl text-[#00fbff] border border-white/30 group-hover:bg-cyan-500/30 transition-all duration-500 cyan-glow">
+                  <div className="p-4 bg-white/30 rounded-2xl text-[#00ff9f] border border-white/30 group-hover:bg-emerald-500/30 transition-all duration-500 emerald-glow">
                     {room.type === 'announcement' ? <Hash size={24} strokeWidth={2.5} /> : <Users size={24} strokeWidth={2.5} />}
                   </div>
                   <span className="text-[10px] uppercase font-black tracking-widest px-4 py-1.5 rounded-xl bg-white/30 text-white/40 border border-white/30">
                     {room.type?.replace("_", " ")}
                   </span>
                 </div>
-                <h3 className="text-2xl font-black text-white group-hover:text-[#00fbff] transition-all duration-500 truncate tracking-tighter">
+                <h3 className="text-2xl font-black text-white group-hover:text-[#00ff9f] transition-all duration-500 truncate tracking-tighter">
                   {room.name}
                 </h3>
                 <div className="flex items-center gap-2 mt-3">
-                  <div className="w-2 h-2 rounded-full bg-[#00fbff] shadow-[0_0_10px_rgba(0,251,255,1)] animate-pulse"></div>
+                  <div className="w-2 h-2 rounded-full bg-[#00ff9f] shadow-[0_0_10px_rgba(0,255,159,1)] animate-pulse"></div>
                   <p className="text-[10px] text-white/40 font-black uppercase tracking-widest">
                     {room.departmentId?.name || 'Public Infrastructure'}
                   </p>
@@ -118,7 +118,7 @@ const AdminChatManagement = () => {
                 </div>
                 <button
                   onClick={() => openEditModal(room)}
-                  className="flex items-center gap-2 text-[#00fbff] text-[10px] font-black uppercase tracking-[0.3em] hover:text-white hover:bg-cyan-500/30 px-5 py-2.5 rounded-xl transition-all border border-transparent hover:border-cyan-500/30 cyan-glow"
+                  className="flex items-center gap-2 text-[#00ff9f] text-[10px] font-black uppercase tracking-[0.3em] hover:text-white hover:bg-emerald-500/30 px-5 py-2.5 rounded-xl transition-all border border-transparent hover:border-emerald-500/30 emerald-glow"
                 >
                   <Pencil size={12} strokeWidth={3} />
                   Modify

@@ -23,7 +23,7 @@ const Unauthorized = () => {
         </p>
         <button 
           onClick={() => window.history.back()}
-          className="w-full rounded-2xl bg-white/30 border border-white/30 py-4 text-xs font-black uppercase tracking-[0.2em] text-white hover:bg-emerald-500/30 hover:text-[#00ff9f] transition-all active:scale-95 emerald-glow"
+          className="w-full rounded-2xl bg-white/30 border border-white/30 py-4 text-xs font-black uppercase tracking-[0.2em] text-white hover:bg-blue-500/30 hover:text-[#00d4ff] transition-all active:scale-95 blue-glow"
         >
           Return to Previous Sector
         </button>

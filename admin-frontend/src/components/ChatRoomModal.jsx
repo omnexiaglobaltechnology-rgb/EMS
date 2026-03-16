@@ -146,15 +146,15 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
 
   const toggleAllInDept = (deptId) => {
     const users = filteredUsersByDepartment[deptId] || [];
-    const userIds = users.map((u) => u.id);
-    const allSelected = userIds.every((id) => selectedUserIds.has(id));
+    const userIds = users.map((u) => u.id || u._id);
+    const allSelected = userIds.every((id) => selectedUserIds.has(String(id)));
 
     setSelectedUserIds((prev) => {
       const next = new Set(prev);
       if (allSelected) {
-        userIds.forEach((id) => next.delete(id));
+        userIds.forEach((id) => next.delete(String(id)));
       } else {
-        userIds.forEach((id) => next.add(id));
+        userIds.forEach((id) => next.add(String(id)));
       }
       return next;
     });
@@ -169,8 +169,8 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
       admin: "bg-red-500/30 text-red-400 border-red-500/30",
       manager: "bg-amber-500/30 text-amber-400 border-amber-500/30",
       manager_intern: "bg-amber-500/30 text-amber-300 border-amber-500/30",
-      team_lead: "bg-emerald-500/30 text-[#00ff9f] border-emerald-500/30 shadow-[0_0_10px_rgba(0,255,159,0.2)]",
-      team_lead_intern: "bg-emerald-500/30 text-emerald-300 border-emerald-500/30",
+      team_lead: "bg-blue-500/30 text-[#00d4ff] border-blue-500/30 shadow-[0_0_10px_rgba(0,212,255,0.2)]",
+      team_lead_intern: "bg-blue-500/30 text-blue-300 border-blue-500/30",
       intern: "bg-white/30 text-white/40 border-white/30",
     };
     return colors[role] || "bg-white/30 text-white/40 border-white/30";
@@ -190,7 +190,7 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
       // In create mode, also send emails for backward compat
       if (!isEditMode) {
         const selectedEmails = allUsers
-          .filter((u) => selectedUserIds.has(u.id))
+          .filter((u) => selectedUserIds.has(String(u.id || u._id)))
           .map((u) => u.email);
         payload.emails = selectedEmails;
       }
@@ -210,7 +210,7 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
         {/* Header */}
         <div className="px-10 py-8 border-b border-white/30 bg-white/30">
           <h2 className="text-3xl font-black text-white tracking-tighter uppercase">
-            {isEditMode ? "Modify Chat" : "Generate Chat"} <span className="text-[#00ff9f] emerald-glow">Stream</span>
+            {isEditMode ? "Modify Chat" : "Generate Chat"} <span className="text-[#00d4ff] blue-glow">Stream</span>
           </h2>
           <p className="text-[10px] text-white/40 mt-2 font-black uppercase tracking-[0.2em]">
             {isEditMode
@@ -224,12 +224,12 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
           <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
             {/* Room Name */}
             <div className="space-y-2 group">
-              <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00fbff] transition-colors">
+              <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00d4ff] transition-colors">
                 Link Identifier
               </label>
               <input
                 required
-                className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00fbff] outline-none transition-all shadow-inner"
+                className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all shadow-inner"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="e.g. Project Alpha Discussion"
@@ -239,11 +239,11 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
             {/* Type + Department row */}
             <div className="grid grid-cols-2 gap-5">
               <div className="space-y-2 group">
-                <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00fbff] transition-colors">
+                <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00d4ff] transition-colors">
                   Protocol Type
                 </label>
                 <select
-                  className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white capitalize focus:ring-2 focus:ring-[#00fbff] outline-none transition-all appearance-none shadow-inner"
+                  className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white capitalize focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all appearance-none shadow-inner"
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value })}
                 >
@@ -255,13 +255,13 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
                 </select>
               </div>
 
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00fbff] transition-colors">
+              <div className="space-y-2 group">
+                <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00d4ff] transition-colors">
                   Room Department
                 </label>
                 <select
                   required
-                  className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white focus:ring-2 focus:ring-[#00fbff] outline-none transition-all appearance-none shadow-inner"
+                  className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all appearance-none shadow-inner"
                   value={form.departmentId}
                   onChange={(e) =>
                     setForm({ ...form, departmentId: e.target.value })
@@ -281,10 +281,10 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
             <div className="space-y-4 pt-4">
               <div className="flex items-center justify-between">
                 <label className="text-[10px] font-black uppercase tracking-widest text-white flex items-center gap-3">
-                  <Users size={18} className="text-[#00ff9f] emerald-glow" strokeWidth={3} />
+                  <Users size={18} className="text-[#00d4ff] blue-glow" strokeWidth={3} />
                   Authorize Entities
                 </label>
-                <span className="text-[10px] font-black text-[#00ff9f] bg-emerald-500/30 px-4 py-2 rounded-full border border-emerald-500/30 backdrop-blur-3xl shadow-[0_0_15px_rgba(0,255,159,0.1)] emerald-glow">
+                <span className="text-[10px] font-black text-[#00d4ff] bg-blue-500/30 px-4 py-2 rounded-full border border-blue-500/30 backdrop-blur-3xl shadow-[0_0_15px_rgba(0,212,255,0.1)] blue-glow">
                   {selectedUserIds.size} Linked
                 </span>
               </div>
@@ -297,7 +297,7 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
                     Filter by Department
                   </label>
                   <select
-                    className="w-full rounded-xl bg-white/30 border border-white/30 px-3 py-2 text-xs text-white focus:ring-2 focus:ring-[#00ff9f] outline-none transition-all appearance-none"
+                    className="w-full rounded-xl bg-white/30 border border-white/30 px-3 py-2 text-xs text-white focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all appearance-none"
                     value={userDeptFilter}
                     onChange={(e) => setUserDeptFilter(e.target.value)}
                   >
@@ -320,7 +320,7 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
                     <input
                       type="text"
                       placeholder="Name, email..."
-                      className="w-full rounded-xl bg-white/30 border border-white/30 px-4 py-2.5 text-xs text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00ff9f] outline-none transition-all"
+                      className="w-full rounded-xl bg-white/30 border border-white/30 px-4 py-2.5 text-xs text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -346,11 +346,11 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
                     ([deptId, users]) => {
                       const isExpanded = expandedDepts.has(deptId);
                       const allSelected = users.every((u) =>
-                        selectedUserIds.has(u.id)
+                        selectedUserIds.has(String(u.id || u._id))
                       );
                       const someSelected =
                         !allSelected &&
-                        users.some((u) => selectedUserIds.has(u.id));
+                        users.some((u) => selectedUserIds.has(String(u.id || u._id)));
 
                       return (
                         <div key={deptId} className="border-b border-white/30 last:border-b-0">
@@ -374,9 +374,9 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
                               }}
                               className={`w-5 h-5 rounded-lg border flex items-center justify-center shrink-0 transition-all ${
                                 allSelected
-                                  ? "bg-[#00ff9f] border-[#00ff9f] shadow-[0_0_15px_rgba(0,255,159,0.4)]"
+                                  ? "bg-[#00d4ff] border-[#00d4ff] shadow-[0_0_15px_rgba(0,212,255,0.4)]"
                                   : someSelected
-                                  ? "bg-emerald-500/40 border-emerald-500/50"
+                                  ? "bg-blue-500/40 border-blue-500/50"
                                   : "border-white/30 hover:border-white/50"
                               }`}
                             >
@@ -389,7 +389,7 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
                               {getDeptName(deptId)}
                             </span>
                             <span className="text-[10px] font-black text-white/40 bg-white/30 px-2 py-1 rounded-lg border border-white/30">
-                              {users.filter((u) => selectedUserIds.has(u.id)).length}/{users.length}
+                              {users.filter((u) => selectedUserIds.has(String(u.id || u._id))).length}/{users.length}
                             </span>
                           </div>
 
@@ -397,26 +397,26 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
                           {isExpanded && (
                             <div className="divide-y divide-white/5">
                               {users.map((user) => {
-                                const isSelected = selectedUserIds.has(user.id);
+                                const isSelected = selectedUserIds.has(String(user.id || user._id));
                                 return (
                                   <label
-                                    key={user.id}
+                                    key={user.id || user._id}
                                     className={`flex items-center gap-4 px-6 py-3 cursor-pointer transition-all ${
                                       isSelected
-                                        ? "bg-emerald-500/30"
+                                        ? "bg-blue-600/30"
                                         : "hover:bg-white/30"
                                     }`}
                                   >
                                     <input
                                       type="checkbox"
                                       checked={isSelected}
-                                      onChange={() => toggleUser(user.id)}
+                                      onChange={() => toggleUser(String(user.id || user._id))}
                                       className="sr-only"
                                     />
                                     <div
                                       className={`w-5 h-5 rounded-lg border flex items-center justify-center shrink-0 transition-all ${
                                         isSelected
-                                          ? "bg-emerald-600 border-emerald-600 shadow-lg shadow-emerald-600/20"
+                                          ? "bg-blue-600 border-blue-600 shadow-lg shadow-blue-600/20"
                                           : "border-white/30"
                                       }`}
                                     >
@@ -467,7 +467,7 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
             <button
               type="submit"
               disabled={loading}
-              className="rounded-2xl emerald-button px-12 py-4 text-xs font-black uppercase tracking-[0.2em] active:scale-95 disabled:opacity-50"
+              className="rounded-2xl blue-button px-12 py-4 text-xs font-black uppercase tracking-[0.2em] active:scale-95 disabled:opacity-50"
             >
               {loading
                 ? isEditMode

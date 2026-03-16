@@ -98,14 +98,14 @@ const AdminUserManagement = () => {
             <input
               type="text"
               placeholder="Search users..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/30 border border-white/30 text-white text-sm focus:ring-2 focus:ring-[#00ff9f] outline-none transition-all placeholder:text-white/30"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/30 border border-white/30 text-white text-sm focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all placeholder:text-white/30"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </form>
           <button
             onClick={() => setShowAdd(true)}
-            className="flex items-center gap-3 rounded-xl emerald-button px-6 py-2.5 text-xs font-black uppercase tracking-widest active:scale-95"
+            className="flex items-center gap-3 rounded-xl blue-button px-6 py-2.5 text-xs font-black uppercase tracking-widest active:scale-95"
           >
             <Plus size={18} strokeWidth={3} />
             Add User
@@ -127,7 +127,7 @@ const AdminUserManagement = () => {
           onClick={() => setActiveTab("employee")}
           className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
             activeTab === "employee"
-              ? "bg-white/40 text-[#00ff9f] shadow-[0_0_15px_rgba(0,255,159,0.2)] border border-white/30 emerald-glow"
+              ? "bg-white/40 text-[#00d4ff] shadow-[0_0_15px_rgba(0,212,255,0.2)] border border-white/30 blue-glow"
               : "text-white/40 hover:text-white"
           }`}
         >
@@ -137,7 +137,7 @@ const AdminUserManagement = () => {
           onClick={() => setActiveTab("intern")}
           className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px) font-black uppercase tracking-widest transition-all ${
             activeTab === "intern"
-              ? "bg-white/40 text-[#00ff9f] shadow-[0_0_15px_rgba(0,255,159,0.2)] border border-white/30 emerald-glow"
+              ? "bg-white/40 text-[#00d4ff] shadow-[0_0_15px_rgba(0,212,255,0.2)] border border-white/30 blue-glow"
               : "text-white/40 hover:text-white"
           }`}
         >
@@ -163,7 +163,7 @@ const AdminUserManagement = () => {
               {loading ? (
                 <tr>
                   <td colSpan="5" className="p-20 text-center text-white/30">
-                    <Loader className="mx-auto mb-4 h-10 w-10 animate-spin text-[#00ff9f] emerald-glow" />
+                    <Loader className="mx-auto mb-4 h-10 w-10 animate-spin text-[#00d4ff] blue-glow" />
                     <p className="font-bold uppercase tracking-widest text-[10px]">Synchronizing {activeTab}s...</p>
                   </td>
                 </tr>
@@ -183,7 +183,7 @@ const AdminUserManagement = () => {
                     </td>
                     <td className="p-6 text-white/80">
                       {u.department ? (
-                        <span className="inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-emerald-500/30 text-[#00ff9f] border border-emerald-500/30 backdrop-blur-md emerald-glow">
+                        <span className="inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-blue-500/30 text-[#00d4ff] border border-blue-500/30 backdrop-blur-md blue-glow">
                           {u.department.name}
                         </span>
                       ) : (
@@ -194,7 +194,7 @@ const AdminUserManagement = () => {
                       {u.reportsTo ? (
                         <div>
                           <div className="font-black text-white text-sm uppercase tracking-tight">{u.reportsTo.name}</div>
-                          <div className="text-[10px] text-[#00ff9f] uppercase font-black tracking-widest mt-0.5 emerald-glow">
+                          <div className="text-[10px] text-[#00d4ff] uppercase font-black tracking-widest mt-0.5 blue-glow">
                             {u.reportsTo.role?.replace(/_/g, " ")}
                           </div>
                         </div>
@@ -223,7 +223,7 @@ const AdminUserManagement = () => {
                               setShowPasswordModal(u.id);
                               setOpenMenuId(null);
                             }}
-                            className="flex items-center gap-3 w-full px-5 py-3 text-left text-[10px] font-black text-white/70 hover:bg-white/30 hover:text-[#00ff9f] transition-all uppercase tracking-[0.2em] emerald-glow"
+                            className="flex items-center gap-3 w-full px-5 py-3 text-left text-[10px] font-black text-white/70 hover:bg-white/30 hover:text-[#00d4ff] transition-all uppercase tracking-[0.2em] blue-glow"
                           >
                             <Key size={14} strokeWidth={3} /> Reset Password
                           </button>
@@ -262,13 +262,13 @@ const AdminUserManagement = () => {
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300">
           <div className="w-full max-w-sm rounded-3xl glass-dark p-8 space-y-6 shadow-2xl border border-white/30">
             <h2 className="text-xl font-black text-white flex items-center gap-4 uppercase tracking-tighter">
-              <Key size={22} className="text-[#00ff9f] emerald-glow" strokeWidth={3} /> Reset Security Access
+              <Key size={22} className="text-[#00d4ff] blue-glow" strokeWidth={3} /> Reset Security Access
             </h2>
             <div className="space-y-2">
               <label className="text-xs font-bold uppercase tracking-wider text-white/50 ml-1">New Password</label>
               <input
                 type="password"
-                className="w-full rounded-xl bg-white/30 border border-white/30 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00ff9f] outline-none transition-all"
+                className="w-full rounded-xl bg-white/30 border border-white/30 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Enter new password"
@@ -287,7 +287,7 @@ const AdminUserManagement = () => {
               </button>
               <button
                 onClick={handleChangePassword}
-                className="rounded-xl emerald-button px-8 py-3 text-[10px] font-black uppercase tracking-widest active:scale-95"
+                className="rounded-xl blue-button px-8 py-3 text-[10px] font-black uppercase tracking-widest active:scale-95"
               >
                 Refactor
               </button>

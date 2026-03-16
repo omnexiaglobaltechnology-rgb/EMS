@@ -91,18 +91,18 @@ const Topbar = () => {
       style={{ left: 256 + 24, width: `calc(100% - ${256 + 48}px)` }}
     >
       <span className="font-black text-white uppercase tracking-widest text-xs opacity-80">
-        Administrative <span className="text-[#00ff9f] emerald-glow">Command Console</span>
+        Administrative <span className="text-[#00d4ff] blue-glow">Command Console</span>
       </span>
 
       <div className="relative">
         <button
           onClick={() => setIsOpen((prev) => !prev)}
-          className="relative text-white/60 cursor-pointer border border-white/30 bg-white/30 rounded-xl p-2.5 hover:bg-white/40 hover:text-[#00ff9f] transition-all duration-300"
+          className="relative text-white/60 cursor-pointer border border-white/30 bg-white/30 rounded-xl p-2.5 hover:bg-white/40 hover:text-[#00d4ff] transition-all duration-300"
           title="Notifications"
         >
           <BellIcon size={20} />
           {unreadCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 bg-[#00ff9f] text-slate-900 text-[10px] rounded-full min-w-5 h-5 px-1 flex items-center justify-center font-black shadow-[0_0_15px_rgba(0,255,159,0.6)]">
+            <span className="absolute -top-1.5 -right-1.5 bg-[#00d4ff] text-slate-900 text-[10px] rounded-full min-w-5 h-5 px-1 flex items-center justify-center font-black shadow-[0_0_15px_rgba(0,212,255,0.6)]">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
@@ -149,7 +149,7 @@ const Topbar = () => {
                         </p>
                       </div>
                       {!notification.isRead && (
-                        <span className="mt-1 h-2 w-2 rounded-full bg-[#00ff9f] shadow-[0_0_8px_rgba(0,255,159,0.8)]" />
+                        <span className="mt-1 h-2 w-2 rounded-full bg-[#00d4ff] shadow-[0_0_8px_rgba(0,212,255,0.8)]" />
                       )}
                     </div>
                   </button>

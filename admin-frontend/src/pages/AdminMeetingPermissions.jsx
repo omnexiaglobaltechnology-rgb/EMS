@@ -71,7 +71,7 @@ const AdminMeetingPermissions = () => {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-[#00ff9f] emerald-glow" />
+        <Loader2 className="h-8 w-8 animate-spin text-[#00d4ff] blue-glow" />
       </div>
     );
   }
@@ -85,7 +85,7 @@ const AdminMeetingPermissions = () => {
 
       {(error || success) && (
         <div className={`p-5 rounded-2xl border backdrop-blur-md flex items-center gap-4 animate-in fade-in slide-in-from-top-2 ${
-          success ? "bg-emerald-500/30 border-emerald-500/30 text-emerald-400" : "bg-red-500/30 border-red-500/30 text-red-400"
+          success ? "bg-blue-500/30 border-blue-500/30 text-blue-400" : "bg-red-500/30 border-red-500/30 text-red-400"
         }`}>
           {success ? <CheckCircle2 size={24} /> : <AlertCircle size={24} />}
           <p className="text-sm font-bold uppercase tracking-wider">{success ? "Configuration secured" : error}</p>
@@ -96,10 +96,10 @@ const AdminMeetingPermissions = () => {
         {/* Creation Rights */}
         <div className="card-glass p-8 space-y-6">
           <div className="flex items-center gap-4">
-            <div className="bg-white/30 p-4 rounded-3xl text-[#00ff9f] border border-white/30 shadow-[0_0_20px_rgba(0,255,159,0.2)] emerald-glow">
+            <div className="bg-white/30 p-4 rounded-3xl text-[#00d4ff] border border-white/30 shadow-[0_0_20px_rgba(0,212,255,0.2)] blue-glow">
               <Users size={32} strokeWidth={2.5} />
             </div>
-            <h2 className="text-2xl font-black text-white tracking-tighter uppercase">Creation <span className="text-[#00ff9f] emerald-glow">Rights</span></h2>
+            <h2 className="text-2xl font-black text-white tracking-tighter uppercase">Creation <span className="text-[#00d4ff] blue-glow">Rights</span></h2>
           </div>
           <p className="text-xs text-white/40 font-bold uppercase tracking-widest leading-relaxed">
             Authorized roles for scheduling
@@ -107,10 +107,10 @@ const AdminMeetingPermissions = () => {
           <div className="space-y-3">
             {roles.map(role => (
               <label key={role.id} className="flex items-center justify-between p-4 rounded-2xl border border-white/30 bg-white/30 hover:bg-white/40 hover:border-white/50 transition-all cursor-pointer group">
-                <span className="text-xs font-black text-white/80 uppercase tracking-widest group-hover:text-[#00ff9f] transition-all duration-500">{role.label}</span>
+                <span className="text-xs font-black text-white/80 uppercase tracking-widest group-hover:text-[#00d4ff] transition-all duration-500">{role.label}</span>
                 <input
                   type="checkbox"
-                  className="w-6 h-6 rounded-xl border border-white/30 bg-white/30 text-[#00ff9f] focus:ring-offset-0 focus:ring-2 focus:ring-[#00ff9f] cursor-pointer transition-all shadow-inner"
+                  className="w-6 h-6 rounded-xl border border-white/30 bg-white/30 text-[#00d4ff] focus:ring-offset-0 focus:ring-2 focus:ring-[#00d4ff] cursor-pointer transition-all shadow-inner"
                   checked={config.allowedRoles.includes(role.id)}
                   onChange={() => handleToggleRole(role.id, "allowedRoles")}
                 />
@@ -136,7 +136,7 @@ const AdminMeetingPermissions = () => {
                 <span className="text-sm font-bold text-white group-hover:text-amber-400 transition-colors">{role.label}</span>
                 <input
                   type="checkbox"
-                  className="w-5 h-5 rounded-lg border-white/30 bg-white/30 text-[#00ff9f] focus:ring-offset-0 focus:ring-2 focus:ring-[#00ff9f] cursor-pointer transition-all shadow-inner"
+                  className="w-5 h-5 rounded-lg border-white/30 bg-white/30 text-[#00d4ff] focus:ring-offset-0 focus:ring-2 focus:ring-[#00d4ff] cursor-pointer transition-all shadow-inner"
                   checked={config.canInviteAcrossDepartments.includes(role.id)}
                   onChange={() => handleToggleRole(role.id, "canInviteAcrossDepartments")}
                 />
@@ -150,9 +150,9 @@ const AdminMeetingPermissions = () => {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-4 rounded-2xl emerald-button px-12 py-5 font-black uppercase tracking-[0.2em] text-xs active:scale-95 disabled:opacity-50 shadow-2xl"
+          className="flex items-center gap-4 rounded-2xl blue-button px-12 py-5 font-black uppercase tracking-[0.2em] text-xs active:scale-95 disabled:opacity-50 shadow-2xl"
         >
-          {saving ? <Loader2 className="h-5 w-5 animate-spin text-[#00ff9f] emerald-glow" /> : <Save size={20} strokeWidth={3} />}
+          {saving ? <Loader2 className="h-5 w-5 animate-spin text-[#00d4ff] blue-glow" /> : <Save size={20} strokeWidth={3} />}
           {saving ? "Synchronizing..." : "Authorize Permissions"}
         </button>
       </div>

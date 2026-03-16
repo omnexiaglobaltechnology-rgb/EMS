@@ -111,15 +111,15 @@ const UserModal = ({ title, user, onClose, onSave }) => {
     <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-500">
       <div className="w-full max-w-lg rounded-[3rem] glass-dark p-10 space-y-8 max-h-[90vh] overflow-y-auto border border-white/30 shadow-[0_40px_100px_rgba(0,0,0,0.6)]">
         <h2 className="text-3xl font-black text-white tracking-tighter uppercase">
-          {title.split(' ')[0]} <span className="text-[#00ff9f] emerald-glow">{title.split(' ').slice(1).join(' ')}</span>
+          {title.split(' ')[0]} <span className="text-[#00d4ff] blue-glow">{title.split(' ').slice(1).join(' ')}</span>
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* Name */}
           <div className="space-y-2 group">
-            <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00fbff] transition-colors">Full Name</label>
+            <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00d4ff] transition-colors">Full Name</label>
             <input
-              className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00ff9f] outline-none transition-all shadow-inner"
+              className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all shadow-inner"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="John Doe"
@@ -128,9 +128,9 @@ const UserModal = ({ title, user, onClose, onSave }) => {
 
           {/* Username */}
           <div className="space-y-2 group">
-            <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00fbff] transition-colors">Username / ID</label>
+            <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00d4ff] transition-colors">Username / ID</label>
             <input
-              className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00ff9f] outline-none transition-all shadow-inner"
+              className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all shadow-inner"
               value={form.username}
               onChange={(e) => setForm({ ...form, username: e.target.value })}
               placeholder="EMP001"
@@ -139,9 +139,9 @@ const UserModal = ({ title, user, onClose, onSave }) => {
 
           {/* Email */}
           <div className="space-y-2 group">
-            <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00fbff] transition-colors">Email Address</label>
+            <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00d4ff] transition-colors">Email Address</label>
             <input
-              className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00ff9f] outline-none transition-all shadow-inner"
+              className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all shadow-inner"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               placeholder="john@omnexia.in"
@@ -150,12 +150,12 @@ const UserModal = ({ title, user, onClose, onSave }) => {
 
           {/* Password (only for new users) */}
           <div className="space-y-2 group">
-            <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00ff9f] transition-colors">
+            <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00d4ff] transition-colors">
               {isNewUser ? "Secure Key" : "Reset Key"}
             </label>
             <input
               type="password"
-              className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00ff9f] outline-none transition-all shadow-inner"
+              className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all shadow-inner"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               placeholder="••••••••••••"
@@ -166,9 +166,9 @@ const UserModal = ({ title, user, onClose, onSave }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           {/* User Type */}
           <div className="space-y-2 group">
-            <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00fbff] transition-colors">User Track</label>
+            <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00d4ff] transition-colors">User Track</label>
             <select
-              className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white capitalize focus:ring-2 focus:ring-[#00ff9f] outline-none transition-all appearance-none shadow-inner"
+              className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white capitalize focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all appearance-none shadow-inner"
               value={form.userType}
               onChange={(e) => setForm({ ...form, userType: e.target.value })}
             >
@@ -180,9 +180,9 @@ const UserModal = ({ title, user, onClose, onSave }) => {
 
           {/* Role */}
           <div className="space-y-2 group">
-            <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00fbff] transition-colors">Role</label>
+            <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00d4ff] transition-colors">Role</label>
             <select
-              className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white capitalize focus:ring-2 focus:ring-[#00ff9f] outline-none transition-all appearance-none shadow-inner"
+              className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white capitalize focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all appearance-none shadow-inner"
               value={form.role}
               onChange={(e) => setForm({ ...form, role: e.target.value })}
             >
@@ -202,7 +202,7 @@ const UserModal = ({ title, user, onClose, onSave }) => {
               Department {loadingDepts && "..."}
             </label>
             <select
-              className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white focus:ring-2 focus:ring-[#00fbff] outline-none transition-all appearance-none disabled:opacity-30 shadow-inner"
+              className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all appearance-none disabled:opacity-30 shadow-inner"
               value={form.departmentId}
               onChange={(e) => setForm({ ...form, departmentId: e.target.value })}
               disabled={loadingDepts || form.role === 'ceo'}
@@ -222,7 +222,7 @@ const UserModal = ({ title, user, onClose, onSave }) => {
               Reports To {loadingReportsTo && "..."}
             </label>
             <select
-              className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white focus:ring-2 focus:ring-[#00fbff] outline-none transition-all appearance-none disabled:opacity-30 shadow-inner"
+              className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all appearance-none disabled:opacity-30 shadow-inner"
               value={form.reportsTo}
               onChange={(e) => setForm({ ...form, reportsTo: e.target.value })}
               disabled={loadingReportsTo || form.role === 'ceo' || (!form.departmentId && !['cto', 'cfo', 'coo', 'manager', 'manager_intern'].includes(form.role))}
@@ -247,7 +247,7 @@ const UserModal = ({ title, user, onClose, onSave }) => {
           </button>
           <button
             onClick={handleSubmit}
-            className="rounded-2xl emerald-button px-10 py-4 text-xs font-black uppercase tracking-[0.2em] active:scale-95"
+            className="rounded-2xl blue-button px-10 py-4 text-xs font-black uppercase tracking-[0.2em] active:scale-95"
           >
             {isNewUser ? "Initialize User" : "Save Changes"}
           </button>

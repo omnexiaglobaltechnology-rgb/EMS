@@ -262,11 +262,11 @@ const AdminDashboard = () => {
               <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">{item.title}</p>
               <h2 className="text-5xl font-black mt-2 text-white tracking-tighter">{item.value}</h2>
               {item.change && (
-                <p className="text-[#00ff9f] text-[10px] mt-2 font-black uppercase tracking-widest emerald-glow">{item.change}</p>
+                <p className="text-[#00d4ff] text-[10px] mt-2 font-black uppercase tracking-widest blue-glow">{item.change}</p>
               )}
             </div>
 
-            <div className="rounded-2xl bg-white/30 p-4 text-[#00ff9f] border border-white/30 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_20px_rgba(0,255,159,0.1)]">
+            <div className="rounded-2xl bg-white/30 p-4 text-[#00d4ff] border border-white/30 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_20px_rgba(0,212,255,0.1)]">
               <item.icon size={26} strokeWidth={2.5} />
             </div>
           </div>
@@ -299,7 +299,7 @@ const AdminDashboard = () => {
         {/* System Status */}
         <div className="card-glass">
           <h2 className="text-xl font-black mb-8 text-white border-b border-white/30 pb-4 uppercase tracking-tighter">
-            System <span className="text-[#00ff9f] emerald-glow">Status</span>
+            System <span className="text-[#00d4ff] blue-glow">Status</span>
           </h2>
 
           <div className="space-y-4">
@@ -310,8 +310,8 @@ const AdminDashboard = () => {
               >
                 <span className="font-bold text-white/80 tracking-wide uppercase text-[10px] tracking-[0.1em]">{s.label}</span>
 
-                <span className="flex items-center gap-2 text-[#00ff9f] text-[10px] font-black uppercase tracking-widest emerald-glow">
-                  <span className="h-2 w-2 rounded-full bg-[#00ff9f] shadow-[0_0_10px_rgba(0,255,159,1)] animate-pulse" />
+                <span className="flex items-center gap-2 text-[#00d4ff] text-[10px] font-black uppercase tracking-widest blue-glow">
+                  <span className="h-2 w-2 rounded-full bg-[#00d4ff] shadow-[0_0_10px_rgba(0,212,255,1)] animate-pulse" />
                   {s.status}
                 </span>
               </div>

@@ -24,7 +24,7 @@ const Sidebar = () => {
     >
       {/* ---------------- USER INFO SECTION ---------------- */}
       <div className="flex items-center gap-4 px-5 py-10 mb-2 text-left text-white border-b border-white/30">
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/30 backdrop-blur-2xl text-lg font-black emerald-glow shadow-[0_0_20px_rgba(0,255,159,0.2)] border border-white/30">
+        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-white/30 backdrop-blur-2xl text-lg font-black blue-glow shadow-[0_0_20px_rgba(0,212,255,0.2)] border border-white/30">
           {name?.substring(0, 2) || "UN"}
         </div>
         <div className="leading-tight overflow-hidden">
@@ -49,7 +49,7 @@ const Sidebar = () => {
             className={({ isActive }) =>
               `group flex items-center px-4 py-3.5 font-bold rounded-2xl capitalize transition-all duration-300 tracking-wide ${
                 isActive 
-                  ? "bg-white/30 text-[#00ff9f] shadow-[0_0_15px_rgba(0,255,159,0.15)] border border-white/30 emerald-glow" 
+                  ? "bg-white/30 text-[#00d4ff] shadow-[0_0_15px_rgba(0,212,255,0.15)] border border-white/30 blue-glow" 
                   : "text-white/40 hover:bg-white/30 hover:text-white border border-transparent"
               }`
             }

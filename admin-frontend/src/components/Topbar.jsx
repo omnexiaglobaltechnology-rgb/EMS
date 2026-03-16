@@ -87,7 +87,7 @@ const Topbar = () => {
 
   return (
     <header
-      className="h-20 glass m-6 rounded-3xl flex justify-between px-8 items-center fixed left-64 top-0 right-0 z-30 border border-white/10"
+      className="h-20 glass m-6 rounded-3xl flex justify-between px-8 items-center fixed left-64 top-0 right-0 z-30 border border-white/30"
       style={{ left: 256 + 24, width: `calc(100% - ${256 + 48}px)` }}
     >
       <span className="font-black text-white uppercase tracking-widest text-xs opacity-80">
@@ -97,7 +97,7 @@ const Topbar = () => {
       <div className="relative">
         <button
           onClick={() => setIsOpen((prev) => !prev)}
-          className="relative text-white/60 cursor-pointer border border-white/10 bg-white/5 rounded-xl p-2.5 hover:bg-white/10 hover:text-[#00fbff] transition-all duration-300"
+          className="relative text-white/60 cursor-pointer border border-white/30 bg-white/30 rounded-xl p-2.5 hover:bg-white/40 hover:text-[#00fbff] transition-all duration-300"
           title="Notifications"
         >
           <BellIcon size={20} />
@@ -109,8 +109,8 @@ const Topbar = () => {
         </button>
 
         {isOpen && (
-          <div className="absolute right-0 mt-4 w-96 rounded-2xl glass-dark shadow-2xl z-50 overflow-hidden border border-white/10 animate-in fade-in slide-in-from-top-2 duration-200">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+          <div className="absolute right-0 mt-4 w-96 rounded-2xl glass-dark shadow-2xl z-50 overflow-hidden border border-white/30 animate-in fade-in slide-in-from-top-2 duration-200">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/30">
               <p className="font-semibold text-white">Notifications</p>
               {unreadCount > 0 && (
                 <button
@@ -132,8 +132,8 @@ const Topbar = () => {
                   <button
                     key={notification.id}
                     onClick={() => handleNotificationClick(notification)}
-                    className={`w-full text-left px-4 py-3 border-b border-white/5 hover:bg-white/5 transition-colors ${
-                      notification.isRead ? "text-white/70" : "bg-white/10 text-white"
+                    className={`w-full text-left px-4 py-3 border-b border-white/30 hover:bg-white/30 transition-colors ${
+                      notification.isRead ? "text-white/70" : "bg-white/30 text-white"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">

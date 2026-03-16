@@ -61,7 +61,7 @@ const AdminSettings = () => {
                 type="text"
                 value={settings.companyName}
                 onChange={(e) => handleChange("companyName", e.target.value)}
-                className="w-full rounded-2xl bg-white/5 border border-white/10 px-5 py-4 text-sm text-white placeholder:text-white/10 focus:ring-2 focus:ring-[#00fbff] outline-none transition-all shadow-inner"
+                className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00fbff] outline-none transition-all shadow-inner"
               />
             </div>
 
@@ -71,7 +71,7 @@ const AdminSettings = () => {
                 type="email"
                 value={settings.supportEmail}
                 onChange={(e) => handleChange("supportEmail", e.target.value)}
-                className="w-full rounded-2xl bg-white/5 border border-white/10 px-5 py-4 text-sm text-white placeholder:text-white/10 focus:ring-2 focus:ring-[#00fbff] outline-none transition-all shadow-inner"
+                className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00fbff] outline-none transition-all shadow-inner"
               />
             </div>
           </div>
@@ -84,7 +84,7 @@ const AdminSettings = () => {
             Security Settings
           </h2>
 
-          <div className="divide-y divide-white/5">
+          <div className="divide-y divide-white/30">
             {/* Two Factor Auth */}
             <div className="flex items-center justify-between py-6 first:pt-0">
               <div>
@@ -97,7 +97,7 @@ const AdminSettings = () => {
                   handleChange("twoFactorAuth", !settings.twoFactorAuth)
                 }
                 className={`relative inline-flex h-8 w-14 items-center rounded-full transition-all duration-500 ${
-                  settings.twoFactorAuth ? "bg-[#00fbff] shadow-[0_0_20px_rgba(0,251,255,0.6)]" : "bg-white/10"
+                  settings.twoFactorAuth ? "bg-[#00fbff] shadow-[0_0_20px_rgba(0,251,255,0.6)]" : "bg-white/30"
                 }`}
               >
                 <span
@@ -122,7 +122,7 @@ const AdminSettings = () => {
                   handleChange("sessionTimeout", !settings.sessionTimeout)
                 }
                 className={`relative inline-flex h-7 w-12 items-center rounded-full transition-all duration-300 ${
-                  settings.sessionTimeout ? "bg-indigo-600 shadow-[0_0_15px_rgba(79,70,229,0.4)]" : "bg-white/10"
+                  settings.sessionTimeout ? "bg-indigo-600 shadow-[0_0_15px_rgba(79,70,229,0.4)]" : "bg-white/30"
                 }`}
               >
                 <span

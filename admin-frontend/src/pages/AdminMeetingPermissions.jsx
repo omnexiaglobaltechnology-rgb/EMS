@@ -85,7 +85,7 @@ const AdminMeetingPermissions = () => {
 
       {(error || success) && (
         <div className={`p-5 rounded-2xl border backdrop-blur-md flex items-center gap-4 animate-in fade-in slide-in-from-top-2 ${
-          success ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400" : "bg-red-500/10 border-red-500/20 text-red-400"
+          success ? "bg-emerald-500/30 border-emerald-500/30 text-emerald-400" : "bg-red-500/30 border-red-500/30 text-red-400"
         }`}>
           {success ? <CheckCircle2 size={24} /> : <AlertCircle size={24} />}
           <p className="text-sm font-bold uppercase tracking-wider">{success ? "Configuration secured" : error}</p>
@@ -96,7 +96,7 @@ const AdminMeetingPermissions = () => {
         {/* Creation Rights */}
         <div className="card-glass p-8 space-y-6">
           <div className="flex items-center gap-4">
-            <div className="bg-white/5 p-4 rounded-3xl text-[#00fbff] border border-white/10 shadow-[0_0_20px_rgba(0,251,255,0.2)] cyan-glow">
+            <div className="bg-white/30 p-4 rounded-3xl text-[#00fbff] border border-white/30 shadow-[0_0_20px_rgba(0,251,255,0.2)] cyan-glow">
               <Users size={32} strokeWidth={2.5} />
             </div>
             <h2 className="text-2xl font-black text-white tracking-tighter uppercase">Creation <span className="text-[#00fbff] cyan-glow">Rights</span></h2>
@@ -106,11 +106,11 @@ const AdminMeetingPermissions = () => {
           </p>
           <div className="space-y-3">
             {roles.map(role => (
-              <label key={role.id} className="flex items-center justify-between p-4 rounded-2xl border border-white/5 bg-white/2 hover:bg-white/5 hover:border-white/10 transition-all cursor-pointer group">
+              <label key={role.id} className="flex items-center justify-between p-4 rounded-2xl border border-white/30 bg-white/30 hover:bg-white/40 hover:border-white/50 transition-all cursor-pointer group">
                 <span className="text-xs font-black text-white/80 uppercase tracking-widest group-hover:text-[#00fbff] transition-all duration-500">{role.label}</span>
                 <input
                   type="checkbox"
-                  className="w-6 h-6 rounded-xl border border-white/10 bg-white/5 text-[#00fbff] focus:ring-offset-0 focus:ring-2 focus:ring-[#00fbff] cursor-pointer transition-all shadow-inner"
+                  className="w-6 h-6 rounded-xl border border-white/30 bg-white/30 text-[#00fbff] focus:ring-offset-0 focus:ring-2 focus:ring-[#00fbff] cursor-pointer transition-all shadow-inner"
                   checked={config.allowedRoles.includes(role.id)}
                   onChange={() => handleToggleRole(role.id, "allowedRoles")}
                 />
@@ -122,7 +122,7 @@ const AdminMeetingPermissions = () => {
         {/* Visibility Rights */}
         <div className="card-glass p-8 space-y-6">
           <div className="flex items-center gap-4">
-            <div className="bg-white/5 p-3 rounded-2xl text-amber-400 border border-white/10 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+            <div className="bg-white/30 p-3 rounded-2xl text-amber-400 border border-white/30 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
               <Globe size={24} />
             </div>
             <h2 className="text-xl font-bold text-white">Cross-Dept</h2>
@@ -132,11 +132,11 @@ const AdminMeetingPermissions = () => {
           </p>
           <div className="space-y-3">
             {roles.map(role => (
-              <label key={role.id} className="flex items-center justify-between p-4 rounded-2xl border border-white/5 bg-white/2 hover:bg-white/5 hover:border-white/10 transition-all cursor-pointer group">
+              <label key={role.id} className="flex items-center justify-between p-4 rounded-2xl border border-white/30 bg-white/30 hover:bg-white/40 hover:border-white/50 transition-all cursor-pointer group">
                 <span className="text-sm font-bold text-white group-hover:text-amber-400 transition-colors">{role.label}</span>
                 <input
                   type="checkbox"
-                  className="w-5 h-5 rounded-lg border-white/10 bg-white/5 text-indigo-600 focus:ring-offset-0 focus:ring-2 focus:ring-indigo-500 cursor-pointer transition-all"
+                  className="w-5 h-5 rounded-lg border-white/30 bg-white/30 text-[#00fbff] focus:ring-offset-0 focus:ring-2 focus:ring-[#00fbff] cursor-pointer transition-all shadow-inner"
                   checked={config.canInviteAcrossDepartments.includes(role.id)}
                   onChange={() => handleToggleRole(role.id, "canInviteAcrossDepartments")}
                 />

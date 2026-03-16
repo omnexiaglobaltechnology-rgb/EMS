@@ -133,21 +133,21 @@ const AdminDepartments = () => {
 
       {/* Error */}
       {error && (
-        <div className="flex items-start gap-3 rounded-2xl border border-red-500/20 bg-red-500/10 p-5 backdrop-blur-md animate-in fade-in slide-in-from-top-2">
+        <div className="flex items-start gap-3 rounded-2xl border border-red-500/30 bg-red-500/30 p-5 backdrop-blur-md animate-in fade-in slide-in-from-top-2">
           <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-400" />
           <p className="text-sm text-red-200 font-medium">{error}</p>
         </div>
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 rounded-xl bg-white/5 p-1.5 w-fit border border-white/10 backdrop-blur-md">
+      <div className="flex gap-1 rounded-xl bg-white/30 p-1.5 w-fit border border-white/30 backdrop-blur-md">
         {["employee", "intern"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
               activeTab === tab
-                ? "bg-white/10 text-[#00fbff] shadow-[0_0_15px_rgba(0,251,255,0.2)] border border-white/10 cyan-glow"
+                ? "bg-white/40 text-[#00fbff] shadow-[0_0_15px_rgba(0,251,255,0.2)] border border-white/30 cyan-glow"
                 : "text-white/40 hover:text-white"
             }`}
           >
@@ -161,7 +161,7 @@ const AdminDepartments = () => {
         {filtered.map((dept) => (
           <div
             key={dept._id || dept.id}
-            className="card-glass p-6 space-y-4 group hover:border-white/20 transition-all duration-300"
+            className="card-glass p-6 space-y-4 group hover:border-white/30 transition-all duration-300"
           >
             <div className="flex justify-between items-start">
               <div>
@@ -175,13 +175,13 @@ const AdminDepartments = () => {
               <div className="flex gap-2">
                 <button
                   onClick={() => openEdit(dept)}
-                  className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 hover:text-white transition-all border border-white/5"
+                  className="p-2 rounded-xl bg-white/30 hover:bg-white/40 text-white/40 hover:text-white transition-all border border-white/30"
                 >
                   <Pencil size={14} />
                 </button>
                 <button
                   onClick={() => handleDelete(dept._id || dept.id)}
-                  className="p-2 rounded-xl bg-white/5 hover:bg-red-500/10 text-white/40 hover:text-red-400 transition-all border border-white/5"
+                  className="p-2 rounded-xl bg-white/30 hover:bg-red-500/30 text-white/40 hover:text-red-400 transition-all border border-white/30"
                 >
                   <Trash2 size={14} />
                 </button>
@@ -190,8 +190,8 @@ const AdminDepartments = () => {
             {dept.description && (
               <p className="text-sm text-white/60 leading-relaxed">{dept.description}</p>
             )}
-            <div className="flex items-center gap-2 pt-4 border-t border-white/5">
-              <div className="p-1.5 rounded-lg bg-white/5">
+            <div className="flex items-center gap-2 pt-4 border-t border-white/30">
+              <div className="p-1.5 rounded-lg bg-white/30">
                 <Users size={12} className="text-white/30" />
               </div>
               <span className="text-xs font-bold text-white/30 uppercase tracking-wider">
@@ -202,7 +202,7 @@ const AdminDepartments = () => {
         ))}
 
         {filtered.length === 0 && (
-          <div className="col-span-full text-center py-20 bg-white/2 rounded-3xl border-2 border-dashed border-white/10">
+          <div className="col-span-full text-center py-20 bg-white/30 rounded-3xl border-2 border-dashed border-white/30">
             <Building2 className="mx-auto mb-4 h-16 w-16 text-white/5" />
             <p className="text-white/40 font-bold text-lg">No {activeTab} departments yet</p>
           </div>
@@ -211,8 +211,8 @@ const AdminDepartments = () => {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="w-full max-w-md rounded-3xl glass-dark p-8 space-y-6 shadow-2xl border border-white/10">
+        <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
+          <div className="w-full max-w-md rounded-3xl glass-dark p-8 space-y-6 shadow-2xl border border-white/30">
             <h2 className="text-2xl font-bold text-white">
               {editDept ? "Edit Dept" : "New Dept"}
             </h2>
@@ -220,7 +220,7 @@ const AdminDepartments = () => {
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-white/40 ml-1">Department Name</label>
               <input
-                className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white placeholder:text-white/20 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                className="w-full rounded-xl bg-white/30 border border-white/30 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00fbff] outline-none transition-all"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="e.g. Technical, Finance, Operations"
@@ -231,7 +231,7 @@ const AdminDepartments = () => {
               <div className="space-y-2">
                 <label className="text-[10px] font-black uppercase tracking-widest text-white/40 ml-1">Track</label>
                 <select
-                  className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none cursor-pointer"
+                  className="w-full rounded-xl bg-white/30 border border-white/30 px-4 py-3 text-sm text-white focus:ring-2 focus:ring-[#00fbff] outline-none transition-all appearance-none cursor-pointer"
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value })}
                 >
@@ -244,7 +244,7 @@ const AdminDepartments = () => {
             <div className="space-y-2">
               <label className="text-[10px] font-black uppercase tracking-widest text-white/40 ml-1">Description</label>
               <textarea
-                className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white placeholder:text-white/20 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                className="w-full rounded-xl bg-white/30 border border-white/30 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00fbff] outline-none transition-all"
                 rows={3}
                 value={form.description}
                 onChange={(e) =>
@@ -260,7 +260,7 @@ const AdminDepartments = () => {
                   setShowModal(false);
                   setEditDept(null);
                 }}
-                className="rounded-xl px-6 py-3 text-sm font-bold text-white/60 hover:text-white hover:bg-white/5 transition-all"
+                className="rounded-xl px-6 py-3 text-sm font-bold text-white/60 hover:text-white hover:bg-white/30 transition-all"
               >
                 Cancel
               </button>

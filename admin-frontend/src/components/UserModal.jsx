@@ -108,8 +108,8 @@ const UserModal = ({ title, user, onClose, onSave }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-500">
-      <div className="w-full max-w-lg rounded-[3rem] glass-dark p-10 space-y-8 max-h-[90vh] overflow-y-auto border border-white/10 shadow-[0_40px_100px_rgba(0,0,0,0.6)]">
+    <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-500">
+      <div className="w-full max-w-lg rounded-[3rem] glass-dark p-10 space-y-8 max-h-[90vh] overflow-y-auto border border-white/30 shadow-[0_40px_100px_rgba(0,0,0,0.6)]">
         <h2 className="text-3xl font-black text-white tracking-tighter uppercase">
           {title.split(' ')[0]} <span className="text-[#00fbff] cyan-glow">{title.split(' ').slice(1).join(' ')}</span>
         </h2>
@@ -119,7 +119,7 @@ const UserModal = ({ title, user, onClose, onSave }) => {
           <div className="space-y-2 group">
             <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00fbff] transition-colors">Full Name</label>
             <input
-              className="w-full rounded-2xl bg-white/5 border border-white/10 px-5 py-4 text-sm text-white placeholder:text-white/10 focus:ring-2 focus:ring-[#00fbff] outline-none transition-all shadow-inner"
+              className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00fbff] outline-none transition-all shadow-inner"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="John Doe"
@@ -130,7 +130,7 @@ const UserModal = ({ title, user, onClose, onSave }) => {
           <div className="space-y-2 group">
             <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00fbff] transition-colors">Username / ID</label>
             <input
-              className="w-full rounded-2xl bg-white/5 border border-white/10 px-5 py-4 text-sm text-white placeholder:text-white/10 focus:ring-2 focus:ring-[#00fbff] outline-none transition-all shadow-inner"
+              className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00fbff] outline-none transition-all shadow-inner"
               value={form.username}
               onChange={(e) => setForm({ ...form, username: e.target.value })}
               placeholder="EMP001"
@@ -141,7 +141,7 @@ const UserModal = ({ title, user, onClose, onSave }) => {
           <div className="space-y-2 group">
             <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00fbff] transition-colors">Email Address</label>
             <input
-              className="w-full rounded-2xl bg-white/5 border border-white/10 px-5 py-4 text-sm text-white placeholder:text-white/10 focus:ring-2 focus:ring-[#00fbff] outline-none transition-all shadow-inner"
+              className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00fbff] outline-none transition-all shadow-inner"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               placeholder="john@omnexia.in"
@@ -155,7 +155,7 @@ const UserModal = ({ title, user, onClose, onSave }) => {
             </label>
             <input
               type="password"
-              className="w-full rounded-2xl bg-white/5 border border-white/10 px-5 py-4 text-sm text-white placeholder:text-white/10 focus:ring-2 focus:ring-[#00fbff] outline-none transition-all shadow-inner"
+              className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00fbff] outline-none transition-all shadow-inner"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
               placeholder="••••••••••••"
@@ -168,7 +168,7 @@ const UserModal = ({ title, user, onClose, onSave }) => {
           <div className="space-y-2 group">
             <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00fbff] transition-colors">User Track</label>
             <select
-              className="w-full rounded-2xl bg-white/5 border border-white/10 px-5 py-4 text-sm text-white capitalize focus:ring-2 focus:ring-[#00fbff] outline-none transition-all appearance-none shadow-inner"
+              className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white capitalize focus:ring-2 focus:ring-[#00fbff] outline-none transition-all appearance-none shadow-inner"
               value={form.userType}
               onChange={(e) => setForm({ ...form, userType: e.target.value })}
             >
@@ -182,7 +182,7 @@ const UserModal = ({ title, user, onClose, onSave }) => {
           <div className="space-y-2 group">
             <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00fbff] transition-colors">Role</label>
             <select
-              className="w-full rounded-2xl bg-white/5 border border-white/10 px-5 py-4 text-sm text-white capitalize focus:ring-2 focus:ring-[#00fbff] outline-none transition-all appearance-none shadow-inner"
+              className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white capitalize focus:ring-2 focus:ring-[#00fbff] outline-none transition-all appearance-none shadow-inner"
               value={form.role}
               onChange={(e) => setForm({ ...form, role: e.target.value })}
             >
@@ -202,7 +202,7 @@ const UserModal = ({ title, user, onClose, onSave }) => {
               Department {loadingDepts && "..."}
             </label>
             <select
-              className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none disabled:opacity-30"
+              className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white focus:ring-2 focus:ring-[#00fbff] outline-none transition-all appearance-none disabled:opacity-30 shadow-inner"
               value={form.departmentId}
               onChange={(e) => setForm({ ...form, departmentId: e.target.value })}
               disabled={loadingDepts || form.role === 'ceo'}
@@ -222,7 +222,7 @@ const UserModal = ({ title, user, onClose, onSave }) => {
               Reports To {loadingReportsTo && "..."}
             </label>
             <select
-              className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none disabled:opacity-30"
+              className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white focus:ring-2 focus:ring-[#00fbff] outline-none transition-all appearance-none disabled:opacity-30 shadow-inner"
               value={form.reportsTo}
               onChange={(e) => setForm({ ...form, reportsTo: e.target.value })}
               disabled={loadingReportsTo || form.role === 'ceo' || (!form.departmentId && !['cto', 'cfo', 'coo', 'manager', 'manager_intern'].includes(form.role))}
@@ -241,7 +241,7 @@ const UserModal = ({ title, user, onClose, onSave }) => {
         <div className="flex justify-end gap-4 pt-6">
           <button
             onClick={onClose}
-            className="rounded-xl px-6 py-3 text-sm font-bold text-white/70 hover:text-white hover:bg-white/5 transition-all"
+            className="rounded-xl px-6 py-3 text-sm font-bold text-white/70 hover:text-white hover:bg-white/30 transition-all"
           >
             Cancel
           </button>

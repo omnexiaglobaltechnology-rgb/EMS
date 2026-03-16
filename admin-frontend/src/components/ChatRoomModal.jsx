@@ -162,18 +162,18 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
 
   const getRoleBadgeColor = (role) => {
     const colors = {
-      ceo: "bg-purple-500/10 text-purple-400 border-purple-500/20",
-      cto: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-      cfo: "bg-green-500/10 text-green-400 border-green-500/20",
-      coo: "bg-orange-500/10 text-orange-400 border-orange-500/20",
-      admin: "bg-red-500/10 text-red-400 border-red-500/20",
-      manager: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-      manager_intern: "bg-amber-500/5 text-amber-300 border-amber-500/10",
-      team_lead: "bg-cyan-500/10 text-[#00fbff] border-cyan-500/20 shadow-[0_0_10px_rgba(0,251,255,0.2)]",
-      team_lead_intern: "bg-cyan-500/5 text-cyan-300 border-cyan-500/10",
-      intern: "bg-white/5 text-white/40 border-white/10",
+      ceo: "bg-purple-500/30 text-purple-400 border-purple-500/30",
+      cto: "bg-blue-500/30 text-blue-400 border-blue-500/30",
+      cfo: "bg-green-500/30 text-green-400 border-green-500/30",
+      coo: "bg-orange-500/30 text-orange-400 border-orange-500/30",
+      admin: "bg-red-500/30 text-red-400 border-red-500/30",
+      manager: "bg-amber-500/30 text-amber-400 border-amber-500/30",
+      manager_intern: "bg-amber-500/30 text-amber-300 border-amber-500/30",
+      team_lead: "bg-cyan-500/30 text-[#00fbff] border-cyan-500/30 shadow-[0_0_10px_rgba(0,251,255,0.2)]",
+      team_lead_intern: "bg-cyan-500/30 text-cyan-300 border-cyan-500/30",
+      intern: "bg-white/30 text-white/40 border-white/30",
     };
-    return colors[role] || "bg-white/5 text-white/40 border-white/10";
+    return colors[role] || "bg-white/30 text-white/40 border-white/30";
   };
 
   const handleSubmit = async (e) => {
@@ -205,10 +205,10 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300">
-      <div className="w-full max-w-2xl rounded-3xl glass-dark shadow-2xl flex flex-col max-h-[90vh] border border-white/10 overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
+      <div className="w-full max-w-2xl rounded-3xl glass-dark shadow-2xl flex flex-col max-h-[90vh] border border-white/30 overflow-hidden">
         {/* Header */}
-        <div className="px-10 py-8 border-b border-white/5 bg-white/2">
+        <div className="px-10 py-8 border-b border-white/30 bg-white/30">
           <h2 className="text-3xl font-black text-white tracking-tighter uppercase">
             {isEditMode ? "Modify Chat" : "Generate Chat"} <span className="text-[#00fbff] cyan-glow">Stream</span>
           </h2>
@@ -229,7 +229,7 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
               </label>
               <input
                 required
-                className="w-full rounded-2xl bg-white/5 border border-white/10 px-5 py-4 text-sm text-white placeholder:text-white/10 focus:ring-2 focus:ring-[#00fbff] outline-none transition-all shadow-inner"
+                className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00fbff] outline-none transition-all shadow-inner"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="e.g. Project Alpha Discussion"
@@ -243,7 +243,7 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
                   Protocol Type
                 </label>
                 <select
-                  className="w-full rounded-2xl bg-white/5 border border-white/10 px-5 py-4 text-sm text-white capitalize focus:ring-2 focus:ring-[#00fbff] outline-none transition-all appearance-none shadow-inner"
+                  className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white capitalize focus:ring-2 focus:ring-[#00fbff] outline-none transition-all appearance-none shadow-inner"
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value })}
                 >
@@ -256,12 +256,12 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
               </div>
 
               <div className="space-y-2">
-                <label className="text-xs font-bold uppercase tracking-wider text-white/50 ml-1">
+                <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00fbff] transition-colors">
                   Room Department
                 </label>
                 <select
                   required
-                  className="w-full rounded-2xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none"
+                  className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white focus:ring-2 focus:ring-[#00fbff] outline-none transition-all appearance-none shadow-inner"
                   value={form.departmentId}
                   onChange={(e) =>
                     setForm({ ...form, departmentId: e.target.value })
@@ -284,20 +284,20 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
                   <Users size={18} className="text-[#00fbff] cyan-glow" strokeWidth={3} />
                   Authorize Entities
                 </label>
-                <span className="text-[10px] font-black text-[#00fbff] bg-cyan-500/10 px-4 py-2 rounded-full border border-cyan-500/20 backdrop-blur-3xl shadow-[0_0_15px_rgba(0,251,255,0.1)] cyan-glow">
+                <span className="text-[10px] font-black text-[#00fbff] bg-cyan-500/30 px-4 py-2 rounded-full border border-cyan-500/30 backdrop-blur-3xl shadow-[0_0_15px_rgba(0,251,255,0.1)] cyan-glow">
                   {selectedUserIds.size} Linked
                 </span>
               </div>
 
               {/* Filters Area */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 bg-white/5 p-4 rounded-3xl border border-white/10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 bg-white/30 p-4 rounded-3xl border border-white/30">
                 <div className="space-y-2">
                   <label className="text-[10px] uppercase font-black text-white/30 flex items-center gap-1.5 ml-1">
                     <Filter size={10} />
                     Filter by Department
                   </label>
                   <select
-                    className="w-full rounded-xl bg-white/5 border border-white/10 px-3 py-2 text-xs text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none"
+                    className="w-full rounded-xl bg-white/30 border border-white/30 px-3 py-2 text-xs text-white focus:ring-2 focus:ring-[#00fbff] outline-none transition-all appearance-none"
                     value={userDeptFilter}
                     onChange={(e) => setUserDeptFilter(e.target.value)}
                   >
@@ -320,7 +320,7 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
                     <input
                       type="text"
                       placeholder="Name, email..."
-                      className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-2.5 text-xs text-white placeholder:text-white/10 focus:ring-2 focus:ring-[#00fbff] outline-none transition-all"
+                      className="w-full rounded-xl bg-white/30 border border-white/30 px-4 py-2.5 text-xs text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00fbff] outline-none transition-all"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -329,7 +329,7 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
               </div>
 
               {/* Department-wise user list */}
-              <div className="border border-white/10 rounded-3xl max-h-[250px] overflow-y-auto bg-white/5 scrollbar-thin scrollbar-thumb-white/10">
+              <div className="border border-white/30 rounded-3xl max-h-[250px] overflow-y-auto bg-white/30 scrollbar-thin scrollbar-thumb-white/10">
                 {fetchingData ? (
                   <div className="py-12 text-center text-white/30">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-400 mx-auto mb-3"></div>
@@ -353,10 +353,10 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
                         users.some((u) => selectedUserIds.has(u.id));
 
                       return (
-                        <div key={deptId} className="border-b border-white/5 last:border-b-0">
+                        <div key={deptId} className="border-b border-white/30 last:border-b-0">
                           {/* Department header */}
                           <div
-                            className="flex items-center gap-3 px-4 py-3 bg-white/5 cursor-pointer hover:bg-white/10 transition-colors sticky top-0 z-10 backdrop-blur-md"
+                            className="flex items-center gap-3 px-4 py-3 bg-white/30 cursor-pointer hover:bg-white/40 transition-colors sticky top-0 z-10 backdrop-blur-md"
                             onClick={() => toggleDept(deptId)}
                           >
                             {isExpanded ? (
@@ -377,7 +377,7 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
                                   ? "bg-[#00fbff] border-[#00fbff] shadow-[0_0_15px_rgba(0,251,255,0.4)]"
                                   : someSelected
                                   ? "bg-cyan-500/40 border-cyan-500/50"
-                                  : "border-white/20 hover:border-white/40"
+                                  : "border-white/30 hover:border-white/50"
                               }`}
                             >
                               {(allSelected || someSelected) && (
@@ -388,7 +388,7 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
                             <span className="text-xs font-bold text-white/90 flex-1 truncate uppercase tracking-wider">
                               {getDeptName(deptId)}
                             </span>
-                            <span className="text-[10px] font-black text-white/40 bg-white/5 px-2 py-1 rounded-lg border border-white/10">
+                            <span className="text-[10px] font-black text-white/40 bg-white/30 px-2 py-1 rounded-lg border border-white/30">
                               {users.filter((u) => selectedUserIds.has(u.id)).length}/{users.length}
                             </span>
                           </div>
@@ -403,8 +403,8 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
                                     key={user.id}
                                     className={`flex items-center gap-4 px-6 py-3 cursor-pointer transition-all ${
                                       isSelected
-                                        ? "bg-indigo-500/10"
-                                        : "hover:bg-white/5"
+                                        ? "bg-indigo-500/30"
+                                        : "hover:bg-white/30"
                                     }`}
                                   >
                                     <input
@@ -417,7 +417,7 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
                                       className={`w-5 h-5 rounded-lg border flex items-center justify-center shrink-0 transition-all ${
                                         isSelected
                                           ? "bg-indigo-600 border-indigo-600 shadow-lg shadow-indigo-600/20"
-                                          : "border-white/20"
+                                          : "border-white/30"
                                       }`}
                                     >
                                       {isSelected && (
@@ -435,7 +435,7 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
                                     </div>
 
                                     <span
-                                      className={`text-[9px] uppercase font-black tracking-widest px-2 py-1 rounded-full shrink-0 border border-white/10 ${getRoleBadgeColor(
+                                      className={`text-[9px] uppercase font-black tracking-widest px-2 py-1 rounded-full shrink-0 border border-white/30 ${getRoleBadgeColor(
                                         user.role
                                       )}`}
                                     >
@@ -456,11 +456,11 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
           </div>
 
           {/* Footer */}
-          <div className="px-10 py-8 border-t border-white/5 flex justify-end gap-6 bg-white/2">
+          <div className="px-10 py-8 border-t border-white/30 flex justify-end gap-6 bg-white/30">
             <button
               type="button"
               onClick={onClose}
-              className="rounded-xl px-8 py-3.5 text-xs font-black uppercase tracking-[0.2em] text-white/40 hover:text-white hover:bg-white/5 transition-all"
+                className="rounded-xl px-8 py-3.5 text-xs font-black uppercase tracking-[0.2em] text-white/40 hover:text-white hover:bg-white/30 transition-all"
             >
               Abort
             </button>

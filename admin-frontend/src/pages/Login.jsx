@@ -49,10 +49,10 @@ const Login = () => {
       <div className="absolute bottom-[10%] right-[10%] w-[40rem] h-[40rem] bg-indigo-600/10 rounded-full blur-[150px] animate-pulse delay-700"></div>
 
       {/* Main Card Container - GLASS VERSION */}
-      <div className="w-full max-w-5xl glass-dark rounded-[3rem] overflow-hidden shadow-[0_40px_100px_-15px_rgba(0,0,0,0.5)] flex flex-col md:flex-row min-h-[650px] relative z-10 border border-white/10">
+      <div className="w-full max-w-5xl glass-dark rounded-[3rem] overflow-hidden shadow-[0_40px_100px_-15px_rgba(0,0,0,0.5)] flex flex-col md:flex-row min-h-[650px] relative z-10 border border-white/30">
         
         {/* ---------------- LEFT PANEL: BRANDING ---------------- */}
-        <div className="md:w-1/2 p-16 flex flex-col items-center justify-center relative bg-white/2 border-r border-white/5">
+        <div className="md:w-1/2 p-16 flex flex-col items-center justify-center relative bg-white/30 border-r border-white/30">
            {/* Big Centered Logo */}
            <div className="text-center animate-in fade-in zoom-in duration-1000 w-full relative">
               <div className="absolute inset-0 bg-indigo-500/10 blur-3xl rounded-full"></div>
@@ -65,14 +65,14 @@ const Login = () => {
            </div>
 
            {/* Mobile-only divider */}
-           <div className="md:hidden w-full h-px bg-white/5 my-8"></div>
+           <div className="md:hidden w-full h-px bg-white/30 my-8"></div>
         </div>
 
         {/* ---------------- RIGHT PANEL: LOGIN FORM ---------------- */}
         <div className="flex-1 p-10 lg:p-20 flex flex-col justify-center relative overflow-hidden">
           <div className="max-w-sm mx-auto w-full relative z-10">
             <div className="text-center mb-12">
-              <div className="inline-flex items-center justify-center px-5 py-2 bg-cyan-500/10 text-[#00fbff] rounded-full mb-6 text-[10px] font-black uppercase tracking-[0.2em] border border-cyan-500/20 backdrop-blur-3xl cyan-glow">
+              <div className="inline-flex items-center justify-center px-5 py-2 bg-cyan-500/30 text-[#00fbff] rounded-full mb-6 text-[10px] font-black uppercase tracking-[0.2em] border border-cyan-500/30 backdrop-blur-3xl cyan-glow">
                  Secure Admin Entry
               </div>
               <h1 className="text-6xl font-black text-white tracking-tighter">Welcome</h1>
@@ -80,7 +80,7 @@ const Login = () => {
             </div>
 
             {error && (
-              <div className="mb-8 p-5 rounded-2xl bg-red-500/10 border border-red-500/20 animate-in fade-in slide-in-from-top-2">
+              <div className="mb-8 p-5 rounded-2xl bg-red-500/30 border border-red-500/30 animate-in fade-in slide-in-from-top-2">
                 <p className="text-xs text-red-300 font-bold flex items-center gap-3 uppercase tracking-wider">
                   <span className="text-base">⚠️</span> {error}
                 </p>
@@ -104,7 +104,7 @@ const Login = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="admin@omnexia.in"
                     autoComplete="email"
-                    className="w-full bg-transparent border-b-2 border-white/10 pl-10 pb-3 text-white placeholder-white/10 transition-all focus:outline-none focus:border-[#00fbff] text-sm font-bold tracking-wide"
+                    className="w-full bg-transparent border-b-2 border-white/30 pl-10 pb-3 text-white placeholder-white/30 transition-all focus:outline-none focus:border-[#00fbff] text-sm font-bold tracking-wide"
                     required
                   />
                 </div>
@@ -126,7 +126,7 @@ const Login = () => {
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••••••"
                     autoComplete="current-password"
-                    className="w-full bg-transparent border-b-2 border-white/10 pl-10 pb-3 text-white placeholder-white/10 transition-all focus:outline-none focus:border-[#00fbff] text-sm font-bold tracking-wide"
+                    className="w-full bg-transparent border-b-2 border-white/30 pl-10 pb-3 text-white placeholder-white/30 transition-all focus:outline-none focus:border-[#00fbff] text-sm font-bold tracking-wide"
                     required
                   />
                   <button

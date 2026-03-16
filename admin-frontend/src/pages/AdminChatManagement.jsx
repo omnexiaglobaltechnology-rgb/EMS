@@ -73,12 +73,12 @@ const AdminChatManagement = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
-          <div className="col-span-full py-24 text-center glass rounded-[3rem] border border-white/5 bg-white/2">
+          <div className="col-span-full py-24 text-center glass rounded-[3rem] border border-white/30 bg-white/30">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00fbff] cyan-glow mx-auto mb-6"></div>
             <p className="font-black uppercase tracking-[0.3em] text-[10px] text-white/40">Synchronizing Data Streams...</p>
           </div>
         ) : rooms.length === 0 ? (
-          <div className="col-span-full py-20 text-center border-2 border-dashed border-white/10 rounded-[3rem] bg-white/2 backdrop-blur-md">
+          <div className="col-span-full py-20 text-center border-2 border-dashed border-white/30 rounded-[3rem] bg-white/30 backdrop-blur-md">
             <MessageSquare className="mx-auto h-20 w-20 text-white/5 mb-6" />
             <p className="text-white/20 text-lg font-black uppercase tracking-[0.2em]">Silence Detected</p>
             <button
@@ -90,13 +90,13 @@ const AdminChatManagement = () => {
           </div>
         ) : (
           rooms.map((room) => (
-            <div key={room._id} className="card-glass p-6 flex flex-col justify-between group hover:border-white/20 transition-all duration-300">
+            <div key={room._id} className="card-glass p-6 flex flex-col justify-between group hover:border-white/30 transition-all duration-300">
               <div>
                 <div className="flex items-center justify-between mb-6">
-                  <div className="p-4 bg-white/5 rounded-2xl text-[#00fbff] border border-white/10 group-hover:bg-cyan-500/10 transition-all duration-500 cyan-glow">
+                  <div className="p-4 bg-white/30 rounded-2xl text-[#00fbff] border border-white/30 group-hover:bg-cyan-500/30 transition-all duration-500 cyan-glow">
                     {room.type === 'announcement' ? <Hash size={24} strokeWidth={2.5} /> : <Users size={24} strokeWidth={2.5} />}
                   </div>
-                  <span className="text-[10px] uppercase font-black tracking-widest px-4 py-1.5 rounded-xl bg-white/5 text-white/40 border border-white/10">
+                  <span className="text-[10px] uppercase font-black tracking-widest px-4 py-1.5 rounded-xl bg-white/30 text-white/40 border border-white/30">
                     {room.type?.replace("_", " ")}
                   </span>
                 </div>
@@ -111,14 +111,14 @@ const AdminChatManagement = () => {
                 </div>
               </div>
               
-              <div className="mt-8 pt-8 border-t border-white/5 flex items-center justify-between">
+              <div className="mt-8 pt-8 border-t border-white/30 flex items-center justify-between">
                 <div className="flex items-center gap-2 text-white/30 text-[10px] font-black uppercase tracking-widest">
                   <Users size={14} className="text-white/20" strokeWidth={3} />
                   <span>{room.participants?.length || 0} Entities</span>
                 </div>
                 <button
                   onClick={() => openEditModal(room)}
-                  className="flex items-center gap-2 text-[#00fbff] text-[10px] font-black uppercase tracking-[0.3em] hover:text-white hover:bg-cyan-500/20 px-5 py-2.5 rounded-xl transition-all border border-transparent hover:border-cyan-500/20 cyan-glow"
+                  className="flex items-center gap-2 text-[#00fbff] text-[10px] font-black uppercase tracking-[0.3em] hover:text-white hover:bg-cyan-500/30 px-5 py-2.5 rounded-xl transition-all border border-transparent hover:border-cyan-500/30 cyan-glow"
                 >
                   <Pencil size={12} strokeWidth={3} />
                   Modify

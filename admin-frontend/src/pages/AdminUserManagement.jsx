@@ -98,7 +98,7 @@ const AdminUserManagement = () => {
             <input
               type="text"
               placeholder="Search users..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/5 border border-white/10 text-white text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all placeholder:text-white/20"
+              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/30 border border-white/30 text-white text-sm focus:ring-2 focus:ring-[#00fbff] outline-none transition-all placeholder:text-white/30"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -122,12 +122,12 @@ const AdminUserManagement = () => {
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 rounded-xl bg-white/5 p-1.5 w-fit border border-white/10 backdrop-blur-md">
+      <div className="flex gap-1 rounded-xl bg-white/30 p-1.5 w-fit border border-white/30 backdrop-blur-md">
         <button
           onClick={() => setActiveTab("employee")}
           className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
             activeTab === "employee"
-              ? "bg-white/10 text-[#00fbff] shadow-[0_0_15px_rgba(0,251,255,0.2)] border border-white/10 cyan-glow"
+              ? "bg-white/40 text-[#00fbff] shadow-[0_0_15px_rgba(0,251,255,0.2)] border border-white/30 cyan-glow"
               : "text-white/40 hover:text-white"
           }`}
         >
@@ -137,7 +137,7 @@ const AdminUserManagement = () => {
           onClick={() => setActiveTab("intern")}
           className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
             activeTab === "intern"
-              ? "bg-white/10 text-[#00fbff] shadow-[0_0_15px_rgba(0,251,255,0.2)] border border-white/10 cyan-glow"
+              ? "bg-white/40 text-[#00fbff] shadow-[0_0_15px_rgba(0,251,255,0.2)] border border-white/30 cyan-glow"
               : "text-white/40 hover:text-white"
           }`}
         >
@@ -146,10 +146,10 @@ const AdminUserManagement = () => {
       </div>
 
       {/* Users Table */}
-      <div className="rounded-3xl border border-white/10 bg-white/5 overflow-hidden shadow-2xl backdrop-blur-md">
+      <div className="rounded-3xl border border-white/30 bg-white/30 overflow-hidden shadow-2xl backdrop-blur-md">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left border-collapse">
-            <thead className="text-white/40 bg-white/5 uppercase tracking-widest text-[10px] font-black">
+            <thead className="text-white/40 bg-white/30 uppercase tracking-widest text-[10px] font-black">
               <tr>
                 <th className="p-6">User / ID</th>
                 <th className="p-6">Department</th>
@@ -176,14 +176,14 @@ const AdminUserManagement = () => {
                 </tr>
               ) : (
                 users.map((u) => (
-                  <tr key={u.id} className="hover:bg-white/5 transition-colors group">
+                  <tr key={u.id} className="hover:bg-white/30 transition-colors group">
                     <td className="p-6">
                       <div className="font-bold text-white text-base">{u.name || "N/A"}</div>
                       <div className="text-xs text-white/40 font-mono mt-0.5 tracking-tight">{u.username || u.email}</div>
                     </td>
                     <td className="p-6 text-white/80">
                       {u.department ? (
-                        <span className="inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-cyan-500/10 text-[#00fbff] border border-cyan-500/20 backdrop-blur-md cyan-glow">
+                        <span className="inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-cyan-500/30 text-[#00fbff] border border-cyan-500/30 backdrop-blur-md cyan-glow">
                           {u.department.name}
                         </span>
                       ) : (
@@ -203,7 +203,7 @@ const AdminUserManagement = () => {
                       )}
                     </td>
                     <td className="p-6 text-right">
-                      <span className="inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-white/5 text-white/40 border border-white/10">
+                      <span className="inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-white/30 text-white/40 border border-white/30">
                         {u.role?.replace(/_/g, " ")}
                       </span>
                     </td>
@@ -211,25 +211,25 @@ const AdminUserManagement = () => {
                     <td className="p-6 text-right relative">
                       <button
                         onClick={() => setOpenMenuId(openMenuId === u.id ? null : u.id)}
-                        className="p-2 hover:bg-white/10 rounded-xl transition-all text-white/40 hover:text-white"
+                        className="p-2 hover:bg-white/30 rounded-xl transition-all text-white/40 hover:text-white"
                       >
                         <MoreVertical size={20} />
                       </button>
 
                       {openMenuId === u.id && (
-                        <div className="absolute right-6 mt-2 w-52 rounded-2xl glass-dark z-20 shadow-2xl py-2 animate-in fade-in zoom-in-95 duration-150 origin-top-right border border-white/10">
+                        <div className="absolute right-6 mt-2 w-52 rounded-2xl glass-dark z-20 shadow-2xl py-2 animate-in fade-in zoom-in-95 duration-150 origin-top-right border border-white/30">
                           <button
                             onClick={() => {
                               setShowPasswordModal(u.id);
                               setOpenMenuId(null);
                             }}
-                            className="flex items-center gap-3 w-full px-5 py-3 text-left text-[10px] font-black text-white/70 hover:bg-white/10 hover:text-[#00fbff] transition-all uppercase tracking-[0.2em] cyan-glow"
+                            className="flex items-center gap-3 w-full px-5 py-3 text-left text-[10px] font-black text-white/70 hover:bg-white/30 hover:text-[#00fbff] transition-all uppercase tracking-[0.2em] cyan-glow"
                           >
                             <Key size={14} strokeWidth={3} /> Reset Password
                           </button>
                           <button
                             onClick={() => deleteUser(u.id)}
-                            className="flex items-center gap-3 w-full px-5 py-3 text-left text-[10px] font-black text-red-400 hover:bg-red-500/10 transition-all uppercase tracking-[0.2em]"
+                            className="flex items-center gap-3 w-full px-5 py-3 text-left text-[10px] font-black text-red-400 hover:bg-red-500/30 transition-all uppercase tracking-[0.2em]"
                           >
                             Delete User
                           </button>
@@ -260,7 +260,7 @@ const AdminUserManagement = () => {
       {/* Password Change Modal */}
       {showPasswordModal && (
         <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="w-full max-w-sm rounded-3xl glass-dark p-8 space-y-6 shadow-2xl border border-white/10">
+          <div className="w-full max-w-sm rounded-3xl glass-dark p-8 space-y-6 shadow-2xl border border-white/30">
             <h2 className="text-xl font-black text-white flex items-center gap-4 uppercase tracking-tighter">
               <Key size={22} className="text-[#00fbff] cyan-glow" strokeWidth={3} /> Reset Security Access
             </h2>
@@ -268,7 +268,7 @@ const AdminUserManagement = () => {
               <label className="text-xs font-bold uppercase tracking-wider text-white/50 ml-1">New Password</label>
               <input
                 type="password"
-                className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white placeholder:text-white/20 focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                className="w-full rounded-xl bg-white/30 border border-white/30 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00fbff] outline-none transition-all"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 placeholder="Enter new password"
@@ -281,7 +281,7 @@ const AdminUserManagement = () => {
                   setShowPasswordModal(null);
                   setNewPassword("");
                 }}
-                className="rounded-xl px-5 py-2.5 text-sm font-bold text-white/60 hover:text-white hover:bg-white/5 transition-all"
+                className="rounded-xl px-5 py-2.5 text-sm font-bold text-white/60 hover:text-white hover:bg-white/30 transition-all"
               >
                 Cancel
               </button>

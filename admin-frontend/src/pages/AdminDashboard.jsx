@@ -266,7 +266,7 @@ const AdminDashboard = () => {
               )}
             </div>
 
-            <div className="rounded-2xl bg-white/5 p-4 text-[#00fbff] border border-white/10 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_20px_rgba(0,251,255,0.1)]">
+            <div className="rounded-2xl bg-white/30 p-4 text-[#00fbff] border border-white/30 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_20px_rgba(0,251,255,0.1)]">
               <item.icon size={26} strokeWidth={2.5} />
             </div>
           </div>
@@ -277,14 +277,14 @@ const AdminDashboard = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent User Activity */}
         <div className="card-glass">
-          <h2 className="text-xl font-bold mb-6 text-white border-b border-white/10 pb-4">Recent User Activity</h2>
+          <h2 className="text-xl font-bold mb-6 text-white border-b border-white/30 pb-4">Recent User Activity</h2>
 
           <div className="space-y-4">
             {recentActivity.length > 0 ? (
               recentActivity.map((a, i) => (
                 <div
                   key={i}
-                  className="flex justify-between items-center rounded-xl bg-white/5 border border-white/10 px-4 py-3 hover:bg-white/10 transition-colors"
+                  className="flex justify-between items-center rounded-xl bg-white/30 border border-white/30 px-4 py-3 hover:bg-white/40 transition-colors"
                 >
                   <span className="text-sm font-medium text-white/90">{a.text}</span>
                   <span className="text-xs text-white/40">{a.time}</span>
@@ -298,7 +298,7 @@ const AdminDashboard = () => {
 
         {/* System Status */}
         <div className="card-glass">
-          <h2 className="text-xl font-black mb-8 text-white border-b border-white/5 pb-4 uppercase tracking-tighter">
+          <h2 className="text-xl font-black mb-8 text-white border-b border-white/30 pb-4 uppercase tracking-tighter">
             System <span className="text-[#00fbff] cyan-glow">Status</span>
           </h2>
 
@@ -306,7 +306,7 @@ const AdminDashboard = () => {
             {systemStatus.map((s) => (
               <div
                 key={s.label}
-                className="flex justify-between items-center rounded-2xl bg-white/2 border border-white/5 px-5 py-4 hover:bg-white/5 transition-all duration-300"
+                className="flex justify-between items-center rounded-2xl bg-white/30 border border-white/30 px-5 py-4 hover:bg-white/40 transition-all duration-300"
               >
                 <span className="font-bold text-white/80 tracking-wide uppercase text-[10px] tracking-[0.1em]">{s.label}</span>
 

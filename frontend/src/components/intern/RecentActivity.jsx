@@ -1,4 +1,4 @@
-import { CheckSquare, Calendar, FileText } from "lucide-react";
+import { CheckSquare, Calendar, FileText, ArrowRight } from "lucide-react";
 
 const activities = [];
 

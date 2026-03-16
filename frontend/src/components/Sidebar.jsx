@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { NavLink, useNavigate } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
 
 import { MENU } from "../auth/menu";
 import { logout } from "../redux/authSlice";

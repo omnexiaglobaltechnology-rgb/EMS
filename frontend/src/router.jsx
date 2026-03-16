@@ -207,6 +207,7 @@ export const router = createBrowserRouter([
       { path: "dashboard", element: <ManagerDashboard /> },
       { path: "analytics", element: <ManagerAnalytics /> },
       { path: "reports", element: <ManagerReports /> },
+      { path: "employee-management", element: <EmployeeManagement /> },
       { path: "meetings", element: <ManagerMeetings /> },
       { path: "chat", element: <ManagerDepartmentChat /> },
       { path: "settings", element: <ProfileSettings /> },
@@ -229,6 +230,7 @@ export const router = createBrowserRouter([
       { path: "intern-meetings", element: <Manager_internMeetings /> },
       { path: "chat", element: <Manager_internDepartmentChat /> },
       { path: "reports", element: <Manager_internReports /> },
+      { path: "employee-management", element: <EmployeeManagement /> },
       {
         path: "review-submissions",
         element: <Manager_internSubmissionsReview />,

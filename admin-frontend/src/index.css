@@ -50,5 +50,10 @@ body {
 }
 
 .card-glass {
-    @apply glass rounded-xl p-6 transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl;
+    background: var(--glass-background);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
+    @apply rounded-[2rem] p-8 transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl;
 }

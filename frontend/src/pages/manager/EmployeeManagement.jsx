@@ -61,41 +61,33 @@ const EmployeeManagement = () => {
     if (loading) return <div className="flex h-96 items-center justify-center"><Loader className="animate-spin text-indigo-600" size={32} /></div>;
 
     return (
-        <div className="space-y-8 animate-in fade-in duration-700">
-            <div className="flex justify-between items-center glass-dark p-8 rounded-[2.5rem] border border-white/10 shadow-2xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-[#00d4ff]/5 blur-[100px] rounded-full group-hover:bg-[#00d4ff]/10 transition-colors"></div>
-                <div className="relative z-10">
-                    <h1 className="text-3xl font-black text-white tracking-tighter uppercase leading-tight">
-                        Team <span className="text-[#00d4ff] blue-glow">Management</span>
-                    </h1>
-                    <div className="flex items-center gap-4 mt-2">
-                        <div className="h-1 w-12 bg-[#00d4ff] rounded-full blue-glow"></div>
-                        <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">
-                            Subordinate Directory Alpha
-                        </p>
-                    </div>
+        <div className="space-y-8 animate-in fade-in duration-500">
+            <div className="flex justify-between items-center bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm shadow-slate-100/50">
+                <div>
+                    <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Team Management</h1>
+                    <p className="text-slate-500 text-sm mt-1">Manage your direct reports and department members</p>
                 </div>
                 <button 
                     onClick={() => { setSelectedUser(null); setShowModal(true); }}
-                    className="blue-button rounded-2xl px-6 py-4 flex items-center gap-3 active:scale-95 z-10"
+                    className="bg-indigo-600 text-white rounded-2xl px-6 py-3 flex items-center gap-2 font-bold text-sm hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95"
                 >
                     <Plus size={18} />
-                    <span className="text-xs uppercase tracking-widest">Add Member</span>
+                    Add Member
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
                 {members.map(member => (
-                    <div key={member._id} className="card-glass group">
+                    <div key={member._id} className="bg-white rounded-[32px] border border-slate-100 p-8 hover:shadow-xl hover:shadow-slate-200/50 transition-all duration-300 group">
                         <div className="flex items-start justify-between">
-                            <div className="flex items-center gap-5">
-                                <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center text-white/20 group-hover:text-[#00d4ff] group-hover:border-[#00d4ff]/30 transition-all duration-500">
+                            <div className="flex items-center gap-4">
+                                <div className="w-16 h-16 rounded-2xl bg-slate-50 flex items-center justify-center text-slate-400 group-hover:bg-indigo-50 group-hover:text-indigo-600 transition-colors duration-300">
                                     <User size={32} />
                                 </div>
                                 <div className="space-y-1">
-                                    <h3 className="text-xl font-black text-white tracking-tight uppercase">{member.name}</h3>
-                                    <div className="flex items-center gap-2 text-white/40 text-[10px] font-bold uppercase tracking-widest">
-                                        <Mail size={14} className="text-[#00d4ff]" />
+                                    <h3 className="text-xl font-bold text-slate-900">{member.name}</h3>
+                                    <div className="flex items-center gap-2 text-slate-500 text-sm">
+                                        <Mail size={14} />
                                         {member.email}
                                     </div>
                                 </div>
@@ -103,13 +95,13 @@ const EmployeeManagement = () => {
                             <div className="flex gap-2">
                                 <button 
                                     onClick={() => { setSelectedUser(member); setShowModal(true); }}
-                                    className="p-3 text-white/20 hover:text-[#00d4ff] hover:bg-[#00d4ff]/10 rounded-xl transition-all border border-transparent hover:border-[#00d4ff]/20"
+                                    className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
                                 >
                                     <Edit size={18} />
                                 </button>
                                 <button 
                                     onClick={() => handleDelete(member._id)}
-                                    className="p-3 text-white/20 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all border border-transparent hover:border-red-500/20"
+                                    className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-xl transition-all"
                                 >
                                     <Trash2 size={18} />
                                 </button>
@@ -117,28 +109,28 @@ const EmployeeManagement = () => {
                         </div>
 
                         <div className="mt-8 grid grid-cols-2 gap-4">
-                            <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
-                                <div className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] mb-1">Status Vector</div>
+                            <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
+                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Status</div>
                                 <div className="flex items-center gap-2">
-                                    <div className="w-2 h-2 rounded-full bg-[#00d4ff] blue-glow" />
-                                    <span className="text-xs font-black text-[#00d4ff] uppercase tracking-wider">{member.role}</span>
+                                    <div className="w-2 h-2 rounded-full bg-green-500" />
+                                    <span className="text-sm font-bold text-slate-700 capitalize">{member.role}</span>
                                 </div>
                             </div>
-                            <div className="bg-white/5 rounded-2xl p-4 border border-white/5">
-                                <div className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em] mb-1">Neural Rating</div>
+                            <div className="bg-slate-50/50 rounded-2xl p-4 border border-slate-100">
+                                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Performance</div>
                                 <div className="flex items-center gap-2">
-                                    <Activity size={14} className="text-[#00d4ff]" />
-                                    <span className="text-xs font-black text-white uppercase tracking-wider">8.4 / 10</span>
+                                    <Activity size={14} className="text-indigo-500" />
+                                    <span className="text-sm font-bold text-slate-700">8.4 / 10</span>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="mt-8 pt-6 border-t border-white/5 flex items-center justify-between">
-                            <button className="flex items-center gap-2 text-[10px] font-black text-[#00d4ff] uppercase tracking-[0.2em] hover:gap-3 transition-all blue-glow">
+                        <div className="mt-6 pt-6 border-t border-slate-50 flex items-center justify-between">
+                            <button className="flex items-center gap-2 text-xs font-bold text-indigo-600 hover:gap-3 transition-all">
                                 <History size={14} />
                                 Task History
                             </button>
-                            <button className="flex items-center gap-2 text-[10px] font-black text-white/40 uppercase tracking-[0.2em] hover:text-white transition-all">
+                            <button className="flex items-center gap-2 text-xs font-bold text-slate-500 hover:text-slate-900 transition-all">
                                 View Profile
                                 <ExternalLink size={14} />
                             </button>

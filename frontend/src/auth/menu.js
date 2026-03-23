@@ -33,7 +33,6 @@ const MENU = {
   team_lead_intern: [
     "dashboard",
     "intern-tasks",
-    "employee-management",
     "reviews",
     "meetings",
     "chat",
@@ -51,7 +50,6 @@ const MENU = {
   manager_intern: [
     "dashboard",
     "intern-analytics",
-    "employee-management",
     "reports",
     "intern-meetings",
     "chat",

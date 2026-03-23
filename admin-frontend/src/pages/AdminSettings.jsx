@@ -39,110 +39,98 @@ const AdminSettings = () => {
   };
 
   return (
-    <div className="space-y-10">
+    <div className="space-y-8">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-white">System Settings</h1>
-        <p className="text-white/60 font-medium">Configure system-wide preferences and security</p>
+        <h1 className="text-2xl font-semibold">System Settings</h1>
+        <p className="text-slate-500">Configure system preferences</p>
       </div>
 
-      <div className="grid gap-8">
-        {/* General Settings */}
-        <div className="card-glass p-8 space-y-6">
-          <h2 className="text-xl font-black text-white flex items-center gap-4 uppercase tracking-tighter">
-            <div className="w-1.5 h-6 bg-[#00d4ff] rounded-full blue-glow"></div>
-            General <span className="text-[#00d4ff] blue-glow">Configuration</span>
-          </h2>
+      {/* General Settings */}
+      <div className="rounded-xl border border-gray-300 bg-white p-6 space-y-5">
+        <h2 className="text-lg font-semibold">General Settings</h2>
 
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-white/40 ml-1">Company Name</label>
-              <input
-                type="text"
-                value={settings.companyName}
-                onChange={(e) => handleChange("companyName", e.target.value)}
-                className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all shadow-inner"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-white/40 ml-1">Support Email</label>
-              <input
-                type="email"
-                value={settings.supportEmail}
-                onChange={(e) => handleChange("supportEmail", e.target.value)}
-                className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all shadow-inner"
-              />
-            </div>
-          </div>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Company Name</label>
+          <input
+            type="text"
+            value={settings.companyName}
+            onChange={(e) => handleChange("companyName", e.target.value)}
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
         </div>
 
-        {/* Security Settings */}
-        <div className="card-glass p-8 space-y-8">
-          <h2 className="text-xl font-bold text-white flex items-center gap-3">
-            <div className="w-1.5 h-6 bg-amber-500 rounded-full"></div>
-            Security Settings
-          </h2>
+        <div className="space-y-2">
+          <label className="text-sm font-medium">Support Email</label>
+          <input
+            type="email"
+            value={settings.supportEmail}
+            onChange={(e) => handleChange("supportEmail", e.target.value)}
+            className="w-full rounded-lg border border-gray-300 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+        </div>
+      </div>
 
-          <div className="divide-y divide-white/30">
-            {/* Two Factor Auth */}
-            <div className="flex items-center justify-between py-6 first:pt-0">
-              <div>
-                <p className="font-bold text-white">Two-Factor Authentication</p>
-                <p className="text-sm text-white/40">Require 2FA for all users</p>
-              </div>
+      {/* Security Settings */}
+      <div className="rounded-xl border border-gray-300 bg-white p-6 space-y-6">
+        <h2 className="text-lg font-semibold">Security Settings</h2>
 
-              <button
-                onClick={() =>
-                  handleChange("twoFactorAuth", !settings.twoFactorAuth)
-                }
-                className={`relative inline-flex h-8 w-14 items-center rounded-full transition-all duration-500 ${
-                  settings.twoFactorAuth ? "bg-[#00d4ff] shadow-[0_0_20px_rgba(0,212,255,0.6)]" : "bg-white/30"
-                }`}
-              >
-                <span
-                  className={`inline-block h-6 w-6 transform rounded-full bg-white shadow-2xl transition-transform duration-500 ${
-                    settings.twoFactorAuth ? "translate-x-7" : "translate-x-1"
-                  }`}
-                />
-              </button>
-            </div>
-
-            {/* Session Timeout */}
-            <div className="flex items-center justify-between py-6 last:pb-0">
-              <div>
-                <p className="font-bold text-white">Session Timeout</p>
-                <p className="text-sm text-white/40">
-                  Auto logout after 30 minutes of inactivity
-                </p>
-              </div>
-
-              <button
-                onClick={() =>
-                  handleChange("sessionTimeout", !settings.sessionTimeout)
-                }
-                className={`relative inline-flex h-7 w-12 items-center rounded-full transition-all duration-300 ${
-                  settings.sessionTimeout ? "bg-blue-600 shadow-[0_0_15px_rgba(0,212,255,0.4)]" : "bg-white/30"
-                }`}
-              >
-                <span
-                  className={`inline-block h-5 w-5 transform rounded-full bg-white shadow-lg transition-transform duration-300 ${
-                    settings.sessionTimeout ? "translate-x-6" : "translate-x-1"
-                  }`}
-                />
-              </button>
-            </div>
+        {/* Two Factor Auth */}
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-medium">Two-Factor Authentication</p>
+            <p className="text-sm text-slate-500">Require 2FA for all users</p>
           </div>
+
+          <button
+            onClick={() =>
+              handleChange("twoFactorAuth", !settings.twoFactorAuth)
+            }
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${
+              settings.twoFactorAuth ? "bg-indigo-600" : "bg-slate-300"
+            }`}
+          >
+            <span
+              className={`inline-block h-5 w-5 transform rounded-full bg-white transition ${
+                settings.twoFactorAuth ? "translate-x-5" : "translate-x-1"
+              }`}
+            />
+          </button>
+        </div>
+
+        {/* Session Timeout */}
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="font-medium">Session Timeout</p>
+            <p className="text-sm text-slate-500">
+              Auto logout after 30 minutes
+            </p>
+          </div>
+
+          <button
+            onClick={() =>
+              handleChange("sessionTimeout", !settings.sessionTimeout)
+            }
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition ${
+              settings.sessionTimeout ? "bg-indigo-600" : "bg-slate-300"
+            }`}
+          >
+            <span
+              className={`inline-block h-5 w-5 transform rounded-full bg-white transition ${
+                settings.sessionTimeout ? "translate-x-5" : "translate-x-1"
+              }`}
+            />
+          </button>
         </div>
       </div>
 
       {/* Save Button */}
-      <div className="flex justify-end pt-4">
+      <div>
         <button
           onClick={handleSave}
-          className="rounded-2xl blue-button px-12 py-5 font-black uppercase tracking-[0.2em] text-xs active:scale-95 shadow-2xl"
+          className="rounded-lg bg-slate-900 px-6 py-2 text-white hover:bg-slate-800"
         >
-          Commit System Update
+          Save Changes
         </button>
       </div>
     </div>

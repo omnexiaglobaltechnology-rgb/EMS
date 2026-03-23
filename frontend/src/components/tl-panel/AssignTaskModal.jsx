@@ -70,83 +70,106 @@ const AssignTaskModal = ({ onClose, onSubmit, targetRole = "intern" }) => {
   const roleLabel = targetRole === "intern" ? "Intern" : "Team Lead";
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
-      <div className="w-full max-w-lg rounded-xl bg-white p-6 space-y-4">
-        <h2 className="text-lg font-semibold">Assign New Task</h2>
-
-        {/* Assignee selector */}
-        <select
-          className="w-full rounded border px-3 py-2"
-          value={form.assigneeId}
-          onChange={(e) => setForm({ ...form, assigneeId: e.target.value })}
-          disabled={loadingUsers}
-        >
-          <option value="">
-            {loadingUsers ? "Loading…" : `Select ${roleLabel}`}
-          </option>
-          {users.map((u) => (
-            <option key={u.id} value={u.id}>
-              {u.name} ({u.email})
-            </option>
-          ))}
-        </select>
-
-        <input
-          placeholder="Task name *"
-          className="w-full rounded border px-3 py-2"
-          value={form.task}
-          onChange={(e) => setForm({ ...form, task: e.target.value })}
-        />
-
-        <input
-          placeholder="Description (optional)"
-          className="w-full rounded border px-3 py-2"
-          value={form.description}
-          onChange={(e) => setForm({ ...form, description: e.target.value })}
-        />
-
-        <div className="grid grid-cols-2 gap-3">
-          <select
-            className="rounded border px-3 py-2"
-            value={form.priority}
-            onChange={(e) => setForm({ ...form, priority: e.target.value })}
-          >
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-          </select>
-
-          <select
-            className="rounded border px-3 py-2"
-            value={form.status}
-            onChange={(e) => setForm({ ...form, status: e.target.value })}
-          >
-            <option value="pending">Not Started</option>
-            <option value="in_progress">In Progress</option>
-            <option value="completed">Completed</option>
-          </select>
+    <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300">
+      <div className="w-full max-w-lg rounded-[28px] border border-white/10 bg-[#0f172a]/90 backdrop-blur-2xl p-8 space-y-6 shadow-2xl animate-in zoom-in-95 duration-300">
+        <div className="space-y-1">
+          <h2 className="text-xl font-bold text-white tracking-tight">Assign New Task</h2>
+          <p className="text-xs text-slate-400 font-medium">Coordinate work by assigning tasks to {roleLabel.toLowerCase()}s</p>
         </div>
 
-        <input
-          type="date"
-          className="w-full rounded border px-3 py-2"
-          value={form.deadline}
-          onChange={(e) => setForm({ ...form, deadline: e.target.value })}
-        />
+        <div className="space-y-4">
+          {/* Assignee selector */}
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Select {roleLabel}</label>
+            <select
+              className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all appearance-none cursor-pointer"
+              value={form.assigneeId}
+              onChange={(e) => setForm({ ...form, assigneeId: e.target.value })}
+              disabled={loadingUsers}
+            >
+              <option value="" className="bg-[#0f172a]">
+                {loadingUsers ? "Loading user records…" : `Choose an ${roleLabel.toLowerCase()}`}
+              </option>
+              {users.map((u) => (
+                <option key={u.id} value={u.id} className="bg-[#0f172a]">
+                  {u.name} — {u.email}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Task Name</label>
+            <input
+              placeholder="What needs to be done?"
+              className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
+              value={form.task}
+              onChange={(e) => setForm({ ...form, task: e.target.value })}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Description (Optional)</label>
+            <textarea
+              placeholder="Add more details about this assignment..."
+              className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all min-h-[100px] resize-none"
+              value={form.description}
+              onChange={(e) => setForm({ ...form, description: e.target.value })}
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Priority</label>
+              <select
+                className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all cursor-pointer"
+                value={form.priority}
+                onChange={(e) => setForm({ ...form, priority: e.target.value })}
+              >
+                <option value="low" className="bg-[#0f172a]">Low Priority</option>
+                <option value="medium" className="bg-[#0f172a]">Medium Priority</option>
+                <option value="high" className="bg-[#0f172a]">High Priority</option>
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Initial Status</label>
+              <select
+                className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all cursor-pointer"
+                value={form.status}
+                onChange={(e) => setForm({ ...form, status: e.target.value })}
+              >
+                <option value="pending" className="bg-[#0f172a]">Not Started</option>
+                <option value="in_progress" className="bg-[#0f172a]">In Progress</option>
+                <option value="completed" className="bg-[#0f172a]">Completed</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500 ml-1">Deadline Date</label>
+            <input
+              type="date"
+              className="w-full rounded-xl bg-white/5 border border-white/10 px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all cursor-pointer [color-scheme:dark]"
+              value={form.deadline}
+              onChange={(e) => setForm({ ...form, deadline: e.target.value })}
+            />
+          </div>
+        </div>
 
         <div className="flex justify-end gap-3 pt-4">
           <button
             onClick={onClose}
-            className="rounded border px-4 py-2 cursor-pointer"
+            className="px-6 py-2.5 rounded-xl border border-white/10 text-sm font-bold text-slate-300 hover:bg-white/5 transition-all active:scale-95"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
             disabled={loadingUsers}
-            className="rounded bg-indigo-600 px-4 py-2 text-white cursor-pointer disabled:opacity-50"
+            className="px-8 py-2.5 rounded-xl bg-indigo-600 text-sm font-bold text-white hover:bg-indigo-500 shadow-lg shadow-indigo-600/20 transition-all active:scale-95 disabled:opacity-50 disabled:grayscale"
           >
-            Assign Task
+            {loadingUsers ? "Syncing..." : "Assign Task"}
           </button>
         </div>
       </div>

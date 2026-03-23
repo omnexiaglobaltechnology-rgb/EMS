@@ -6,9 +6,16 @@
  */
 const RecentReportItem = ({ title, time }) => {
   return (
-    <div className="flex items-center justify-between rounded-lg bg-slate-50 px-4 py-3 mb-3">
-      <span className="font-medium">{title}</span>
-      <span className="text-sm text-slate-500">{time}</span>
+    <div className="flex items-center justify-between rounded-xl bg-white/5 border border-white/5 px-5 py-4 mb-4 transition-all duration-300 hover:bg-white/10 hover:border-white/10 group cursor-default shadow-sm">
+      <div className="flex flex-col">
+        <span className="font-semibold text-slate-100 group-hover:text-white transition-colors">
+          {title}
+        </span>
+        <span className="text-xs text-slate-500 mt-1 uppercase tracking-tighter">Report Type: Performance</span>
+      </div>
+      <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-1 rounded font-medium border border-slate-700 shadow-sm">
+        {time}
+      </span>
     </div>
   );
 };

@@ -101,126 +101,124 @@ const AdminDepartments = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-24">
+      <div className="flex items-center justify-center py-12">
         <div className="text-center">
-          <Loader className="mx-auto mb-6 h-12 w-12 animate-spin text-[#00d4ff] blue-glow" />
-          <p className="text-white/40 text-[10px] font-black uppercase tracking-[0.3em]">Synchronizing Infrastructure...</p>
+          <Loader className="mx-auto mb-2 h-8 w-8 animate-spin text-gray-400" />
+          <p className="text-gray-500 text-sm">Loading departments...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white flex items-center gap-3">
-            <Building2 size={28} className="text-indigo-400" /> Department Management
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <Building2 size={24} /> Department Management
           </h1>
-          <p className="text-white/60 font-medium">
+          <p className="text-slate-500">
             Create and manage departments for employees and interns
           </p>
         </div>
         <button
           onClick={openAdd}
-          className="flex items-center gap-3 rounded-xl blue-button px-8 py-3.5 text-xs font-black uppercase tracking-[0.2em] active:scale-95"
+          className="flex items-center gap-2 rounded bg-slate-900 px-4 py-2 text-white text-sm font-medium hover:bg-slate-800"
         >
-          <Plus size={18} strokeWidth={3} />
-          Initialize Dept
+          <Plus size={16} />
+          Add Department
         </button>
       </div>
 
       {/* Error */}
       {error && (
-        <div className="flex items-start gap-3 rounded-2xl border border-red-500/30 bg-red-500/30 p-5 backdrop-blur-md animate-in fade-in slide-in-from-top-2">
-          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-400" />
-          <p className="text-sm text-red-200 font-medium">{error}</p>
+        <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
+          <p className="text-sm text-red-800">{error}</p>
         </div>
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 rounded-xl bg-white/30 p-1.5 w-fit border border-white/30 backdrop-blur-md">
+      <div className="flex gap-1 rounded-lg bg-slate-100 p-1 w-fit">
         {["employee", "intern"].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
-            className={`px-8 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+            className={`px-4 py-2 rounded-md text-sm font-medium capitalize transition-all ${
               activeTab === tab
-                ? "bg-white/40 text-[#00d4ff] shadow-[0_0_15px_rgba(0,212,255,0.2)] border border-white/30 blue-glow"
-                : "text-white/40 hover:text-white"
+                ? "bg-white text-slate-900 shadow-sm"
+                : "text-slate-500 hover:text-slate-700"
             }`}
           >
-            {tab}s
+            {tab} Departments
           </button>
         ))}
       </div>
 
       {/* Department Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filtered.map((dept) => (
           <div
             key={dept._id || dept.id}
-            className="card-glass p-6 space-y-4 group hover:border-white/30 transition-all duration-300"
+            className="rounded-xl border border-gray-200 bg-white p-5 space-y-3 hover:shadow-md transition-shadow"
           >
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="font-black text-2xl text-white group-hover:text-[#00d4ff] transition-all duration-500 tracking-tighter">
+                <h3 className="font-semibold text-lg text-slate-800">
                   {dept.name}
                 </h3>
-                <span className="text-[10px] font-black text-[#00d4ff] uppercase tracking-[0.2em] blue-glow mt-1 block">
-                  {dept.type} PROTOCOL
+                <span className="text-xs font-medium text-slate-400 uppercase">
+                  {dept.type}
                 </span>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-1">
                 <button
                   onClick={() => openEdit(dept)}
-                  className="p-2 rounded-xl bg-white/30 hover:bg-white/40 text-white/40 hover:text-white transition-all border border-white/30"
+                  className="p-1.5 rounded hover:bg-slate-100 text-slate-400"
                 >
                   <Pencil size={14} />
                 </button>
                 <button
                   onClick={() => handleDelete(dept._id || dept.id)}
-                  className="p-2 rounded-xl bg-white/30 hover:bg-red-500/30 text-white/40 hover:text-red-400 transition-all border border-white/30"
+                  className="p-1.5 rounded hover:bg-red-50 text-red-400"
                 >
                   <Trash2 size={14} />
                 </button>
               </div>
             </div>
             {dept.description && (
-              <p className="text-sm text-white/60 leading-relaxed">{dept.description}</p>
+              <p className="text-sm text-slate-500">{dept.description}</p>
             )}
-            <div className="flex items-center gap-2 pt-4 border-t border-white/30">
-              <div className="p-1.5 rounded-lg bg-white/30">
-                <Users size={12} className="text-white/30" />
-              </div>
-              <span className="text-xs font-bold text-white/30 uppercase tracking-wider">
-                Managed by {dept.createdBy?.name || "System"}
+            <div className="flex items-center gap-1 text-xs text-slate-400">
+              <Users size={12} />
+              <span>
+                Created by {dept.createdBy?.name || "Admin"}
               </span>
             </div>
           </div>
         ))}
 
         {filtered.length === 0 && (
-          <div className="col-span-full text-center py-20 bg-white/30 rounded-3xl border-2 border-dashed border-white/30">
-            <Building2 className="mx-auto mb-4 h-16 w-16 text-white/5" />
-            <p className="text-white/40 font-bold text-lg">No {activeTab} departments yet</p>
+          <div className="col-span-full text-center py-12 text-slate-400">
+            <Building2 className="mx-auto mb-2 h-12 w-12 opacity-20" />
+            <p>No {activeTab} departments yet.</p>
           </div>
         )}
       </div>
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="w-full max-w-md rounded-3xl glass-dark p-8 space-y-6 shadow-2xl border border-white/30">
-            <h2 className="text-2xl font-bold text-white">
-              {editDept ? "Edit Dept" : "New Dept"}
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 space-y-4">
+            <h2 className="text-lg font-semibold">
+              {editDept ? "Edit Department" : "Create Department"}
             </h2>
 
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-white/40 ml-1">Department Name</label>
+            <div className="space-y-1">
+              <label className="text-sm font-medium">Department Name</label>
               <input
-                className="w-full rounded-xl bg-white/30 border border-white/30 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all"
+                className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="e.g. Technical, Finance, Operations"
@@ -228,47 +226,47 @@ const AdminDepartments = () => {
             </div>
 
             {!editDept && (
-              <div className="space-y-2">
-                <label className="text-[10px] font-black uppercase tracking-widest text-white/40 ml-1">Track</label>
+              <div className="space-y-1">
+                <label className="text-sm font-medium">Track</label>
                 <select
-                  className="w-full rounded-xl bg-white/30 border border-white/30 px-4 py-3 text-sm text-white focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all appearance-none cursor-pointer"
+                  className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value })}
                 >
-                  <option value="employee" className="bg-slate-900">Employee</option>
-                  <option value="intern" className="bg-slate-900">Intern</option>
+                  <option value="employee">Employee</option>
+                  <option value="intern">Intern</option>
                 </select>
               </div>
             )}
 
-            <div className="space-y-2">
-              <label className="text-[10px] font-black uppercase tracking-widest text-white/40 ml-1">Description</label>
+            <div className="space-y-1">
+              <label className="text-sm font-medium">Description</label>
               <textarea
-                className="w-full rounded-xl bg-white/30 border border-white/30 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all"
+                className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
                 rows={3}
                 value={form.description}
                 onChange={(e) =>
                   setForm({ ...form, description: e.target.value })
                 }
-                placeholder="Explain the department's focus..."
+                placeholder="Optional description"
               />
             </div>
 
-            <div className="flex justify-end gap-3 pt-6">
+            <div className="flex justify-end gap-3 pt-4 font-medium text-sm">
               <button
                 onClick={() => {
                   setShowModal(false);
                   setEditDept(null);
                 }}
-                className="rounded-xl px-6 py-3 text-sm font-bold text-white/60 hover:text-white hover:bg-white/30 transition-all"
+                className="rounded border border-gray-300 px-4 py-2 hover:bg-gray-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSave}
-                className="rounded-2xl blue-button px-10 py-4 text-xs font-black uppercase tracking-[0.2em] active:scale-95"
+                className="rounded bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700"
               >
-                {editDept ? "Commit Changes" : "Initialize Link"}
+                {editDept ? "Save Changes" : "Create Department"}
               </button>
             </div>
           </div>

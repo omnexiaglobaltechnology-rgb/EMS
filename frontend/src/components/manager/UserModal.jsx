@@ -22,87 +22,71 @@ const UserModal = ({ title, user, onClose, onSave }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-xl flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-300">
-      <div className="w-full max-w-lg glass-dark rounded-[2.5rem] border border-white/20 shadow-2xl p-10 space-y-8 relative animate-in zoom-in-95 duration-500">
-        <button 
-          onClick={onClose} 
-          className="absolute top-8 right-8 text-white/40 hover:text-[#00d4ff] hover:rotate-90 transition-all duration-300"
-        >
-          <X size={24} />
+    <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl p-8 space-y-6 relative animate-in fade-in zoom-in-95 duration-200">
+        <button onClick={onClose} className="absolute top-6 right-6 text-slate-400 hover:text-slate-600 transition-colors">
+          <X size={20} />
         </button>
 
-        <div className="space-y-2">
-          <h2 className="text-3xl font-black text-white uppercase tracking-tighter leading-none">{title}</h2>
-          <div className="h-1 w-12 bg-[#00d4ff] rounded-full blue-glow"></div>
-        </div>
+        <h2 className="text-2xl font-bold text-slate-900">{title}</h2>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">Full Name</label>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Full Name</label>
             <input
               required
-              className="w-full rounded-2xl bg-white/5 border border-white/10 px-5 py-4 text-sm text-white placeholder:text-white/20 focus:border-[#00d4ff]/50 focus:bg-white/[0.08] outline-none transition-all duration-300"
+              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              placeholder="E.g. JASON BOURNE"
+              placeholder="e.g. John Smith"
             />
           </div>
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">Email Terminal</label>
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Email</label>
             <input
               required
               type="email"
-              className="w-full rounded-2xl bg-white/5 border border-white/10 px-5 py-4 text-sm text-white placeholder:text-white/20 focus:border-[#00d4ff]/50 focus:bg-white/[0.08] outline-none transition-all duration-300"
+              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
-              placeholder="IDENTIFIER@EMS.NET"
+              placeholder="john@company.com"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">Track</label>
-              <div className="relative">
-                <select
-                  className="w-full rounded-2xl bg-white/5 border border-white/10 px-5 py-4 text-sm text-white focus:border-[#00d4ff]/50 outline-none transition-all duration-300 appearance-none cursor-pointer"
-                  value={form.userType}
-                  onChange={(e) => setForm({ ...form, userType: e.target.value })}
-                >
-                  <option value="employee" className="bg-[#0f172a]">Employee</option>
-                  <option value="intern" className="bg-[#0f172a]">Intern</option>
-                </select>
-                <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-white/20">
-                  <Activity size={12} />
-                </div>
-              </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Track</label>
+              <select
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none"
+                value={form.userType}
+                onChange={(e) => setForm({ ...form, userType: e.target.value })}
+              >
+                <option value="employee">Employee</option>
+                <option value="intern">Intern</option>
+              </select>
             </div>
-            <div className="space-y-2">
-              <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">Role</label>
-              <div className="relative">
-                <select
-                  className="w-full rounded-2xl bg-white/5 border border-white/10 px-5 py-4 text-sm text-white focus:border-[#00d4ff]/50 outline-none transition-all duration-300 appearance-none cursor-pointer"
-                  value={form.role}
-                  onChange={(e) => setForm({ ...form, role: e.target.value })}
-                >
-                  <option value="employee" className="bg-[#0f172a]">Employee</option>
-                  <option value="intern" className="bg-[#0f172a]">Intern</option>
-                </select>
-                <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-white/20">
-                  <Activity size={12} />
-                </div>
-              </div>
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Role</label>
+              <select
+                className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all appearance-none"
+                value={form.role}
+                onChange={(e) => setForm({ ...form, role: e.target.value })}
+              >
+                <option value="employee">Employee</option>
+                <option value="intern">Intern</option>
+              </select>
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] ml-1">Sec-Key</label>
+          <div className="space-y-1">
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Password</label>
             <input
               type="password"
-              className="w-full rounded-2xl bg-white/5 border border-white/10 px-5 py-4 text-sm text-white placeholder:text-white/20 focus:border-[#00d4ff]/50 focus:bg-white/[0.08] outline-none transition-all duration-300"
+              className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
               value={form.password}
               onChange={(e) => setForm({ ...form, password: e.target.value })}
-              placeholder={user ? "ENCRYPTED - LEAVE BLANK" : "MIN 8 CHARACTERS"}
+              placeholder={user ? "Leave blank to keep current" : "Min 8 characters"}
               minLength={8}
               required={!user}
             />
@@ -110,9 +94,9 @@ const UserModal = ({ title, user, onClose, onSave }) => {
 
           <button
             type="submit"
-            className="w-full blue-button rounded-2xl py-5 text-xs uppercase tracking-[0.3em] active:scale-[0.98]"
+            className="w-full bg-slate-900 text-white rounded-xl py-4 font-bold text-sm hover:bg-slate-800 transition-all shadow-lg hover:shadow-slate-200 active:scale-95"
           >
-            {user ? "Commit Changes" : "Initialize Member"}
+            {user ? "Update Member" : "Add to Team"}
           </button>
         </form>
       </div>

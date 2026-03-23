@@ -38,6 +38,40 @@ const CooMeetingRoom = () => {
   };
 
   /**
+   * Intercedes with the browser to provision and mount user media devices.
+   */
+  const requestMedia = useCallback(async ({ audio = true, video = true } = {}) => {
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setMediaError("Media devices are not supported in this browser.");
+      setMicOn(false);
+      setCameraOn(false);
+      return null;
+    }
+
+    try {
+      const currentStream = await navigator.mediaDevices.getUserMedia({
+        audio,
+        video,
+      });
+
+      stopCurrentStream();
+      streamRef.current = currentStream;
+
+      setMicOn(currentStream.getAudioTracks().length > 0);
+      setCameraOn(currentStream.getVideoTracks().length > 0);
+      setMediaError("");
+      return currentStream;
+    } catch (error) {
+      setMediaError(
+        "Camera/Microphone permission is blocked. Please allow access in browser site settings.",
+      );
+      setMicOn(false);
+      setCameraOn(false);
+      return null;
+    }
+  }, []);
+
+  /**
    * Automates the departure lifecycle: stopping localized capture, finalizing recordings,
    * and subsequently routing the user back.
    */
@@ -52,14 +86,6 @@ const CooMeetingRoom = () => {
     navigate(-1);
   };
 
-  /**
-   * Intercedes with the browser to provision and mount user media devices.
-   *
-   * @param {object} options
-   * @param {boolean} options.audio - Dictates microphone requisition
-   * @param {boolean} options.video - Dictates camera requisition
-   * @returns {Promise<MediaStream|null>} Local media stream instance or null alongside an error flag
-   */
   const [videoElMounted, setVideoElMounted] = useState(0);
 
   const setLocalVideoRef = useCallback((el) => {
@@ -67,6 +93,7 @@ const CooMeetingRoom = () => {
     setVideoElMounted(n => n + 1);
   }, []);
 
+  // Sync video element with stream
   useEffect(() => {
     const el = videoRef.current;
     if (!el || !streamRef.current) return;
@@ -76,6 +103,7 @@ const CooMeetingRoom = () => {
     el.volume = 0;
   }, [streamRef.current, videoElMounted]);
 
+  // Initialize meeting and media — single useEffect
   useEffect(() => {
     const init = async () => {
       try {
@@ -86,54 +114,21 @@ const CooMeetingRoom = () => {
       }
     };
 
-    const requestMedia = async ({ audio = true, video = true } = {}) => {
-      if (!navigator.mediaDevices?.getUserMedia) {
-        setMediaError("Media devices are not supported in this browser.");
-        setMicOn(false);
-        setCameraOn(false);
-        return null;
-      }
-
-      try {
-        const currentStream = await navigator.mediaDevices.getUserMedia({
-          audio,
-          video,
-        });
-
-        if (!micOn) {
-          currentStream.getAudioTracks().forEach(track => track.enabled = false);
-        }
-        if (!cameraOn) {
-          currentStream.getVideoTracks().forEach(track => track.enabled = false);
-        }
-
-        stopCurrentStream();
-        streamRef.current = currentStream;
-
-        setMicOn(currentStream.getAudioTracks().length > 0);
-        setCameraOn(currentStream.getVideoTracks().length > 0);
-        setMediaError("");
-        return currentStream;
-      } catch (error) {
-        setMediaError(
-          "Camera/Microphone permission is blocked. Please allow access in browser site settings.",
-        );
-        setMicOn(false);
-        setCameraOn(false);
-        return null;
-      }
-    };
-
     init();
     requestMedia({ audio: true, video: true });
 
     return () => {
+      if (
+        mediaRecorderRef.current &&
+        mediaRecorderRef.current.state !== "inactive"
+      ) {
+        mediaRecorderRef.current.stop();
+      }
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
       }
     };
-  }, [id]);
-
+  }, [id, requestMedia]);
 
   const toggleMic = () => {
     if (streamRef.current) {
@@ -166,7 +161,6 @@ const CooMeetingRoom = () => {
 
   /**
    * Overrides the current video stream with an actively queried display surface stream.
-   * Maps 'onended' browser controls to trigger systematic fallback to the camera.
    */
   const toggleScreenShare = async () => {
     if (isScreenSharing) {
@@ -222,32 +216,6 @@ const CooMeetingRoom = () => {
     setChatInput("");
   };
 
-  // Get camera + mic stream and fetch meeting
-  useEffect(() => {
-    const init = async () => {
-      await requestMedia({ video: true, audio: true });
-      try {
-        const data = await meetingsApi.getById(id);
-        setMeeting(data);
-      } catch (err) {
-        console.error("Failed to fetch meeting details", err);
-      }
-    };
-
-    init();
-
-    return () => {
-      if (
-        mediaRecorderRef.current &&
-        mediaRecorderRef.current.state !== "inactive"
-      ) {
-        mediaRecorderRef.current.stop();
-      }
-      stopCurrentStream();
-    };
-  }, []);
-
-  // Start Recording
   /**
    * Activates MediaRecorder hooks across the aggregated user streams to capture the live session.
    */
@@ -289,7 +257,6 @@ const CooMeetingRoom = () => {
     setRecording(true);
   };
 
-  // Stop Recording
   /**
    * Ceases active MediaRecorder processing and generates a downloadable video output.
    */
@@ -408,10 +375,6 @@ const CooMeetingRoom = () => {
         >
           <Link />
         </button>
-
-        {/* <button>
-          <Flag />
-        </button> */}
 
         <button onClick={toggleScreenShare}>
           <ScreenShare className={isScreenSharing ? "text-green-400" : ""} />

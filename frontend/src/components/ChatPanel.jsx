@@ -1,7 +1,18 @@
+/**
+ * @deprecated This component is unused. Chat is handled by ChatInterface.jsx.
+ * Kept for reference only.
+ */
 import { useEffect, useState, useRef } from "react";
-import { useChatSocket } from "../hooks/useChatSocket";
-import { apiChat } from "../utils/api";
 import { Send, Trash2, Edit2, AlertCircle, MessageCircle } from "lucide-react";
+
+// NOTE: useChatSocket hook and apiChat do not exist. This component is unused.
+// If reactivating, implement the necessary hook and API methods first.
+const useChatSocket = () => ({ socket: null, isConnected: false });
+const apiChat = {
+  getMessages: async () => [],
+  editMessage: async () => {},
+  deleteMessage: async () => {},
+};
 
 /**
  * ChatComponent handles the real-time chat interface for a specific chat room.

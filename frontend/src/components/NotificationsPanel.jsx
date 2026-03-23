@@ -1,5 +1,17 @@
+/**
+ * @deprecated This component is unused. Notifications are handled by Topbar.jsx
+ * via the inAppNotifications.js utility. Kept for reference only.
+ */
 import { useEffect, useState } from "react";
-import { apiNotifications } from "../utils/api";
+// NOTE: apiNotifications does not exist in api.js. This component is unused.
+// If reactivating, implement the necessary API methods in utils/api.js first.
+const apiNotifications = {
+  getNotifications: async () => ({ notifications: [] }),
+  markAsRead: async () => {},
+  deleteNotification: async () => {},
+  markAllAsRead: async () => {},
+  clearAll: async () => {},
+};
 import { Bell, X, Check, Trash2 } from "lucide-react";
 
 /**

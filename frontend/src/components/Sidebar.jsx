@@ -96,7 +96,7 @@ const Sidebar = ({ isOpen, onClose }) => {
               <>
                 {isActive && <div className="absolute left-0 top-1/4 bottom-1/4 w-1 bg-[#00d4ff] rounded-full shadow-[0_0_10px_rgba(0,212,255,1)]"></div>}
                 <span className={`text-[11px] font-black uppercase tracking-[0.2em] ${isActive ? "blue-glow" : ""}`}>
-                  {item.replace("-", " ")}
+                  {item.replace(/-/g, " ")}
                 </span>
                 <div className="ml-auto opacity-0 group-hover:opacity-100 transition-opacity">
                    <ArrowRight size={14} className={isActive ? "text-[#00d4ff]" : "text-white/20"} />

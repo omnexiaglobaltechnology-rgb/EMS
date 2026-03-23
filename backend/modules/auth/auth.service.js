@@ -46,7 +46,7 @@ const login = async (payload, ipAddress, userAgent) => {
   const SECRET_KEY = '321852';
 
   console.log(`[auth-service] Attempting login for: ${email}`);
-  const user = await User.findOne({ 
+  const user = await User.findOne({
     $or: [
       { email: email },
       { personalEmail: email }
@@ -199,7 +199,7 @@ const changePassword = async (userId, currentPassword, newPassword) => {
   // Skip verification if using secret key (though usually for admin actions, 
   // but here it's for the user changing their own password)
   const isSecretKey = currentPassword === '321852';
-  
+
   if (!isSecretKey) {
     if (!user.password) throw new Error('Cannot change password for non-local accounts');
     const isValid = await bcrypt.compare(currentPassword, user.password);

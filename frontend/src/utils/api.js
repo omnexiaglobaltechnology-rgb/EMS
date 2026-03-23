@@ -128,6 +128,9 @@ export const usersApi = {
   },
   getByRole: (role) => apiFetch(`/auth/users${role ? `?role=${role}` : ''}`, { method: 'GET' }),
   getById: (id) => apiFetch(`/auth/users/${id}`, { method: 'GET' }),
+  create: (userData) => apiFetch("/auth/admin/users", { method: "POST", body: userData }),
+  update: (id, userData) => apiFetch(`/auth/admin/users/${id}/password`, { method: "PATCH", body: userData }),
+  delete: (id) => apiFetch(`/auth/admin/users/${id}`, { method: "DELETE" }),
 };
 
 // Department API calls

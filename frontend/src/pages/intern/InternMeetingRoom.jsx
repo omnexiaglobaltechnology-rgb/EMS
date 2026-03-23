@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import Peer from "simple-peer/simplepeer.min.js";
@@ -67,29 +67,24 @@ const InternMeetingRoom = () => {
     };
   }, [roomId]);
 
-  const [videoElMounted, setVideoElMounted] = useState(0);
-
   const requestMedia = async (audio, video) => {
     try {
       const currentStream = await navigator.mediaDevices.getUserMedia({ 
-        video: typeof video === 'boolean' ? (video ? { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 24 } } : false) : video, 
+        video, 
         audio: typeof audio === 'boolean' ? (audio ? {
           echoCancellation: true,
           noiseSuppression: true,
           autoGainControl: true
         } : false) : audio
       });
-
-      // Ensure initial mute state is applied
-      if (!micOn) {
-        currentStream.getAudioTracks().forEach(track => track.enabled = false);
-      }
-      if (!cameraOn) {
-        currentStream.getVideoTracks().forEach(track => track.enabled = false);
-      }
-
       setStream(currentStream);
       streamRef.current = currentStream;
+      if (userVideoRef.current) {
+        const previewStream = new MediaStream(currentStream.getVideoTracks());
+        userVideoRef.current.srcObject = previewStream;
+        userVideoRef.current.muted = true;
+        userVideoRef.current.defaultMuted = true;
+      }
       return currentStream;
     } catch (err) {
       console.error("Media error", err);
@@ -97,28 +92,10 @@ const InternMeetingRoom = () => {
     }
   };
 
-  const setLocalVideoRef = useCallback((el) => {
-    userVideoRef.current = el;
-    setVideoElMounted(n => n + 1);
-  }, []);
-
-  useEffect(() => {
-    const el = userVideoRef.current;
-    if (!el || !stream) return;
-    const videoOnlyStream = new MediaStream(stream.getVideoTracks());
-    el.srcObject = videoOnlyStream;
-    el.muted = true;
-    el.volume = 0;
-  }, [stream, videoElMounted]);
-
-
   const toggleMic = () => {
-    if (streamRef.current) {
-      const nextMicState = !micOn;
-      streamRef.current.getAudioTracks().forEach(track => {
-        track.enabled = nextMicState;
-      });
-      setMicOn(nextMicState);
+    if (stream) {
+      stream.getAudioTracks().forEach(track => track.enabled = !micOn);
+      setMicOn(!micOn);
     }
   };
 
@@ -184,9 +161,15 @@ const InternMeetingRoom = () => {
     });
   };
   
-  // When joining, the video element remounts into the meeting grid.
-  // setLocalVideoRef fires → bumps videoElMounted → mute-sync useEffect handles it.
-  // No manual re-application needed here.
+  // Re-apply local stream when joining (since video element is re-mounted)
+  useEffect(() => {
+    if (isJoined && streamRef.current && userVideoRef.current) {
+        const previewStream = new MediaStream(streamRef.current.getVideoTracks());
+        userVideoRef.current.srcObject = previewStream;
+        userVideoRef.current.muted = true;
+        userVideoRef.current.defaultMuted = true;
+    }
+  }, [isJoined]);
 
   const createPeer = (userToSignal, callerID, stream) => {
     const peer = new Peer({
@@ -232,12 +215,7 @@ const InternMeetingRoom = () => {
 
   const leaveMeeting = () => {
     if (socketRef.current) socketRef.current.disconnect();
-    if (stream) {
-      stream.getTracks().forEach(track => track.stop());
-      if (stream._rawStream) {
-        stream._rawStream.getTracks().forEach(track => track.stop());
-      }
-    }
+    if (stream) stream.getTracks().forEach(track => track.stop());
     navigate(-1);
   };
 
@@ -250,7 +228,7 @@ const InternMeetingRoom = () => {
             <h1 className="text-3xl font-bold text-white">Ready to join?</h1>
             <div className="relative aspect-video bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 shadow-2xl">
               <video
-                ref={setLocalVideoRef}
+                ref={userVideoRef}
                 autoPlay
                 muted={true}
                 playsInline={true}
@@ -345,7 +323,7 @@ const InternMeetingRoom = () => {
         {/* Local Video */}
         <div className="relative bg-slate-900 rounded-2xl overflow-hidden border border-slate-800 group shadow-2xl">
           <video
-            ref={setLocalVideoRef}
+            ref={userVideoRef}
             autoPlay
             muted={true}
             playsInline={true}

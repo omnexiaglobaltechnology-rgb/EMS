@@ -118,14 +118,14 @@ const InternSubmissionsReview = () => {
                 <div className="flex gap-2">
                   <button
                     onClick={() => handleStatusChange(item.id, "approved")}
-                    className="bg-green-500 text-white h-7 px-3 text-sm rounded-md"
+                    class="bg-green-500 text-white h-7 px-3 text-sm rounded-md"
                   >
                     Approve
                   </button>
 
                   <button
                     onClick={() => handleStatusChange(item.id, "rejected")}
-                    className="bg-red-500 text-white h-7 px-3 text-sm rounded-md"
+                    class="bg-red-500 text-white h-7 px-3 text-sm rounded-md"
                   >
                     Reject
                   </button>

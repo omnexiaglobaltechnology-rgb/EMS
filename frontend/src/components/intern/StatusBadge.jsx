@@ -6,14 +6,15 @@
  */
 const StatusBadge = ({ status }) => {
   const styles = {
-    approved: "bg-emerald-100 text-emerald-600",
-    pending: "bg-indigo-100 text-indigo-600",
-    rejected: "bg-red-100 text-red-600",
+    approved: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    completed: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
+    pending: "bg-indigo-500/10 text-indigo-400 border-indigo-500/20",
+    rejected: "bg-red-500/10 text-red-400 border-red-500/20",
   };
 
   return (
     <span
-      className={`rounded-full px-3 py-1 text-xs font-medium ${styles[status]}`}
+      className={`rounded-lg px-3 py-1 text-[9px] font-bold uppercase tracking-widest border shadow-lg backdrop-blur-md ${styles[status] || "bg-white/5 text-white border-white/10"}`}
     >
       {status}
     </span>

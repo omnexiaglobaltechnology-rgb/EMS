@@ -1,5 +1,5 @@
 const ROLE_PERMISSIONS = {
-  intern: ['task.read', 'task.submit', 'submission.create', 'submission.read.own'],
+  intern: ['task.read', 'task.update', 'task.submit', 'submission.create', 'submission.read', 'submission.read.own'],
   employee: ['task.read', 'task.submit', 'task.delegate', 'submission.create', 'submission.read.own'],
   team_lead: [
     'task.read',

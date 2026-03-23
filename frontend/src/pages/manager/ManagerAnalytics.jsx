@@ -27,7 +27,7 @@ import {
   Legend,
 } from "recharts";
 
-const COLORS = ["#00d4ff", "#0066ff", "#6366f1"];
+const COLORS = ["#4f46e5", "#22c55e", "#f59e0b"];
 
 /**
  * Analytics dashboard for department managers.
@@ -140,16 +140,9 @@ const ManagerAnalytics = () => {
   return (
     <div className="space-y-8">
       {/* HEADER */}
-      <div className="animate-in fade-in slide-in-from-top-4 duration-700">
-        <h1 className="text-5xl font-black text-white tracking-tighter uppercase leading-tight">
-          Neural <span className="text-[#00d4ff] blue-glow">Analytics</span>
-        </h1>
-        <div className="flex items-center gap-4 mt-3">
-          <div className="h-1 w-20 bg-[#00d4ff] rounded-full blue-glow"></div>
-          <p className="text-xs font-black text-white/40 uppercase tracking-[0.3em]">
-            Real-time Performance Metrics
-          </p>
-        </div>
+      <div>
+        <h1 className="text-3xl font-bold text-slate-900">Analytics</h1>
+        <p className="text-slate-500 mt-1">Department performance metrics</p>
       </div>
 
       {/* Error Message */}
@@ -189,70 +182,49 @@ const ManagerAnalytics = () => {
         />
       </div>
 
-      <div className="card-glass relative overflow-hidden group border-white/5 p-8">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-[#00d4ff]/5 blur-[100px] rounded-full pointer-events-none"></div>
-        <h2 className="text-xs font-black text-white uppercase tracking-[0.2em] mb-10 flex items-center gap-2">
-            <BarChart3 size={14} className="text-[#00d4ff]" />
-            Performance <span className="text-[#00d4ff] blue-glow">Overview</span>
-        </h2>
+      {/* PERFORMANCE OVERVIEW */}
+      <div className="rounded-xl border border-gray-300 bg-white p-6">
+        <div className="rounded-xl border border-gray-300 bg-white p-6 space-y-8">
+          <h2 className="text-xl font-semibold">Performance Overview</h2>
 
-        <div className="space-y-12">
           {/* ================= TOP SECTION ================= */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* LINE CHART - Task Completion Trend */}
-            <div className="bg-white/5 rounded-3xl border border-white/5 p-6 backdrop-blur-md">
-              <div className="flex justify-between items-center mb-6 px-2">
-                <h3 className="text-[10px] font-black text-white/60 uppercase tracking-widest">Efficiency Vector</h3>
-                <span className="text-[10px] font-black text-[#00d4ff] blue-glow uppercase tracking-widest">↑ Optimizing</span>
+            <div className="rounded-lg border border-gray-200 p-4">
+              <div className="flex justify-between mb-4">
+                <h3 className="font-semibold">Team Task Completion Trend</h3>
+                <span className="text-sm text-green-600">↑ Improving</span>
               </div>
 
               <ResponsiveContainer width="100%" height={250}>
                 <LineChart data={metrics.taskTrendData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                  <XAxis 
-                    dataKey="month" 
-                    stroke="rgba(255,255,255,0.3)" 
-                    fontSize={10} 
-                    tickLine={false} 
-                    axisLine={false} 
-                  />
-                  <YAxis 
-                    stroke="rgba(255,255,255,0.3)" 
-                    fontSize={10} 
-                    tickLine={false} 
-                    axisLine={false} 
-                  />
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: "#020617", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "1rem" }}
-                    itemStyle={{ color: "#00d4ff", fontSize: "12px", fontWeight: "900" }}
-                  />
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="month" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
                   <Line
                     type="monotone"
                     dataKey="completed"
-                    stroke="#00d4ff"
-                    strokeWidth={4}
-                    dot={{ r: 4, fill: "#00d4ff", strokeWidth: 0 }}
-                    activeDot={{ r: 8, stroke: "rgba(0,212,255,0.2)", strokeWidth: 20 }}
+                    stroke="#4f46e5"
+                    strokeWidth={3}
+                    dot={{ r: 4 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
             </div>
 
             {/* PIE CHART - Task Status */}
-            <div className="bg-white/5 rounded-3xl border border-white/5 p-6 backdrop-blur-md">
-              <h3 className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-6 px-2">Task Allocation</h3>
+            <div className="rounded-lg border border-gray-200 p-4">
+              <h3 className="font-semibold mb-4">Task Status Distribution</h3>
 
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
                   <Pie
                     data={metrics.taskStatusData}
                     dataKey="value"
-                    outerRadius={80}
-                    innerRadius={50}
-                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    labelLine={false}
-                    fontSize={9}
-                    stroke="none"
+                    outerRadius={90}
+                    label
                   >
                     {metrics.taskStatusData.map((entry, index) => (
                       <Cell
@@ -261,9 +233,8 @@ const ManagerAnalytics = () => {
                       />
                     ))}
                   </Pie>
-                  <Tooltip 
-                    contentStyle={{ backgroundColor: "#020617", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "1rem" }}
-                  />
+                  <Tooltip />
+                  <Legend />
                 </PieChart>
               </ResponsiveContainer>
             </div>
@@ -272,32 +243,19 @@ const ManagerAnalytics = () => {
           {/* ================= BOTTOM SECTION ================= */}
 
           {/* BAR CHART - Member Productivity */}
-          <div className="bg-white/5 rounded-3xl border border-white/5 p-6 backdrop-blur-md">
-            <h3 className="text-[10px] font-black text-white/60 uppercase tracking-widest mb-8 px-2">
-              Individual Asset Productivity
+          <div className="rounded-lg border border-gray-200 p-4">
+            <h3 className="font-semibold mb-4">
+              Individual Team Member Performance
             </h3>
 
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={metrics.memberPerformanceData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
-                <XAxis 
-                    dataKey="name" 
-                    stroke="rgba(255,255,255,0.3)" 
-                    fontSize={10} 
-                    tickLine={false} 
-                    axisLine={false} 
-                />
-                <YAxis 
-                    stroke="rgba(255,255,255,0.3)" 
-                    fontSize={10} 
-                    tickLine={false} 
-                    axisLine={false} 
-                />
-                <Tooltip 
-                    contentStyle={{ backgroundColor: "#020617", border: "1px solid rgba(255,255,255,0.1)", borderRadius: "1rem" }}
-                    cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                />
-                <Bar dataKey="tasks" fill="#00d4ff" radius={[8, 8, 0, 0]} />
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Bar dataKey="tasks" fill="#4f46e5" radius={[6, 6, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>

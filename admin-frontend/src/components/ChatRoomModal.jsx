@@ -146,15 +146,15 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
 
   const toggleAllInDept = (deptId) => {
     const users = filteredUsersByDepartment[deptId] || [];
-    const userIds = users.map((u) => u.id || u._id);
-    const allSelected = userIds.every((id) => selectedUserIds.has(String(id)));
+    const userIds = users.map((u) => u.id);
+    const allSelected = userIds.every((id) => selectedUserIds.has(id));
 
     setSelectedUserIds((prev) => {
       const next = new Set(prev);
       if (allSelected) {
-        userIds.forEach((id) => next.delete(String(id)));
+        userIds.forEach((id) => next.delete(id));
       } else {
-        userIds.forEach((id) => next.add(String(id)));
+        userIds.forEach((id) => next.add(id));
       }
       return next;
     });
@@ -162,18 +162,18 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
 
   const getRoleBadgeColor = (role) => {
     const colors = {
-      ceo: "bg-purple-500/30 text-purple-400 border-purple-500/30",
-      cto: "bg-blue-500/30 text-blue-400 border-blue-500/30",
-      cfo: "bg-green-500/30 text-green-400 border-green-500/30",
-      coo: "bg-orange-500/30 text-orange-400 border-orange-500/30",
-      admin: "bg-red-500/30 text-red-400 border-red-500/30",
-      manager: "bg-amber-500/30 text-amber-400 border-amber-500/30",
-      manager_intern: "bg-amber-500/30 text-amber-300 border-amber-500/30",
-      team_lead: "bg-blue-500/30 text-[#00d4ff] border-blue-500/30 shadow-[0_0_10px_rgba(0,212,255,0.2)]",
-      team_lead_intern: "bg-blue-500/30 text-blue-300 border-blue-500/30",
-      intern: "bg-white/30 text-white/40 border-white/30",
+      ceo: "bg-purple-100 text-purple-700",
+      cto: "bg-blue-100 text-blue-700",
+      cfo: "bg-green-100 text-green-700",
+      coo: "bg-orange-100 text-orange-700",
+      admin: "bg-red-100 text-red-700",
+      manager: "bg-amber-100 text-amber-700",
+      manager_intern: "bg-amber-50 text-amber-600",
+      team_lead: "bg-cyan-100 text-cyan-700",
+      team_lead_intern: "bg-cyan-50 text-cyan-600",
+      intern: "bg-gray-100 text-gray-600",
     };
-    return colors[role] || "bg-white/30 text-white/40 border-white/30";
+    return colors[role] || "bg-gray-100 text-gray-600";
   };
 
   const handleSubmit = async (e) => {
@@ -190,7 +190,7 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
       // In create mode, also send emails for backward compat
       if (!isEditMode) {
         const selectedEmails = allUsers
-          .filter((u) => selectedUserIds.has(String(u.id || u._id)))
+          .filter((u) => selectedUserIds.has(u.id))
           .map((u) => u.email);
         payload.emails = selectedEmails;
       }
@@ -205,31 +205,31 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/30 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300">
-      <div className="w-full max-w-2xl rounded-3xl glass-dark shadow-2xl flex flex-col max-h-[90vh] border border-white/30 overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+      <div className="w-full max-w-2xl rounded-xl bg-white shadow-2xl flex flex-col max-h-[90vh]">
         {/* Header */}
-        <div className="px-10 py-8 border-b border-white/30 bg-white/30">
-          <h2 className="text-3xl font-black text-white tracking-tighter uppercase">
-            {isEditMode ? "Modify Chat" : "Generate Chat"} <span className="text-[#00d4ff] blue-glow">Stream</span>
+        <div className="px-6 py-4 border-b border-slate-200">
+          <h2 className="text-xl font-bold text-slate-900">
+            {isEditMode ? "Edit Chat Room" : "Create Chat Room"}
           </h2>
-          <p className="text-[10px] text-white/40 mt-2 font-black uppercase tracking-[0.2em]">
+          <p className="text-sm text-slate-500 mt-0.5">
             {isEditMode
-              ? "Updating link parameters and member access"
-              : "Initializing new communication protocol and entity mapping"}
+              ? "Update room details and manage participants"
+              : "Set up a new chat room and select participants by department"}
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0 bg-transparent">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 min-h-0">
           {/* Scrollable body */}
-          <div className="flex-1 overflow-y-auto px-8 py-6 space-y-6">
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
             {/* Room Name */}
-            <div className="space-y-2 group">
-              <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00d4ff] transition-colors">
-                Link Identifier
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-slate-700">
+                Room Name
               </label>
               <input
                 required
-                className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all shadow-inner"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
                 placeholder="e.g. Project Alpha Discussion"
@@ -237,39 +237,39 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
             </div>
 
             {/* Type + Department row */}
-            <div className="grid grid-cols-2 gap-5">
-              <div className="space-y-2 group">
-                <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00d4ff] transition-colors">
-                  Protocol Type
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-slate-700">
+                  Type
                 </label>
                 <select
-                  className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white capitalize focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all appearance-none shadow-inner"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm capitalize focus:ring-2 focus:ring-indigo-500 outline-none"
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value })}
                 >
                   {ROOM_TYPES.map((t) => (
-                    <option key={t} value={t} className="bg-slate-900">
+                    <option key={t} value={t}>
                       {t.replace("_", " ")}
                     </option>
                   ))}
                 </select>
               </div>
 
-              <div className="space-y-2 group">
-                <label className="text-[10px] font-black uppercase tracking-widest text-white/30 ml-1 group-focus-within:text-[#00d4ff] transition-colors">
+              <div className="space-y-1">
+                <label className="text-sm font-medium text-slate-700">
                   Room Department
                 </label>
                 <select
                   required
-                  className="w-full rounded-2xl bg-white/30 border border-white/30 px-5 py-4 text-sm text-white focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all appearance-none shadow-inner"
+                  className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 outline-none"
                   value={form.departmentId}
                   onChange={(e) =>
                     setForm({ ...form, departmentId: e.target.value })
                   }
                 >
-                  <option value="" className="bg-slate-900">Select Department</option>
+                  <option value="">Select Department</option>
                   {departments.map((d) => (
-                    <option key={d.id || d._id} value={d.id || d._id} className="bg-slate-900">
+                    <option key={d.id || d._id} value={d.id || d._id}>
                       {d.name}
                     </option>
                   ))}
@@ -278,49 +278,49 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
             </div>
 
             {/* User Picker Section */}
-            <div className="space-y-4 pt-4">
+            <div className="space-y-3 pt-2">
               <div className="flex items-center justify-between">
-                <label className="text-[10px] font-black uppercase tracking-widest text-white flex items-center gap-3">
-                  <Users size={18} className="text-[#00d4ff] blue-glow" strokeWidth={3} />
-                  Authorize Entities
+                <label className="text-sm font-bold text-slate-800 flex items-center gap-2">
+                  <Users size={16} className="text-indigo-600" />
+                  Select Participants
                 </label>
-                <span className="text-[10px] font-black text-[#00d4ff] bg-blue-500/30 px-4 py-2 rounded-full border border-blue-500/30 backdrop-blur-3xl shadow-[0_0_15px_rgba(0,212,255,0.1)] blue-glow">
-                  {selectedUserIds.size} Linked
+                <span className="text-xs font-semibold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-100">
+                  {selectedUserIds.size} selected
                 </span>
               </div>
 
               {/* Filters Area */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 bg-white/30 p-4 rounded-3xl border border-white/30">
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase font-black text-white/30 flex items-center gap-1.5 ml-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-slate-50 p-3 rounded-lg border border-slate-200">
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1">
                     <Filter size={10} />
                     Filter by Department
                   </label>
                   <select
-                    className="w-full rounded-xl bg-white/30 border border-white/30 px-3 py-2 text-xs text-white focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all appearance-none"
+                    className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-xs focus:ring-2 focus:ring-indigo-500 outline-none"
                     value={userDeptFilter}
                     onChange={(e) => setUserDeptFilter(e.target.value)}
                   >
-                    <option value="all" className="bg-slate-900">All Departments</option>
+                    <option value="all">All Departments</option>
                     {departments.map((d) => (
-                      <option key={d.id || d._id} value={d.id || d._id} className="bg-slate-900">
+                      <option key={d.id || d._id} value={d.id || d._id}>
                         {d.name}
                       </option>
                     ))}
-                    <option value="no_department" className="bg-slate-900">No Department</option>
+                    <option value="no_department">No Department</option>
                   </select>
                 </div>
 
-                <div className="space-y-2">
-                  <label className="text-[10px] uppercase font-black text-white/30 flex items-center gap-1.5 ml-1">
+                <div className="space-y-1">
+                  <label className="text-[10px] uppercase font-bold text-slate-400 flex items-center gap-1">
                     <Search size={10} />
                     Search Users
                   </label>
-                  <div className="relative group">
+                  <div className="relative">
                     <input
                       type="text"
                       placeholder="Name, email..."
-                      className="w-full rounded-xl bg-white/30 border border-white/30 px-4 py-2.5 text-xs text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all"
+                      className="w-full rounded-md border border-slate-300 px-2 py-1.5 text-xs focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
                     />
@@ -329,40 +329,40 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
               </div>
 
               {/* Department-wise user list */}
-              <div className="border border-white/30 rounded-3xl max-h-[250px] overflow-y-auto bg-white/30 scrollbar-thin scrollbar-thumb-white/10">
+              <div className="border border-slate-200 rounded-lg max-h-[250px] overflow-y-auto shadow-inner bg-white">
                 {fetchingData ? (
-                  <div className="py-12 text-center text-white/30">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-400 mx-auto mb-3"></div>
-                    <p className="text-sm font-medium">Loading users...</p>
+                  <div className="py-8 text-center text-slate-400">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-indigo-600 mx-auto mb-2"></div>
+                    <p className="text-sm">Loading users...</p>
                   </div>
                 ) : Object.keys(filteredUsersByDepartment).length === 0 ? (
-                  <div className="py-16 text-center text-white/20">
-                    <Users size={40} className="mx-auto mb-4 opacity-10" />
-                    <p className="text-sm font-bold">No users found</p>
-                    <p className="text-xs mt-1">Refine your filters or search</p>
+                  <div className="py-12 text-center text-slate-400">
+                    <Users size={32} className="mx-auto mb-3 opacity-20" />
+                    <p className="text-sm font-medium">No users found in this selection</p>
+                    <p className="text-xs mt-1">Try changing the department filter or search query</p>
                   </div>
                 ) : (
                   Object.entries(filteredUsersByDepartment).map(
                     ([deptId, users]) => {
                       const isExpanded = expandedDepts.has(deptId);
                       const allSelected = users.every((u) =>
-                        selectedUserIds.has(String(u.id || u._id))
+                        selectedUserIds.has(u.id)
                       );
                       const someSelected =
                         !allSelected &&
-                        users.some((u) => selectedUserIds.has(String(u.id || u._id)));
+                        users.some((u) => selectedUserIds.has(u.id));
 
                       return (
-                        <div key={deptId} className="border-b border-white/30 last:border-b-0">
+                        <div key={deptId} className="border-b border-slate-100 last:border-b-0">
                           {/* Department header */}
                           <div
-                            className="flex items-center gap-3 px-4 py-3 bg-white/30 cursor-pointer hover:bg-white/40 transition-colors sticky top-0 z-10 backdrop-blur-md"
+                            className="flex items-center gap-2 px-3 py-2 bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors sticky top-0 z-10"
                             onClick={() => toggleDept(deptId)}
                           >
                             {isExpanded ? (
-                              <ChevronDown size={16} className="text-white/40 shrink-0" />
+                              <ChevronDown size={14} className="text-slate-500 shrink-0" />
                             ) : (
-                              <ChevronRight size={16} className="text-white/40 shrink-0" />
+                              <ChevronRight size={14} className="text-slate-500 shrink-0" />
                             )}
 
                             {/* Select all checkbox */}
@@ -372,70 +372,70 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
                                 e.stopPropagation();
                                 toggleAllInDept(deptId);
                               }}
-                              className={`w-5 h-5 rounded-lg border flex items-center justify-center shrink-0 transition-all ${
+                              className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
                                 allSelected
-                                  ? "bg-[#00d4ff] border-[#00d4ff] shadow-[0_0_15px_rgba(0,212,255,0.4)]"
+                                  ? "bg-indigo-600 border-indigo-600"
                                   : someSelected
-                                  ? "bg-blue-500/40 border-blue-500/50"
-                                  : "border-white/30 hover:border-white/50"
+                                  ? "bg-indigo-200 border-indigo-400"
+                                  : "border-slate-300 hover:border-indigo-400"
                               }`}
                             >
                               {(allSelected || someSelected) && (
-                                <Check size={12} className="text-slate-900 font-black" />
+                                <Check size={10} className="text-white" />
                               )}
                             </button>
 
-                            <span className="text-xs font-bold text-white/90 flex-1 truncate uppercase tracking-wider">
+                            <span className="text-xs font-bold text-slate-700 flex-1 truncate">
                               {getDeptName(deptId)}
                             </span>
-                            <span className="text-[10px] font-black text-white/40 bg-white/30 px-2 py-1 rounded-lg border border-white/30">
-                              {users.filter((u) => selectedUserIds.has(String(u.id || u._id))).length}/{users.length}
+                            <span className="text-[10px] font-bold text-slate-400 bg-white px-1.5 py-0.5 rounded border border-slate-200">
+                              {users.filter((u) => selectedUserIds.has(u.id)).length}/{users.length}
                             </span>
                           </div>
 
                           {/* User list */}
                           {isExpanded && (
-                            <div className="divide-y divide-white/5">
+                            <div className="divide-y divide-slate-50">
                               {users.map((user) => {
-                                const isSelected = selectedUserIds.has(String(user.id || user._id));
+                                const isSelected = selectedUserIds.has(user.id);
                                 return (
                                   <label
-                                    key={user.id || user._id}
-                                    className={`flex items-center gap-4 px-6 py-3 cursor-pointer transition-all ${
+                                    key={user.id}
+                                    className={`flex items-center gap-3 px-4 py-2 cursor-pointer transition-colors ${
                                       isSelected
-                                        ? "bg-blue-600/30"
-                                        : "hover:bg-white/30"
+                                        ? "bg-indigo-50/30"
+                                        : "hover:bg-slate-50"
                                     }`}
                                   >
                                     <input
                                       type="checkbox"
                                       checked={isSelected}
-                                      onChange={() => toggleUser(String(user.id || user._id))}
+                                      onChange={() => toggleUser(user.id)}
                                       className="sr-only"
                                     />
                                     <div
-                                      className={`w-5 h-5 rounded-lg border flex items-center justify-center shrink-0 transition-all ${
+                                      className={`w-4 h-4 rounded border flex items-center justify-center shrink-0 transition-colors ${
                                         isSelected
-                                          ? "bg-blue-600 border-blue-600 shadow-lg shadow-blue-600/20"
-                                          : "border-white/30"
+                                          ? "bg-indigo-600 border-indigo-600"
+                                          : "border-slate-300"
                                       }`}
                                     >
                                       {isSelected && (
-                                        <Check size={12} className="text-white" />
+                                        <Check size={10} className="text-white" />
                                       )}
                                     </div>
 
                                     <div className="flex-1 min-w-0">
-                                      <p className="text-xs font-bold text-white truncate">
+                                      <p className="text-xs font-semibold text-slate-800 truncate">
                                         {user.name || user.username || "Unnamed"}
                                       </p>
-                                      <p className="text-[10px] text-white/40 font-medium truncate">
+                                      <p className="text-[10px] text-slate-400 truncate">
                                         {user.email}
                                       </p>
                                     </div>
 
                                     <span
-                                      className={`text-[9px] uppercase font-black tracking-widest px-2 py-1 rounded-full shrink-0 border border-white/30 ${getRoleBadgeColor(
+                                      className={`text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full shrink-0 ${getRoleBadgeColor(
                                         user.role
                                       )}`}
                                     >
@@ -456,26 +456,26 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
           </div>
 
           {/* Footer */}
-          <div className="px-10 py-8 border-t border-white/30 flex justify-end gap-6 bg-white/30">
+          <div className="px-6 py-4 border-t border-slate-200 flex justify-end gap-3 bg-slate-50 rounded-b-xl">
             <button
               type="button"
               onClick={onClose}
-                className="rounded-xl px-8 py-3.5 text-xs font-black uppercase tracking-[0.2em] text-white/40 hover:text-white hover:bg-white/30 transition-all"
+              className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-100 transition-colors"
             >
-              Abort
+              Cancel
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="rounded-2xl blue-button px-12 py-4 text-xs font-black uppercase tracking-[0.2em] active:scale-95 disabled:opacity-50"
+              className="rounded-lg bg-indigo-600 px-5 py-2 text-white text-sm font-medium hover:bg-indigo-700 transition-colors disabled:opacity-50 shadow-sm"
             >
               {loading
                 ? isEditMode
-                  ? "Saving Link..."
-                  : "Generating link..."
+                  ? "Saving..."
+                  : "Creating..."
                 : isEditMode
-                ? "Commit Changes"
-                : "Initialize Link"}
+                ? "Save Changes"
+                : "Create Room"}
             </button>
           </div>
         </form>

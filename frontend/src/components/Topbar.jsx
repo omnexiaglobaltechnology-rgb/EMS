@@ -9,7 +9,7 @@ import {
   markNotificationAsRead,
 } from "../utils/inAppNotifications";
 import { useTheme } from "../context/ThemeContext";
-import { Menu, Moon, Sun, BellIcon, Terminal } from "lucide-react";
+import { Menu, Moon, Sun, BellIcon } from "lucide-react";
 
 const getMeetingsRoute = (role) => {
   if (!role) return null;
@@ -99,92 +99,82 @@ const Topbar = ({ onToggleSidebar }) => {
   };
 
   return (
-    <header className="h-20 glass-dark text-white border-b border-white/10 flex justify-between px-6 items-center fixed left-0 md:left-64 top-0 right-0 z-40 backdrop-blur-3xl shadow-2xl">
-      <div className="flex items-center gap-6">
+    <header className="h-14 bg-[#090E1A] text-white shadow-md flex justify-between px-4 md:px-6 items-center fixed left-0 md:left-64 top-0 right-0 z-40 border-b border-gray-800">
+      <div className="flex items-center gap-3 md:gap-4">
         <button
           onClick={onToggleSidebar}
-          className="p-3 hover:bg-white/10 rounded-2xl md:hidden text-white/60 transition-colors"
+          className="p-1.5 hover:bg-gray-800 rounded-lg md:hidden text-gray-300"
         >
           <Menu size={20} />
         </button>
-        
-        <div className="flex items-center gap-3">
-           <div className="p-2 bg-[#00d4ff]/10 rounded-xl border border-[#00d4ff]/20">
-             <Terminal size={18} className="text-[#00d4ff] blue-glow" />
-           </div>
-           <div className="flex flex-col">
-             <span className="font-black text-white text-xs uppercase tracking-[0.25em]">
-               Omnexia <span className="text-[#00d4ff] blue-glow">EMS</span>
-             </span>
-             <span className="text-[8px] font-black text-white/30 uppercase tracking-[0.3em] -mt-0.5">Command Console v4.0</span>
-           </div>
-        </div>
-
+        <span className="font-semibold text-white text-sm md:text-base truncate max-w-[150px] md:max-w-none">
+          OMNEXIA EMS
+        </span>
         <button
           onClick={toggleTheme}
-          className="p-2 rounded-xl border border-white/10 hover:bg-white/10 transition-all text-white/40 hover:text-white"
+          className="p-1.5 rounded-lg border border-gray-700 hover:bg-gray-800 transition-colors text-gray-300"
           title={theme === "light" ? "Switch to Dark Mode" : "Switch to Light Mode"}
         >
-          {theme === "light" ? <Moon size={16} /> : <Sun size={16} />}
+          {theme === "light" ? <Moon size={18} /> : <Sun size={18} />}
         </button>
       </div>
 
       <div className="relative">
         <button
           onClick={() => setIsOpen((prev) => !prev)}
-          className={`relative p-3 rounded-2xl transition-all active:scale-95 ${isOpen ? 'bg-[#00d4ff]/20 text-[#00d4ff] shadow-[0_0_20px_rgba(0,212,255,0.3)]' : 'text-white/40 hover:text-white hover:bg-white/10'}`}
-          title="Secure Notifications"
+          className="relative text-gray-400 hover:text-white cursor-pointer p-1"
+          title="Notifications"
         >
           <BellIcon size={20} />
           {unreadCount > 0 && (
-            <span className="absolute top-2 right-2 bg-red-500 text-white text-[9px] rounded-full min-w-4 h-4 flex items-center justify-center font-black shadow-lg">
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] rounded-full min-w-4 h-4 flex items-center justify-center font-bold">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
         </button>
 
         {isOpen && (
-          <div className="absolute right-0 mt-4 w-80 md:w-96 rounded-[2.5rem] border border-white/20 bg-slate-900/40 backdrop-blur-3xl shadow-2xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-300">
-            <div className="flex items-center justify-between px-8 py-6 border-b border-white/10">
-              <p className="text-xs font-black uppercase tracking-widest text-white">Data <span className="text-[#00d4ff] blue-glow">Streams</span></p>
+          <div className="absolute right-0 mt-2 w-80 md:w-96 rounded-lg border border-gray-200 bg-white shadow-xl z-50 overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+              <p className="font-semibold text-slate-900">Notifications</p>
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAllRead}
-                  className="text-[10px] font-black uppercase tracking-widest text-[#00d4ff] blue-glow hover:opacity-70 transition-opacity"
+                  className="text-xs text-indigo-600 hover:text-indigo-700"
                 >
-                  Clear All
+                  Mark all read
                 </button>
               )}
             </div>
 
-            <div className="max-h-96 overflow-y-auto custom-scrollbar p-2">
+            <div className="max-h-96 overflow-y-auto">
               {notifications.length === 0 ? (
-                <div className="px-8 py-12 text-[11px] font-bold text-white/30 text-center uppercase tracking-widest">
-                  No incoming packets
+                <div className="px-4 py-6 text-sm text-gray-500 text-center">
+                  No notifications yet
                 </div>
               ) : (
                 notifications.map((notification) => (
                   <button
                     key={notification.id}
                     onClick={() => handleNotificationClick(notification)}
-                    className={`w-full text-left p-4 my-1 rounded-2xl transition-all group ${
-                      notification.isRead ? "bg-transparent text-white/60 hover:bg-white/5" : "bg-blue-500/10 text-white hover:bg-blue-500/20"
+                    className={`w-full text-left px-4 py-3 border-b border-gray-100 hover:bg-gray-50 ${
+                      notification.isRead ? "bg-white" : "bg-indigo-50"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className={`text-[11px] font-black uppercase tracking-widest truncate ${!notification.isRead ? 'text-[#00d4ff] blue-glow' : 'text-white'}`}>
+                        <p className="text-sm font-medium text-gray-900 truncate">
                           {notification.title}
                         </p>
-                        <p className="text-[10px] text-white/40 mt-1 line-clamp-2 leading-relaxed">
+                        <p className="text-xs text-gray-600 mt-1 line-clamp-2">
                           {notification.message}
                         </p>
-                        <p className="text-[9px] font-black uppercase tracking-widest text-white/20 mt-2">
+                        <p className="text-[11px] text-gray-400 mt-1">
                           {formatTimestamp(notification.timestamp)}
                         </p>
                       </div>
                       {!notification.isRead && (
-                        <span className="mt-1 h-2 w-2 rounded-full bg-[#00d4ff] shadow-[0_0_10px_rgba(0,212,255,1)]" />
+                        <span className="mt-1 h-2 w-2 rounded-full bg-indigo-500" />
                       )}
                     </div>
                   </button>

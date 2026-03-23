@@ -87,35 +87,33 @@ const Topbar = () => {
 
   return (
     <header
-      className="h-20 glass m-6 rounded-3xl flex justify-between px-8 items-center fixed left-64 top-0 right-0 z-30 border border-white/30"
-      style={{ left: 256 + 24, width: `calc(100% - ${256 + 48}px)` }}
+      className="h-14 bg-white shadow flex justify-between px-6 items-center fixed left-64 top-0 right-0 z-30"
+      style={{ height: 56 }}
     >
-      <span className="font-black text-white uppercase tracking-widest text-xs opacity-80">
-        Administrative <span className="text-[#00d4ff] blue-glow">Command Console</span>
-      </span>
+      <span className="font-semibold">Enterprise Management System</span>
 
       <div className="relative">
         <button
           onClick={() => setIsOpen((prev) => !prev)}
-          className="relative text-white/60 cursor-pointer border border-white/30 bg-white/30 rounded-xl p-2.5 hover:bg-white/40 hover:text-[#00d4ff] transition-all duration-300"
+          className="relative text-gray-600 cursor-pointer border border-gray-400 rounded-sm p-1"
           title="Notifications"
         >
-          <BellIcon size={20} />
+          <BellIcon />
           {unreadCount > 0 && (
-            <span className="absolute -top-1.5 -right-1.5 bg-[#00d4ff] text-slate-900 text-[10px] rounded-full min-w-5 h-5 px-1 flex items-center justify-center font-black shadow-[0_0_15px_rgba(0,212,255,0.6)]">
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] rounded-full min-w-5 h-5 px-1 flex items-center justify-center font-semibold">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
         </button>
 
         {isOpen && (
-          <div className="absolute right-0 mt-4 w-96 rounded-2xl glass-dark shadow-2xl z-50 overflow-hidden border border-white/30 animate-in fade-in slide-in-from-top-2 duration-200">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-white/30">
-              <p className="font-semibold text-white">Notifications</p>
+          <div className="absolute right-0 mt-2 w-96 rounded-lg border border-gray-200 bg-white shadow-xl z-50 overflow-hidden">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
+              <p className="font-semibold">Notifications</p>
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAllRead}
-                  className="text-xs text-indigo-400 hover:text-indigo-300 font-medium"
+                  className="text-xs text-indigo-600 hover:text-indigo-700"
                 >
                   Mark all read
                 </button>
@@ -132,24 +130,24 @@ const Topbar = () => {
                   <button
                     key={notification.id}
                     onClick={() => handleNotificationClick(notification)}
-                    className={`w-full text-left px-4 py-3 border-b border-white/30 hover:bg-white/30 transition-colors ${
-                      notification.isRead ? "text-white/70" : "bg-white/30 text-white"
+                    className={`w-full text-left px-4 py-3 border-b border-gray-100 hover:bg-gray-50 ${
+                      notification.isRead ? "bg-white" : "bg-indigo-50"
                     }`}
                   >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="text-sm font-medium truncate">
+                        <p className="text-sm font-medium text-gray-900 truncate">
                           {notification.title}
                         </p>
-                        <p className="text-xs text-white/60 mt-1 line-clamp-2">
+                        <p className="text-xs text-gray-600 mt-1 line-clamp-2">
                           {notification.message}
                         </p>
-                        <p className="text-[11px] text-white/40 mt-1">
+                        <p className="text-[11px] text-gray-400 mt-1">
                           {formatTimestamp(notification.timestamp)}
                         </p>
                       </div>
                       {!notification.isRead && (
-                        <span className="mt-1 h-2 w-2 rounded-full bg-[#00d4ff] shadow-[0_0_8px_rgba(0,212,255,0.8)]" />
+                        <span className="mt-1 h-2 w-2 rounded-full bg-indigo-500" />
                       )}
                     </div>
                   </button>

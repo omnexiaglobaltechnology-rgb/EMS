@@ -37,7 +37,7 @@ const taskSchema = new mongoose.Schema({
   status: {
     type: String,
     default: 'assigned',
-    enum: ['assigned', 'delegated', 'submitted', 'under_review', 'completed', 'rejected'],
+    enum: ['assigned', 'delegated', 'submitted', 'under_review', 'completed', 'rejected', 'in_progress'],
   },
   currentResponsibleId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -56,6 +56,20 @@ const taskSchema = new mongoose.Schema({
     type: Date,
     default: Date.now,
   },
+  history: [
+    {
+      status: String,
+      changedById: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
+      },
+      note: String,
+      at: {
+        type: Date,
+        default: Date.now,
+      },
+    },
+  ],
 });
 
 taskSchema.pre('save', function (next) {

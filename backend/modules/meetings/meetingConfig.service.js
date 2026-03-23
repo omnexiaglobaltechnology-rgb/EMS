@@ -5,7 +5,7 @@ const getOrCreateConfig = async () => {
   if (!config) {
     config = await MeetingConfig.create({
       allowedRoles: ["ceo", "cto", "cfo", "coo", "manager", "team_lead"],
-      canInviteAcrossDepartments: ["ceo", "cto", "cfo", "coo"]
+      canInviteAcrossDepartments: ["ceo", "cto", "cfo", "coo"],
     });
   }
   return config;
@@ -36,5 +36,5 @@ module.exports = {
   getOrCreateConfig,
   updateConfig,
   checkCreationPermission,
-  checkInvitePermission
+  checkInvitePermission,
 };

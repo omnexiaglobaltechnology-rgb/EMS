@@ -71,46 +71,46 @@ const AdminMeetingPermissions = () => {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-[#00d4ff] blue-glow" />
+        <Loader2 className="h-8 w-8 animate-spin text-indigo-600" />
       </div>
     );
   }
 
   return (
-    <div className="max-w-4xl space-y-10">
+    <div className="max-w-4xl space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-white">Meeting Permissions</h1>
-        <p className="text-white/60 font-medium">Define which roles can schedule meetings and invite participants from other departments.</p>
+        <h1 className="text-2xl font-bold text-slate-900">Meeting Permissions</h1>
+        <p className="text-slate-500">Define which roles can schedule meetings and invite participants from other departments.</p>
       </div>
 
       {(error || success) && (
-        <div className={`p-5 rounded-2xl border backdrop-blur-md flex items-center gap-4 animate-in fade-in slide-in-from-top-2 ${
-          success ? "bg-blue-500/30 border-blue-500/30 text-blue-400" : "bg-red-500/30 border-red-500/30 text-red-400"
+        <div className={`p-4 rounded-xl border flex items-center gap-3 animate-in fade-in slide-in-from-top-2 ${
+          success ? "bg-emerald-50 border-emerald-200 text-emerald-800" : "bg-red-50 border-red-200 text-red-800"
         }`}>
-          {success ? <CheckCircle2 size={24} /> : <AlertCircle size={24} />}
-          <p className="text-sm font-bold uppercase tracking-wider">{success ? "Configuration secured" : error}</p>
+          {success ? <CheckCircle2 size={20} /> : <AlertCircle size={20} />}
+          <p className="text-sm font-medium">{success ? "Permissions updated successfully!" : error}</p>
         </div>
       )}
 
-      <div className="grid gap-8 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2">
         {/* Creation Rights */}
-        <div className="card-glass p-8 space-y-6">
-          <div className="flex items-center gap-4">
-            <div className="bg-white/30 p-4 rounded-3xl text-[#00d4ff] border border-white/30 shadow-[0_0_20px_rgba(0,212,255,0.2)] blue-glow">
-              <Users size={32} strokeWidth={2.5} />
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="bg-indigo-100 p-2 rounded-lg text-indigo-600">
+              <Users size={20} />
             </div>
-            <h2 className="text-2xl font-black text-white tracking-tighter uppercase">Creation <span className="text-[#00d4ff] blue-glow">Rights</span></h2>
+            <h2 className="text-lg font-bold text-slate-800">Creation Rights</h2>
           </div>
-          <p className="text-xs text-white/40 font-bold uppercase tracking-widest leading-relaxed">
-            Authorized roles for scheduling
+          <p className="text-xs text-slate-500 mb-4 font-medium leading-relaxed">
+            Specify which roles are authorized to schedule new meetings within the system.
           </p>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {roles.map(role => (
-              <label key={role.id} className="flex items-center justify-between p-4 rounded-2xl border border-white/30 bg-white/30 hover:bg-white/40 hover:border-white/50 transition-all cursor-pointer group">
-                <span className="text-xs font-black text-white/80 uppercase tracking-widest group-hover:text-[#00d4ff] transition-all duration-500">{role.label}</span>
+              <label key={role.id} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer">
+                <span className="text-sm font-semibold text-slate-700">{role.label}</span>
                 <input
                   type="checkbox"
-                  className="w-6 h-6 rounded-xl border border-white/30 bg-white/30 text-[#00d4ff] focus:ring-offset-0 focus:ring-2 focus:ring-[#00d4ff] cursor-pointer transition-all shadow-inner"
+                  className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                   checked={config.allowedRoles.includes(role.id)}
                   onChange={() => handleToggleRole(role.id, "allowedRoles")}
                 />
@@ -120,23 +120,23 @@ const AdminMeetingPermissions = () => {
         </div>
 
         {/* Visibility Rights */}
-        <div className="card-glass p-8 space-y-6">
-          <div className="flex items-center gap-4">
-            <div className="bg-white/30 p-3 rounded-2xl text-amber-400 border border-white/30 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
-              <Globe size={24} />
+        <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="bg-amber-100 p-2 rounded-lg text-amber-600">
+              <Globe size={20} />
             </div>
-            <h2 className="text-xl font-bold text-white">Cross-Dept</h2>
+            <h2 className="text-lg font-bold text-slate-800">Cross-Dept Invitation</h2>
           </div>
-          <p className="text-xs text-white/40 font-bold uppercase tracking-widest leading-relaxed">
-            Invitation reach permissions
+          <p className="text-xs text-slate-500 mb-4 font-medium leading-relaxed">
+            Allow roles to search and invite employees outside of their primary assigned department.
           </p>
-          <div className="space-y-3">
+          <div className="space-y-2">
             {roles.map(role => (
-              <label key={role.id} className="flex items-center justify-between p-4 rounded-2xl border border-white/30 bg-white/30 hover:bg-white/40 hover:border-white/50 transition-all cursor-pointer group">
-                <span className="text-sm font-bold text-white group-hover:text-amber-400 transition-colors">{role.label}</span>
+              <label key={role.id} className="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:bg-slate-50 transition-colors cursor-pointer">
+                <span className="text-sm font-semibold text-slate-700">{role.label}</span>
                 <input
                   type="checkbox"
-                  className="w-5 h-5 rounded-lg border-white/30 bg-white/30 text-[#00d4ff] focus:ring-offset-0 focus:ring-2 focus:ring-[#00d4ff] cursor-pointer transition-all shadow-inner"
+                  className="w-4 h-4 rounded border-slate-300 text-indigo-600 focus:ring-indigo-500"
                   checked={config.canInviteAcrossDepartments.includes(role.id)}
                   onChange={() => handleToggleRole(role.id, "canInviteAcrossDepartments")}
                 />
@@ -146,14 +146,14 @@ const AdminMeetingPermissions = () => {
         </div>
       </div>
 
-      <div className="flex justify-end pt-6">
+      <div className="flex justify-end pt-4">
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex items-center gap-4 rounded-2xl blue-button px-12 py-5 font-black uppercase tracking-[0.2em] text-xs active:scale-95 disabled:opacity-50 shadow-2xl"
+          className="flex items-center gap-2 rounded-xl bg-slate-900 px-8 py-3 text-white font-bold hover:bg-slate-800 transition-all shadow-lg active:scale-95 disabled:opacity-50"
         >
-          {saving ? <Loader2 className="h-5 w-5 animate-spin text-[#00d4ff] blue-glow" /> : <Save size={20} strokeWidth={3} />}
-          {saving ? "Synchronizing..." : "Authorize Permissions"}
+          {saving ? <Loader2 className="h-5 w-5 animate-spin" /> : <Save size={20} />}
+          Save Changes
         </button>
       </div>
     </div>

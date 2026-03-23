@@ -6,14 +6,19 @@
  */
 const TeamProgressRow = ({ label, value }) => {
   return (
-    <div className="mb-5">
-      <div className="flex justify-between mb-1">
-        <span className="font-medium">{label}</span>
-        <span className="text-slate-500">{value}%</span>
+    <div className="mb-6 group">
+      <div className="flex justify-between mb-2">
+        <span className="font-semibold text-slate-200 group-hover:text-white transition-colors">
+          {label}
+        </span>
+        <span className="text-indigo-300 font-bold tabular-nums">{value}%</span>
       </div>
 
-      <div className="h-3 rounded-full bg-slate-100 overflow-hidden">
-        <div className="h-full bg-indigo-600" style={{ width: `${value}%` }} />
+      <div className="h-2.5 rounded-full bg-white/5 border border-white/5 overflow-hidden shadow-inner">
+        <div 
+          className="h-full bg-gradient-to-r from-indigo-600 to-indigo-400 rounded-full transition-all duration-700 ease-out shadow-[0_0_10px_rgba(79,70,229,0.5)]" 
+          style={{ width: `${value}%` }} 
+        />
       </div>
     </div>
   );

@@ -185,16 +185,14 @@ const ManagerDashboard = () => {
 
   return (
     <div className="space-y-8">
-      <div className="animate-in fade-in slide-in-from-top-4 duration-700">
-        <h1 className="text-5xl font-black text-white tracking-tighter uppercase leading-tight">
-          Manager <span className="text-[#00d4ff] blue-glow">Terminal</span>
+      {/* HEADER */}
+      <div>
+        <h1 className="text-3xl font-bold text-slate-900">
+          Welcome back, Manager!
         </h1>
-        <div className="flex items-center gap-4 mt-3">
-          <div className="h-1 w-20 bg-[#00d4ff] rounded-full blue-glow"></div>
-          <p className="text-xs font-black text-white/40 uppercase tracking-[0.3em]">
-            Department Command Center Alpha
-          </p>
-        </div>
+        <p className="text-slate-500 mt-1">
+          Department overview and analytics.
+        </p>
       </div>
 
       {/* Error Message */}
@@ -229,51 +227,40 @@ const ManagerDashboard = () => {
         />
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-2">
+      {/* LOWER SECTION */}
+      <div className="grid gap-6 lg:grid-cols-2">
         {/* TEAM PERFORMANCE */}
-        <div className="card-glass relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-[#00d4ff]/5 blur-3xl rounded-full"></div>
-          <h2 className="text-xs font-black text-white uppercase tracking-[0.2em] mb-8 flex items-center gap-2">
-            <TrendingUp size={14} className="text-[#00d4ff]" />
-            Team <span className="text-[#00d4ff] blue-glow">Performance</span>
-          </h2>
+        <div className="rounded-xl border border-gray-300 bg-white p-6">
+          <h2 className="text-lg font-semibold mb-6">Team Performance</h2>
 
-          <div className="space-y-6">
-            {teamPerformance.length > 0 ? (
-              teamPerformance.map((team, idx) => (
-                <TeamProgressRow
-                  key={idx}
-                  label={team.label}
-                  value={team.value}
-                />
-              ))
-            ) : (
-              <p className="text-white/20 text-xs uppercase tracking-widest italic py-4">Awaiting performance data...</p>
-            )}
-          </div>
+          {teamPerformance.length > 0 ? (
+            teamPerformance.map((team, idx) => (
+              <TeamProgressRow
+                key={idx}
+                label={team.label}
+                value={team.value}
+              />
+            ))
+          ) : (
+            <p className="text-gray-500">No team data available</p>
+          )}
         </div>
 
         {/* RECENT REPORTS */}
-        <div className="card-glass relative overflow-hidden group">
-          <div className="absolute top-0 right-0 w-32 h-32 bg-purple-500/5 blur-3xl rounded-full"></div>
-          <h2 className="text-xs font-black text-white uppercase tracking-[0.2em] mb-8 flex items-center gap-2">
-            <FileText size={14} className="text-[#00d4ff]" />
-            Recent <span className="text-[#00d4ff] blue-glow">Activity</span>
-          </h2>
+        <div className="rounded-xl border border-gray-300 bg-white p-6">
+          <h2 className="text-lg font-semibold mb-6">Recent Reports</h2>
 
-          <div className="space-y-4">
-            {recentReports.length > 0 ? (
-              recentReports.map((report, idx) => (
-                <RecentReportItem
-                  key={idx}
-                  title={report.title}
-                  time={report.time}
-                />
-              ))
-            ) : (
-              <p className="text-white/20 text-xs uppercase tracking-widest italic py-4">No recent activity logs found.</p>
-            )}
-          </div>
+          {recentReports.length > 0 ? (
+            recentReports.map((report, idx) => (
+              <RecentReportItem
+                key={idx}
+                title={report.title}
+                time={report.time}
+              />
+            ))
+          ) : (
+            <p className="text-gray-500">No recent reports available</p>
+          )}
         </div>
       </div>
     </div>

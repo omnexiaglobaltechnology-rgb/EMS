@@ -17,7 +17,12 @@ const ProtectedRoute = ({ allowedRoles, children }) => {
   }
 
   // Redirect users who do not hold one of the authorized roles
-  if (!allowedRoles.includes(role)) {
+  // Normalized comparison prevents issues with case-sensitivity in the DB/token
+  const isAuthorized = allowedRoles.some(
+    (allowedRole) => String(allowedRole).toLowerCase() === String(role).toLowerCase()
+  );
+
+  if (!isAuthorized) {
     return <Navigate to="/unauthorized" />;
   }
 

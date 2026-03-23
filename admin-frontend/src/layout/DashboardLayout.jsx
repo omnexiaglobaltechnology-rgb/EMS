@@ -3,8 +3,8 @@ import Topbar from "../components/Topbar";
 import { Outlet } from "react-router-dom";
 
 // Fixed dimensions used to offset the main content area
-const SIDEBAR_WIDTH = 256;
-const TOPBAR_HEIGHT = 120; // h-20 (80px) + m-6 (24px) + margin offset
+const SIDEBAR_WIDTH = 256; // 64 * 4 (w-64)
+const TOPBAR_HEIGHT = 56; // 14 * 4 (h-14)
 
 /**
  * DashboardLayout component serves as the primary wrapper for authenticated pages.
@@ -13,7 +13,7 @@ const TOPBAR_HEIGHT = 120; // h-20 (80px) + m-6 (24px) + margin offset
  */
 const DashboardLayout = () => {
   return (
-    <div className="min-h-screen">
+    <div>
       {/* Global Navigation Components */}
       <Sidebar />
       <Topbar />
@@ -23,8 +23,8 @@ const DashboardLayout = () => {
         className="main-content"
         style={{
           marginLeft: SIDEBAR_WIDTH,
-          paddingTop: TOPBAR_HEIGHT,
-          minHeight: `100vh`,
+          marginTop: TOPBAR_HEIGHT,
+          minHeight: `calc(100vh - ${TOPBAR_HEIGHT}px)`,
         }}
       >
         <main className="p-6">

@@ -88,26 +88,26 @@ const AdminUserManagement = () => {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-white">User Management</h1>
-          <p className="text-white/60 font-medium">Manage {activeTab}s and their hierarchy</p>
+          <h1 className="text-2xl font-bold text-slate-900">User Management</h1>
+          <p className="text-slate-500">Manage {activeTab}s and their hierarchy</p>
         </div>
 
         <div className="flex items-center gap-3 w-full md:w-auto">
           <form onSubmit={handleSearch} className="relative flex-1 md:w-64">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-white/40" size={16} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
             <input
               type="text"
               placeholder="Search users..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white/30 border border-white/30 text-white text-sm focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all placeholder:text-white/30"
+              className="w-full pl-10 pr-4 py-2 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-indigo-500"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </form>
           <button
             onClick={() => setShowAdd(true)}
-            className="flex items-center gap-3 rounded-xl blue-button px-6 py-2.5 text-xs font-black uppercase tracking-widest active:scale-95"
+            className="flex items-center gap-2 rounded-lg bg-slate-900 px-4 py-2 text-white text-sm font-medium hover:bg-slate-800 transition-colors shadow-sm"
           >
-            <Plus size={18} strokeWidth={3} />
+            <Plus size={16} />
             Add User
           </button>
         </div>
@@ -122,23 +122,23 @@ const AdminUserManagement = () => {
       )}
 
       {/* Tabs */}
-      <div className="flex gap-1 rounded-xl bg-white/30 p-1.5 w-fit border border-white/30 backdrop-blur-md">
+      <div className="flex gap-1 rounded-lg bg-slate-100 p-1 w-fit">
         <button
           onClick={() => setActiveTab("employee")}
-          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
             activeTab === "employee"
-              ? "bg-white/40 text-[#00d4ff] shadow-[0_0_15px_rgba(0,212,255,0.2)] border border-white/30 blue-glow"
-              : "text-white/40 hover:text-white"
+              ? "bg-white text-slate-900 shadow-sm"
+              : "text-slate-500 hover:text-slate-700"
           }`}
         >
           <Users size={16} /> Employees
         </button>
         <button
           onClick={() => setActiveTab("intern")}
-          className={`flex items-center gap-2 px-6 py-3 rounded-xl text-[10px) font-black uppercase tracking-widest transition-all ${
+          className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
             activeTab === "intern"
-              ? "bg-white/40 text-[#00d4ff] shadow-[0_0_15px_rgba(0,212,255,0.2)] border border-white/30 blue-glow"
-              : "text-white/40 hover:text-white"
+              ? "bg-white text-slate-900 shadow-sm"
+              : "text-slate-500 hover:text-slate-700"
           }`}
         >
           <GraduationCap size={16} /> Interns
@@ -146,90 +146,89 @@ const AdminUserManagement = () => {
       </div>
 
       {/* Users Table */}
-      <div className="rounded-3xl border border-white/30 bg-white/30 overflow-hidden shadow-2xl backdrop-blur-md">
+      <div className="rounded-xl border border-slate-200 bg-white overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left border-collapse">
-            <thead className="text-white/40 bg-white/30 uppercase tracking-widest text-[10px] font-black">
+          <table className="w-full text-sm text-left">
+            <thead className="text-slate-500 bg-slate-50 border-b border-slate-200">
               <tr>
-                <th className="p-6">User / ID</th>
-                <th className="p-6">Department</th>
-                <th className="p-6">Supervisor</th>
-                <th className="p-6">Role</th>
-                <th className="p-6 text-right">Actions</th>
+                <th className="p-4 font-semibold">User / ID</th>
+                <th className="p-4 font-semibold">Department</th>
+                <th className="p-4 font-semibold">Supervisor</th>
+                <th className="p-4 font-semibold">Role</th>
+                <th className="p-4 font-semibold text-right">Actions</th>
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-slate-100">
               {loading ? (
                 <tr>
-                  <td colSpan="5" className="p-20 text-center text-white/30">
-                    <Loader className="mx-auto mb-4 h-10 w-10 animate-spin text-[#00d4ff] blue-glow" />
-                    <p className="font-bold uppercase tracking-widest text-[10px]">Synchronizing {activeTab}s...</p>
+                  <td colSpan="5" className="p-12 text-center text-slate-400">
+                    <Loader className="mx-auto mb-2 h-8 w-8 animate-spin" />
+                    <p>Loading {activeTab}s...</p>
                   </td>
                 </tr>
               ) : users.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="p-20 text-center text-white/20">
-                    <p className="text-lg font-bold">No {activeTab}s found</p>
-                    <p className="text-sm italic mt-1 text-white/10">Try a different search term</p>
+                  <td colSpan="5" className="p-12 text-center text-slate-400">
+                    No {activeTab}s found matching your criteria.
                   </td>
                 </tr>
               ) : (
                 users.map((u) => (
-                  <tr key={u.id} className="hover:bg-white/30 transition-colors group">
-                    <td className="p-6">
-                      <div className="font-bold text-white text-base">{u.name || "N/A"}</div>
-                      <div className="text-xs text-white/40 font-mono mt-0.5 tracking-tight">{u.username || u.email}</div>
+                  <tr key={u.id} className="hover:bg-slate-50 transition-colors">
+                    <td className="p-4">
+                      <div className="font-semibold text-slate-900">{u.name || "N/A"}</div>
+                      <div className="text-xs text-slate-500 font-mono">{u.username || u.email}</div>
                     </td>
-                    <td className="p-6 text-white/80">
+                    <td className="p-4">
                       {u.department ? (
-                        <span className="inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-blue-500/30 text-[#00d4ff] border border-blue-500/30 backdrop-blur-md blue-glow">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
                           {u.department.name}
                         </span>
                       ) : (
-                        <span className="text-white/20 italic uppercase text-[10px] font-black">Not Assigned</span>
+                        <span className="text-slate-400">Not Assigned</span>
                       )}
                     </td>
-                    <td className="p-6">
+                    <td className="p-4">
                       {u.reportsTo ? (
                         <div>
-                          <div className="font-black text-white text-sm uppercase tracking-tight">{u.reportsTo.name}</div>
-                          <div className="text-[10px] text-[#00d4ff] uppercase font-black tracking-widest mt-0.5 blue-glow">
+                          <div className="font-medium text-slate-700">{u.reportsTo.name}</div>
+                          <div className="text-[10px] text-slate-400 uppercase tracking-wider">
                             {u.reportsTo.role?.replace(/_/g, " ")}
                           </div>
                         </div>
                       ) : (
-                        <span className="text-white/10">—</span>
+                        <span className="text-slate-400">—</span>
                       )}
                     </td>
-                    <td className="p-6 text-right">
-                      <span className="inline-flex items-center px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider bg-white/30 text-white/40 border border-white/30">
+                    <td className="p-4">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold capitalize bg-slate-100 text-slate-600 border border-slate-200">
                         {u.role?.replace(/_/g, " ")}
                       </span>
                     </td>
 
-                    <td className="p-6 text-right relative">
+                    <td className="p-4 text-right relative">
                       <button
                         onClick={() => setOpenMenuId(openMenuId === u.id ? null : u.id)}
-                        className="p-2 hover:bg-white/30 rounded-xl transition-all text-white/40 hover:text-white"
+                        className="p-1.5 hover:bg-slate-200 rounded-lg transition-colors text-slate-400"
                       >
-                        <MoreVertical size={20} />
+                        <MoreVertical size={18} />
                       </button>
 
                       {openMenuId === u.id && (
-                        <div className="absolute right-6 mt-2 w-52 rounded-2xl glass-dark z-20 shadow-2xl py-2 animate-in fade-in zoom-in-95 duration-150 origin-top-right border border-white/30">
+                        <div className="absolute right-4 mt-2 w-48 rounded-lg border border-slate-200 bg-white z-20 shadow-xl py-1 animate-in fade-in zoom-in-95 duration-100 origin-top-right">
                           <button
                             onClick={() => {
                               setShowPasswordModal(u.id);
                               setOpenMenuId(null);
                             }}
-                            className="flex items-center gap-3 w-full px-5 py-3 text-left text-[10px] font-black text-white/70 hover:bg-white/30 hover:text-[#00d4ff] transition-all uppercase tracking-[0.2em] blue-glow"
+                            className="flex items-center gap-2 w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 font-medium"
                           >
-                            <Key size={14} strokeWidth={3} /> Reset Password
+                            <Key size={14} /> Reset Password
                           </button>
                           <button
                             onClick={() => deleteUser(u.id)}
-                            className="flex items-center gap-3 w-full px-5 py-3 text-left text-[10px] font-black text-red-400 hover:bg-red-500/30 transition-all uppercase tracking-[0.2em]"
+                            className="block w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 font-medium"
                           >
                             Delete User
                           </button>
@@ -259,37 +258,37 @@ const AdminUserManagement = () => {
 
       {/* Password Change Modal */}
       {showPasswordModal && (
-        <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in duration-300">
-          <div className="w-full max-w-sm rounded-3xl glass-dark p-8 space-y-6 shadow-2xl border border-white/30">
-            <h2 className="text-xl font-black text-white flex items-center gap-4 uppercase tracking-tighter">
-              <Key size={22} className="text-[#00d4ff] blue-glow" strokeWidth={3} /> Reset Security Access
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+          <div className="w-full max-w-sm rounded-xl bg-white p-6 space-y-4 shadow-2xl">
+            <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <Key size={18} className="text-indigo-600" /> Reset User Password
             </h2>
-            <div className="space-y-2">
-              <label className="text-xs font-bold uppercase tracking-wider text-white/50 ml-1">New Password</label>
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-slate-700">New Password</label>
               <input
                 type="password"
-                className="w-full rounded-xl bg-white/30 border border-white/30 px-4 py-3 text-sm text-white placeholder:text-white/30 focus:ring-2 focus:ring-[#00d4ff] outline-none transition-all"
+                className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                placeholder="Enter new password"
+                placeholder="Enter new secure password"
                 autoFocus
               />
             </div>
-            <div className="flex justify-end gap-3 pt-4">
+            <div className="flex justify-end gap-3 pt-4 text-sm font-medium">
               <button
                 onClick={() => {
                   setShowPasswordModal(null);
                   setNewPassword("");
                 }}
-                className="rounded-xl px-5 py-2.5 text-sm font-bold text-white/60 hover:text-white hover:bg-white/30 transition-all"
+                className="rounded-lg border border-slate-300 px-4 py-2 hover:bg-slate-50 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleChangePassword}
-                className="rounded-xl blue-button px-8 py-3 text-[10px] font-black uppercase tracking-widest active:scale-95"
+                className="rounded-lg bg-indigo-600 px-4 py-2 text-white hover:bg-indigo-700 transition-colors shadow-sm"
               >
-                Refactor
+                Update Password
               </button>
             </div>
           </div>

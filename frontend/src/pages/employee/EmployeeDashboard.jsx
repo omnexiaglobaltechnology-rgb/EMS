@@ -83,73 +83,84 @@ const EmployeeDashboard = () => {
   }
 
   return (
-    <div className="space-y-10">
-      <div className="animate-in fade-in slide-in-from-top-4 duration-700">
-        <h1 className="text-5xl font-black text-white tracking-tighter uppercase leading-tight">
-          Welcome back, <span className="text-[#00d4ff] blue-glow">{name || "Employee"}</span>
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-4xl font-bold text-slate-900">
+          Welcome back, {name || "Employee"}!
         </h1>
-        <div className="flex items-center gap-4 mt-3">
-           <div className="h-1 w-20 bg-[#00d4ff] rounded-full blue-glow"></div>
-           <p className="text-xs font-black text-white/40 uppercase tracking-[0.3em]">
-             Authorized Deployment Module
-           </p>
-        </div>
+        <p className="mt-2 text-lg text-slate-500">
+          Here's your employee portal summary.
+        </p>
       </div>
 
       {error && (
-        <div className="flex items-start gap-4 rounded-[2rem] border border-red-500/20 bg-red-500/10 p-6 animate-in fade-in slide-in-from-top-2">
-          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-500" />
-          <p className="text-xs font-bold text-red-200 uppercase tracking-wider">{error}</p>
+        <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4">
+          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
+          <p className="text-sm text-red-800">{error}</p>
         </div>
       )}
 
-      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        <Link to="/employee/my-tasks" className="transition-transform active:scale-95">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+        <Link to="/employee/my-tasks">
           <StatCard
-            title="Assigned Tasks"
+            title="My Tasks"
             value={String(stats.assignedTasks)}
-            subtitle="Processing..."
-            icon={<CheckSquare size={20} />}
+            subtitle="Active tasks"
+            icon={<CheckSquare />}
+            bg="bg-indigo-50"
+            iconBg="bg-indigo-100 text-indigo-600"
+            border="border-indigo-200"
           />
         </Link>
 
-        <Link to="/employee/submissions" className="transition-transform active:scale-95">
+        <Link to="/employee/submissions">
           <StatCard
             title="Submissions"
             value={String(stats.pendingSubmissions)}
-            icon={<Folder size={20} />}
-            subtitle="Pending Sync"
+            icon={<Folder />}
+            subtitle="Under review"
+            bg="bg-sky-50"
+            iconBg="bg-sky-100 text-sky-600"
+            border="border-sky-200"
           />
         </Link>
 
-        <Link to="/employee/meetings" className="transition-transform active:scale-95">
+        <Link to="/employee/meetings">
           <StatCard
-            title="Neural Link"
+            title="Meetings"
             value={String(stats.meetings)}
-            icon={<Calendar size={20} />}
-            subtitle="Secure Meetings"
+            icon={<Calendar />}
+            subtitle="Today"
+            bg="bg-emerald-50"
+            iconBg="bg-emerald-100 text-emerald-600"
+            border="border-emerald-200"
           />
         </Link>
 
         <StatCard
-          title="Daily Uptime"
+          title="Worked Today"
           value={stats.workedToday}
-          subtitle="Goal achieved: 65%"
-          icon={<Timer size={20} />}
+          subtitle="Goal: 8h"
+          icon={<Timer />}
+          bg="bg-yellow-50"
+          iconBg="bg-yellow-100 text-yellow-600"
+          border="border-yellow-200"
         />
 
         <StatCard
-          title="Weekly Stream"
+          title="This Week"
           value={stats.workedThisWeek}
-          subtitle="Network average"
-          icon={<BarChart3 size={20} />}
+          subtitle="Goal: 40h"
+          icon={<BarChart3 />}
+          bg="bg-purple-50"
+          iconBg="bg-purple-100 text-purple-600"
+          border="border-purple-200"
         />
       </div>
 
-      <div className="glass-dark p-8 rounded-[2.5rem] border border-white/10 shadow-2xl relative overflow-hidden group">
-         <div className="absolute top-0 right-0 w-64 h-64 bg-[#00d4ff]/5 blur-[100px] rounded-full group-hover:bg-[#00d4ff]/10 transition-colors"></div>
-         <h3 className="text-xs font-black text-white uppercase tracking-[0.25em] mb-4">Metric <span className="text-[#00d4ff] blue-glow">Optimization</span></h3>
-         <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest italic">Analyzing real-time performance vectors...</p>
+      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
+        <h3 className="text-lg font-semibold text-slate-800 mb-4">Performance</h3>
+        <p className="text-slate-500 text-sm">Real-time performance metrics will appear here.</p>
       </div>
 
       <RecentActivity />

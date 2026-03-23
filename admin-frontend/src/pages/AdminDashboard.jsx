@@ -239,8 +239,8 @@ const AdminDashboard = () => {
     <div className="space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-white">Admin Dashboard</h1>
-        <p className="text-white/60 font-medium">System overview and management.</p>
+        <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+        <p className="text-slate-500">System overview and management.</p>
       </div>
 
       {/* Error Message */}
@@ -252,22 +252,22 @@ const AdminDashboard = () => {
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         {stats.map((item) => (
           <div
             key={item.title}
-            className="card-glass flex justify-between items-start group"
+            className="rounded-xl border border-gray-300 bg-white p-6 flex justify-between items-start"
           >
             <div>
-              <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">{item.title}</p>
-              <h2 className="text-5xl font-black mt-2 text-white tracking-tighter">{item.value}</h2>
+              <p className="text-sm text-slate-500">{item.title}</p>
+              <h2 className="text-3xl font-bold mt-1">{item.value}</h2>
               {item.change && (
-                <p className="text-[#00d4ff] text-[10px] mt-2 font-black uppercase tracking-widest blue-glow">{item.change}</p>
+                <p className="text-green-600 text-sm mt-1">{item.change}</p>
               )}
             </div>
 
-            <div className="rounded-2xl bg-white/30 p-4 text-[#00d4ff] border border-white/30 group-hover:scale-110 transition-transform duration-500 shadow-[0_0_20px_rgba(0,212,255,0.1)]">
-              <item.icon size={26} strokeWidth={2.5} />
+            <div className="rounded-lg bg-indigo-600 p-3 text-white">
+              <item.icon size={22} />
             </div>
           </div>
         ))}
@@ -276,42 +276,40 @@ const AdminDashboard = () => {
       {/* Bottom Sections */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Recent User Activity */}
-        <div className="card-glass">
-          <h2 className="text-xl font-bold mb-6 text-white border-b border-white/30 pb-4">Recent User Activity</h2>
+        <div className="rounded-xl border border-gray-300 bg-white p-6">
+          <h2 className="text-lg font-semibold mb-4">Recent User Activity</h2>
 
-          <div className="space-y-4">
+          <div className="space-y-3">
             {recentActivity.length > 0 ? (
               recentActivity.map((a, i) => (
                 <div
                   key={i}
-                  className="flex justify-between items-center rounded-xl bg-white/30 border border-white/30 px-4 py-3 hover:bg-white/40 transition-colors"
+                  className="flex justify-between items-center rounded-lg bg-slate-50 px-4 py-3"
                 >
-                  <span className="text-sm font-medium text-white/90">{a.text}</span>
-                  <span className="text-xs text-white/40">{a.time}</span>
+                  <span className="text-sm">{a.text}</span>
+                  <span className="text-xs text-slate-500">{a.time}</span>
                 </div>
               ))
             ) : (
-              <p className="text-white/40 text-sm italic">No recent activity</p>
+              <p className="text-gray-500 text-sm">No recent activity</p>
             )}
           </div>
         </div>
 
         {/* System Status */}
-        <div className="card-glass">
-          <h2 className="text-xl font-black mb-8 text-white border-b border-white/30 pb-4 uppercase tracking-tighter">
-            System <span className="text-[#00d4ff] blue-glow">Status</span>
-          </h2>
+        <div className="rounded-xl border border-gray-300 bg-white p-6">
+          <h2 className="text-lg font-semibold mb-4">System Status</h2>
 
           <div className="space-y-4">
             {systemStatus.map((s) => (
               <div
                 key={s.label}
-                className="flex justify-between items-center rounded-2xl bg-white/30 border border-white/30 px-5 py-4 hover:bg-white/40 transition-all duration-300"
+                className="flex justify-between items-center rounded-lg bg-slate-50 px-4 py-3"
               >
-                <span className="font-bold text-white/80 tracking-wide uppercase text-[10px] tracking-[0.1em]">{s.label}</span>
+                <span className="font-medium">{s.label}</span>
 
-                <span className="flex items-center gap-2 text-[#00d4ff] text-[10px] font-black uppercase tracking-widest blue-glow">
-                  <span className="h-2 w-2 rounded-full bg-[#00d4ff] shadow-[0_0_10px_rgba(0,212,255,1)] animate-pulse" />
+                <span className="flex items-center gap-2 text-green-600 text-sm">
+                  <span className="h-2 w-2 rounded-full bg-green-600" />
                   {s.status}
                 </span>
               </div>

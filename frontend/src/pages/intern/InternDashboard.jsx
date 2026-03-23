@@ -7,6 +7,7 @@ import {
   BarChart3,
   AlertCircle,
   Loader,
+  RefreshCw,
 } from "lucide-react";
 import { useSelector } from "react-redux";
 
@@ -14,7 +15,7 @@ import StatCard from "../../components/intern/StatCard";
 import RecentActivity from "../../components/intern/RecentActivity";
 
 import { Link } from "react-router-dom";
-import { tasksApi, submissionsApi } from "../../utils/api";
+import { tasksApi, submissionsApi, meetingsApi, trackingApi } from "../../utils/api";
 
 /**
  * Central dashboard for interns.
@@ -48,46 +49,88 @@ const InternDashboard = () => {
       setLoading(true);
       setError(null);
 
-      // Fetch all tasks
+      // 1. Fetch all tasks
       const allTasks = await tasksApi.getAll();
 
-      // Filter tasks assigned to this intern
-      const internTasks = allTasks.filter(
-        (task) => task.assignedToId === internId,
-      );
+      // Map tasks and find all tasks with submissions from this intern
+      const processedTasks = await Promise.all(allTasks.map(async (task) => {
+        const taskId = task.id || task._id;
+        const isAssigned = String(task.assignedToId?._id || task.assignedToId?.id || task.assignedToId) === String(internId);
+        
+        let hasSubmissions = false;
+        let isApproved = false;
 
-      // Count tasks by status
-      const activeTasks = internTasks.filter(
-        (task) => task.status === "pending" || task.status === "in_progress",
+        try {
+          const subs = await submissionsApi.getByTask(taskId);
+          if (Array.isArray(subs)) {
+            const mySubs = subs.filter(s => String(s.submittedById?._id || s.submittedById?.id || s.submittedById) === String(internId));
+            hasSubmissions = mySubs.length > 0;
+            isApproved = mySubs.some(s => s.status === 'approved');
+          }
+        } catch (e) {
+          console.warn(`Dashboard sync check failed for task ${taskId}`, e);
+        }
+
+        if (!isAssigned && !hasSubmissions) return null;
+
+        return { ...task, status: isApproved ? 'approved' : task.status };
+      }));
+
+      const finalTasks = processedTasks.filter(t => t !== null);
+
+      // Assigned Tasks: Things the intern needs to work on (unsubmitted)
+      const activeTasks = finalTasks.filter(
+        (task) => ["assigned", "delegated", "rejected", "in_progress"].includes(task.status),
       ).length;
 
-      // Fetch submissions for assigned tasks
-      let allSubmissions = [];
-      for (const task of internTasks) {
-        try {
-          const taskId = task.id || task._id;
-          if (!taskId) continue;
-          const taskSubmissions = await submissionsApi.getByTask(taskId);
-          allSubmissions.push(...taskSubmissions);
-        } catch (err) {
-          console.warn(`Could not fetch submissions for task ${task.id}:`, err);
-        }
+      // 2. Count pending submissions (intern perspective: things they submitted that aren't completed yet)
+      const pendingSubmissions = finalTasks.filter(
+        (task) => task.status === "submitted" || task.status === "under_review",
+      ).length;
+
+      // 3. Fetch meetings
+      let activeMeetings = 0;
+      try {
+        const allMeetings = await meetingsApi.getAll();
+        const myMeetings = allMeetings.filter(m => {
+          const organizerId = m.creatorId?._id || m.creatorId?.id || m.creatorId || m.organizerId;
+          const isOrganizer = organizerId === internId;
+          const isParticipant = m.invitees?.some(p => (p._id || p.id || p) === internId) ||
+                                m.participants?.some(p => (p._id || p.id || p) === internId);
+          return isOrganizer || isParticipant;
+        });
+        activeMeetings = myMeetings.length;
+      } catch (meetErr) {
+        console.warn("Could not fetch meetings:", meetErr);
       }
 
-      // Count pending submissions
-      const pendingSubmissions = allSubmissions.filter(
-        (sub) => sub.status === "pending",
-      ).length;
+      // 4. Fetch work hours from real tracking API
+      let workedToday = "0h 0m";
+      let workedThisWeek = "0h 0m";
+      
+      try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const logsToday = await trackingApi.getTimeLogs({ startDate: today.toISOString() });
+        workedToday = formatDuration(logsToday.totalDuration || 0);
 
-      // Calculate work hours (simple calculation based on task count)
-      // In a real system, this would come from a time tracking service
-      const workedToday = calculateWorkHours(internTasks, "today");
-      const workedThisWeek = calculateWorkHours(internTasks, "week");
+        // Calculate week start (Monday)
+        const day = today.getDay();
+        const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+        const weekStart = new Date(today.setDate(diff));
+        weekStart.setHours(0, 0, 0, 0);
+
+        const logsWeek = await trackingApi.getTimeLogs({ startDate: weekStart.toISOString() });
+        workedThisWeek = formatDuration(logsWeek.totalDuration || 0);
+      } catch (trackErr) {
+        console.warn("Could not fetch time logs:", trackErr);
+      }
 
       setStats({
         assignedTasks: activeTasks,
         pendingSubmissions,
-        meetings: 0, // Meetings data would come from a different API
+        meetings: activeMeetings,
         workedToday,
         workedThisWeek,
       });
@@ -99,6 +142,12 @@ const InternDashboard = () => {
     }
   };
 
+  const formatDuration = (ms) => {
+    const hours = Math.floor(ms / (1000 * 60 * 60));
+    const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+    return `${hours}h ${minutes}m`;
+  };
+
   /**
    * Derives work duration based on task status and update timestamps.
    * This is a simplified simulation of time tracking.
@@ -108,7 +157,7 @@ const InternDashboard = () => {
    * @returns {string} Formatted time string (e.g., "6h 30m")
    */
   const calculateWorkHours = (tasks, period) => {
-    // Simulated logic removed to prevent dummy data impact in production
+    // This is now handled directly in fetchDashboardData using real logs
     return "0h 0m";
   };
 
@@ -134,10 +183,10 @@ const InternDashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <div className="text-center">
-          <Loader className="mx-auto mb-2 h-8 w-8 animate-spin text-slate-400" />
-          <p className="text-slate-500">Loading dashboard...</p>
+      <div className="flex h-[60vh] items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader className="h-12 w-12 animate-spin text-indigo-500" />
+          <p className="text-slate-400 font-medium animate-pulse">Loading dashboard...</p>
         </div>
       </div>
     );
@@ -146,108 +195,155 @@ const InternDashboard = () => {
   const dailyProgress = calculateProgress(stats.workedToday, "8h");
   const weeklyProgress = calculateProgress(stats.workedThisWeek, "40h");
 
-  return (
-    <div className="space-y-8">
+  // Local StatCard to match Manager Dashboard Glass Theme exactly
+  const GlassCard = ({ title, value, icon: Icon, trend }) => (
+    <div className="rounded-[24px] border border-white/10 bg-white/5 backdrop-blur-2xl p-6 flex justify-between shadow-2xl transition-all duration-500 hover:bg-white/10 hover:-translate-y-1">
       <div>
-        <h1 className="text-4xl font-bold text-slate-900">
-          Welcome back, {name || "User"}!
-        </h1>
-        <p className="mt-2 text-lg text-slate-500">
-          Here's your work summary for today and this week.
-        </p>
+        <p className="text-slate-400 font-bold text-[10px] tracking-[0.2em] uppercase">{title}</p>
+        <p className="text-3xl font-bold mt-2 text-white tabular-nums drop-shadow-md">{value}</p>
+        {trend && (
+          <p className="text-emerald-400 text-[10px] font-bold mt-3 uppercase tracking-[0.15em] flex items-center gap-1">
+             <span className="inline-block px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 shadow-lg">
+               {trend}
+             </span>
+          </p>
+        )}
+      </div>
+      <div className="h-12 w-12 rounded-xl bg-indigo-500/10 border-2 border-indigo-500/20 flex items-center justify-center text-indigo-400 shadow-inner shrink-0">
+        <Icon size={24} strokeWidth={2.5} />
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="space-y-10 animate-in fade-in duration-700 min-h-screen bg-[#0f172a] text-white p-6 md:p-8 -m-4 md:-m-6 font-sans">
+      {/* HEADER */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white tracking-tight drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">
+            Intern Dashboard
+          </h1>
+          <p className="text-slate-400 mt-1 text-xs font-semibold flex items-center gap-2">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
+            Welcome back, <span className="text-indigo-400">{name || "User"}</span>! Here's your live summary.
+          </p>
+        </div>
+        <div className="flex flex-col md:flex-row items-center gap-3">
+           <div className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[9px] font-bold uppercase tracking-widest text-indigo-300 shadow-inner">
+             Last updated: {new Date().toLocaleTimeString()}
+           </div>
+           <button 
+             onClick={fetchDashboardData}
+             className="p-2 rounded-lg bg-indigo-500/10 text-indigo-400 border border-indigo-500/10 hover:bg-indigo-500/20 transition-all active:scale-90 group"
+             title="Manual Sync"
+           >
+              <RefreshCw size={16} className="group-hover:rotate-180 transition-transform duration-700" />
+           </button>
+        </div>
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4">
-          <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
-          <p className="text-sm text-red-800">{error}</p>
+        <div className="rounded-xl bg-red-500/10 border border-red-500/20 p-4 text-red-400 font-bold flex flex-col md:flex-row items-center justify-between gap-4 shadow-2xl animate-in fade-in slide-in-from-top-4 backdrop-blur-md mb-6">
+          <div className="flex items-center gap-3">
+             <div className="h-10 w-10 rounded-xl bg-red-500/20 flex items-center justify-center text-red-500 border border-red-500/20 shadow-inner">
+               <AlertCircle size={20} strokeWidth={3} />
+             </div>
+             <div>
+               <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-red-500/60 mb-1">Database Connectivity Alert</p>
+               <p className="text-xs font-bold text-white/90 leading-tight">{error}</p>
+             </div>
+          </div>
+          <button 
+             onClick={fetchDashboardData}
+             className="px-6 py-2 rounded-lg bg-red-500 hover:bg-red-400 text-[#0f172a] text-[9px] font-bold uppercase tracking-widest transition-all shadow-xl shadow-red-500/20 active:scale-95 flex items-center gap-2"
+          >
+             <RefreshCw size={12} />
+             Retry Records Sync
+          </button>
         </div>
       )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        <Link to="/intern/my-tasks" className="transition-transform active:scale-95">
-          <StatCard
-            title="Assigned Tasks"
-            value={String(stats.assignedTasks)}
-            subtitle="Processing..."
-            icon={<CheckSquare size={20} />}
-          />
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-5">
+        <Link to="/intern/my-tasks" className="block outline-none group">
+          <GlassCard title="Assigned Tasks" value={stats.assignedTasks} trend="Active Tasks" icon={CheckSquare} />
         </Link>
-
-        <Link to="/intern/submissions" className="transition-transform active:scale-95">
-          <StatCard
-            title="Submissions"
-            value={String(stats.pendingSubmissions).padStart(2, "0")}
-            icon={<Folder size={20} />}
-            subtitle="Pending Sync"
-          />
+        <Link to="/intern/submissions" className="block outline-none group">
+          <GlassCard title="Submissions" value={String(stats.pendingSubmissions).padStart(2, "0")} trend="Awaiting Review" icon={Folder} />
         </Link>
-
-        <Link to="/intern/meetings" className="transition-transform active:scale-95">
-          <StatCard
-            title="Neural Link"
-            value={String(stats.meetings).padStart(2, "0")}
-            icon={<Calendar size={20} />}
-            subtitle="Secure Meetings"
-          />
+        <Link to="/intern/meetings" className="block outline-none group">
+          <GlassCard title="Meetings" value={String(stats.meetings).padStart(2, "0")} trend="Scheduled Today" icon={Calendar} />
         </Link>
-
-        <StatCard
-          title="Daily Uptime"
-          value={stats.workedToday}
-          subtitle="Goal achieved: 65%"
-          icon={<Timer size={20} />}
-        />
-
-        <StatCard
-          title="Weekly Stream"
-          value={stats.workedThisWeek}
-          subtitle="Network average"
-          icon={<BarChart3 size={20} />}
-        />
-      </div>
-
-      {/* Optional: Visual Time Progress Bar Section */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
-        <h3 className="text-lg font-semibold text-slate-800 mb-4">
-          Time Progress
-        </h3>
-        <div className="space-y-6">
-          {/* Daily Progress */}
-          <div>
-            <div className="flex justify-between mb-2 text-sm font-medium">
-              <span className="text-white/60">Daily Progress</span>
-              <span className="text-[#00d4ff] blue-glow">{dailyProgress}%</span>
-            </div>
-            <div className="w-full bg-white/5 rounded-full h-2.5 overflow-hidden border border-white/10">
-              <div
-                className="bg-[#00d4ff] h-full rounded-full blue-glow shadow-[0_0_10px_rgba(0,212,255,1)]"
-                style={{ width: `${Math.min(dailyProgress, 100)}%` }}
-              ></div>
-            </div>
-          </div>
-
-          {/* Weekly Progress */}
-          <div>
-            <div className="flex justify-between mb-2 text-sm font-medium">
-              <span className="text-white/60">Weekly Progress</span>
-              <span className="text-[#00d4ff] blue-glow">{weeklyProgress}%</span>
-            </div>
-            <div className="w-full bg-white/5 rounded-full h-2.5 overflow-hidden border border-white/10">
-              <div
-                className="bg-[#00d4ff] h-full rounded-full blue-glow shadow-[0_0_10px_rgba(0,212,255,1)]"
-                style={{ width: `${Math.min(weeklyProgress, 100)}%` }}
-              ></div>
-            </div>
-          </div>
+        <div className="cursor-default">
+          <GlassCard title="Worked Today" value={stats.workedToday} trend="Goal: 8h" icon={Timer} />
+        </div>
+        <div className="cursor-default">
+          <GlassCard title="This Week" value={stats.workedThisWeek} trend="Goal: 40h" icon={BarChart3} />
         </div>
       </div>
 
-      {/* Recent Activity */}
-      <div className="gap-6">
-        <RecentActivity />
+      <div className="grid gap-8 lg:grid-cols-2">
+        {/* TIME PROGRESS */}
+        <div className="rounded-[32px] border border-white/10 bg-white/5 backdrop-blur-2xl p-8 shadow-2xl transition-all hover:border-white/20">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-lg font-bold text-white flex items-center gap-3">
+               <span className="p-2.5 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 shadow-inner">
+                  <Timer size={20} />
+               </span>
+               Time Progress
+            </h2>
+            <button className="text-[9px] font-bold text-indigo-400 hover:text-indigo-300 uppercase tracking-[0.2em] bg-indigo-500/10 px-3 py-1.5 rounded-lg border border-indigo-500/20 transition-all">
+              View Log
+            </button>
+          </div>
+
+          <div className="space-y-8">
+             <div className="space-y-3">
+               <div className="flex justify-between text-[10px] font-bold uppercase tracking-[0.15em]">
+                 <span className="text-slate-400">Daily Progress</span>
+                 <span className="text-indigo-400">{dailyProgress}%</span>
+               </div>
+               <div className="w-full bg-white/5 border border-white/10 rounded-full h-3.5 overflow-hidden shadow-inner flex">
+                 <div className="bg-indigo-500 h-full shadow-[0_0_15px_rgba(99,102,241,0.6)] transition-all duration-1000 relative" style={{ width: `${Math.min(dailyProgress, 100)}%` }}>
+                   <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/20"></div>
+                 </div>
+               </div>
+             </div>
+             
+             <div className="space-y-3 pt-3 border-t border-white/5">
+               <div className="flex justify-between text-[10px] font-bold uppercase tracking-[0.15em]">
+                 <span className="text-slate-400">Weekly Progress <span className="opacity-50">(Week 02)</span></span>
+                 <span className="text-emerald-400">{weeklyProgress}%</span>
+               </div>
+               <div className="w-full bg-white/5 border border-white/10 rounded-full h-3.5 overflow-hidden shadow-inner flex">
+                 <div className="bg-emerald-500 h-full shadow-[0_0_15px_rgba(16,185,129,0.6)] transition-all duration-1000 relative" style={{ width: `${Math.min(weeklyProgress, 100)}%` }}>
+                   <div className="absolute inset-0 bg-gradient-to-r from-transparent to-white/20"></div>
+                 </div>
+               </div>
+             </div>
+          </div>
+        </div>
+
+        {/* RECENT ACTIVITY */}
+        <div className="rounded-[32px] border border-white/10 bg-white/5 backdrop-blur-2xl p-8 shadow-2xl transition-all hover:border-white/20">
+           <div className="flex items-center justify-between mb-8">
+            <h2 className="text-lg font-bold text-white flex items-center gap-3">
+                <span className="p-2.5 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/20 shadow-inner">
+                    <CheckSquare size={20} />
+                </span>
+                Activity Log
+            </h2>
+            <div className="h-2.5 w-2.5 rounded-full bg-indigo-500 animate-pulse shadow-[0_0_10px_rgba(99,102,241,0.8)]" />
+          </div>
+          
+          <div className="mt-[-20px] mx-[-10px] h-full overflow-hidden relative">
+             {/* Ensure RecentActivity inherits the dark theme constraints properly by modifying its direct children via Tailwind */}
+             <div className="[&>div]:border-none [&>div]:shadow-none [&>div]:bg-transparent [&_h3]:text-sm [&_h3]:font-bold [&_h3]:text-white [&_p]:text-[11px] [&_p]:text-slate-400 [&_.bg-white]:bg-transparent [&_li]:border-white/5 [&_svg]:text-indigo-400 [&_.bg-indigo-50]:bg-indigo-500/10">
+                 <RecentActivity />
+             </div>
+          </div>
+        </div>
       </div>
     </div>
   );

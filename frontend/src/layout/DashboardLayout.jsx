@@ -17,7 +17,7 @@ const DashboardLayout = () => {
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
 
   return (
-    <div className="min-h-screen text-white relative">
+    <div className={`min-h-screen ${theme === "dark" ? "bg-[#0F172A] text-white" : "bg-slate-50 text-slate-900"}`}>
       {/* Sidebar - responsive visibility */}
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
       

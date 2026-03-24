@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
@@ -14,7 +14,8 @@ import {
   Clock,
   Loader2,
   RefreshCw,
-  LayoutDashboard
+  LayoutDashboard,
+  AlertCircle
 } from "lucide-react";
 
 import { tasksApi, submissionsApi, usersApi, meetingsApi } from "../../utils/api";
@@ -24,7 +25,7 @@ import { tasksApi, submissionsApi, usersApi, meetingsApi } from "../../utils/api
  * Features a high-fidelity glassmorphism interface with real-time stats and activity tracking.
  */
 const TlDashboardIntern = () => {
-  const { name } = useSelector((state) => state.auth);
+  const { id: _currentUserId, name } = useSelector((state) => state.auth);
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState({
@@ -39,12 +40,9 @@ const TlDashboardIntern = () => {
 
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+  }, [fetchDashboardData]);
 
-  /**
-   * Aggregates real-time business data across all modules.
-   */
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -121,7 +119,11 @@ const TlDashboardIntern = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
   const statConfig = [
     { title: "Total Interns", value: stats.totalInterns, icon: Users, color: "indigo", subtitle: "Managed Workforce" },
@@ -156,7 +158,7 @@ const TlDashboardIntern = () => {
             Command Dashboard
           </h1>
           <p className="text-slate-400 mt-2 text-sm font-bold flex items-center gap-2 max-w-lg opacity-80">
-            Welcome back, <span className="text-indigo-400 uppercase tracking-widest">{name || "Leader"}</span>. Here is the team's live operational status.
+            Welcome back, <span className="text-indigo-400 uppercase tracking-widest">{name || "Leader"}</span>. Here is the team&apos;s live operational status.
           </p>
         </div>
         
@@ -172,6 +174,13 @@ const TlDashboardIntern = () => {
            </button>
         </div>
       </div>
+
+      {error && (
+        <div className="flex items-center gap-3 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 animate-in shake duration-500">
+          <AlertCircle size={20} />
+          <p className="text-sm font-medium">{error}</p>
+        </div>
+      )}
 
       {/* STATS GRID */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4">

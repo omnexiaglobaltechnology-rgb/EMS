@@ -94,7 +94,7 @@ const MeetingRoom = () => {
       setCameraOn(stream.getVideoTracks().length > 0);
       setMediaError("");
       return stream;
-    } catch (error) {
+    } catch (_error) {
       setMediaError(
         "Camera/Microphone permission is blocked. Please allow access in browser site settings.",
       );
@@ -189,7 +189,7 @@ const MeetingRoom = () => {
 
       setIsScreenSharing(true);
       setMediaError("");
-    } catch (error) {
+    } catch (_error) {
       setMediaError("Screen sharing was cancelled or blocked.");
     }
   };
@@ -398,6 +398,16 @@ const MeetingRoom = () => {
 
         <button onClick={toggleScreenShare}>
           <ScreenShare className={isScreenSharing ? "text-green-400" : ""} />
+        </button>
+
+        <button 
+          onClick={recording ? stopRecording : startRecording}
+          className={`${recording ? "text-red-500 animate-pulse" : "text-white"}`}
+        >
+          <div className="flex items-center gap-1">
+             <div className={`h-3 w-3 rounded-full ${recording ? "bg-red-500" : "bg-gray-500"}`} />
+             <span className="text-[10px] font-bold">REC</span>
+          </div>
         </button>
       </div>
     </div>

@@ -85,7 +85,7 @@ const CtoMeetingRoom = () => {
       setCameraOn(stream.getVideoTracks().length > 0);
       setMediaError("");
       return stream;
-    } catch (error) {
+    } catch (_error) {
       setMediaError(
         "Camera/Microphone permission is blocked. Please allow access in browser site settings.",
       );
@@ -180,7 +180,7 @@ const CtoMeetingRoom = () => {
 
       setIsScreenSharing(true);
       setMediaError("");
-    } catch (error) {
+    } catch (_error) {
       setMediaError("Screen sharing was cancelled or blocked.");
     }
   };

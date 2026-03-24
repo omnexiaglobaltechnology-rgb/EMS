@@ -35,7 +35,7 @@ const AdminMeetingPermissions = () => {
     try {
       const data = await meetingsApi.getConfig();
       setConfig(data);
-    } catch (err) {
+    } catch {
       setError("Failed to load permissions config");
     } finally {
       setLoading(false);
@@ -61,7 +61,7 @@ const AdminMeetingPermissions = () => {
       await meetingsApi.updateConfig(config);
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
-    } catch (err) {
+    } catch {
       setError("Failed to save configuration");
     } finally {
       setSaving(false);

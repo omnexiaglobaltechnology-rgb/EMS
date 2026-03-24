@@ -1,4 +1,4 @@
-import React from "react";
+// COO Analytics and Organization Intelligence Page
 import {
   LineChart,
   Line,

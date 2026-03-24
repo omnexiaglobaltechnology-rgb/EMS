@@ -5,7 +5,7 @@ import { Plus } from "lucide-react";
 import AssignTaskModal from "../../components/tl-panel/AssignTaskModal";
 import PriorityBadge from "../../components/tl-panel/PriorityBadge";
 import StatusBadge from "../../components/tl-panel/StatusBadge";
-import { tasksApi, submissionsApi, authApi } from "../../utils/api";
+import { tasksApi, submissionsApi } from "../../utils/api";
 
 /**
  * Task management interface for TL Interns to assign and track intern tasks.

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   LineChart,
   Line,
@@ -14,30 +14,6 @@ import {
 } from "recharts";
 import { AlertCircle, Loader } from "lucide-react";
 import { tasksApi } from "../../utils/api";
-
-/* Sprint completion trend */
-const sprintCompletionDataDefault = [
-  { month: "Jan", value: 62 },
-  { month: "Feb", value: 68 },
-  { month: "Mar", value: 72 },
-  { month: "Apr", value: 80 },
-  { month: "May", value: 88 },
-  { month: "Jun", value: 92 },
-];
-
-/* Engineering meeting efficiency */
-const meetingEfficiencyData = [
-  { name: "Effective", value: 82 },
-  { name: "Ineffective", value: 18 },
-];
-
-/* Technical team productivity */
-const technicalTeamData = [
-  { name: "Frontend", value: 90 },
-  { name: "Backend", value: 88 },
-  { name: "DevOps", value: 85 },
-  { name: "QA", value: 80 },
-];
 
 const COLORS = ["#4f46e5", "#e5e7eb"];
 
@@ -55,17 +31,16 @@ const CtoAnalytics = () => {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const COLORS = ["#4f46e5", "#e5e7eb"];
 
   useEffect(() => {
     fetchAnalytics();
-  }, []);
+  }, [fetchAnalytics]);
 
   /**
    * Aggregates engineering tasks to compute localized health scores and
    * generates specialized datasets for trend visualization.
    */
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     try {
       setLoading(true);
       const allTasks = await tasksApi.getAll();
@@ -109,7 +84,7 @@ const CtoAnalytics = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   if (loading) {
     return (
@@ -201,12 +176,12 @@ const CtoAnalytics = () => {
             <ResponsiveContainer width={250} height={250}>
               <PieChart>
                 <Pie
-                  data={meetingEfficiencyData}
+                  data={metrics.meetingEfficiencyData}
                   innerRadius={70}
                   outerRadius={100}
                   dataKey="value"
                 >
-                  {meetingEfficiencyData.map((_, i) => (
+                  {metrics.meetingEfficiencyData.map((_, i) => (
                     <Cell key={i} fill={COLORS[i]} />
                   ))}
                 </Pie>

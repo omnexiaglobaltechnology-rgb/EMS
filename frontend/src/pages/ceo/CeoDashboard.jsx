@@ -58,8 +58,8 @@ const CeoDashboard = () => {
           const taskId = task.id || task._id;
           if (!taskId) continue;
           const taskSubmissions = await submissionsApi.getByTask(taskId);
-          allSubmissions.push(...submissions);
-        } catch (err) {
+          allSubmissions.push(...taskSubmissions);
+        } catch (_err) {
           console.warn(`Could not fetch submissions for task ${task.id}`);
         }
       }
@@ -215,7 +215,7 @@ const CeoDashboard = () => {
           {/* Motivational Quote Card */}
           <div className="rounded-xl bg-gradient-to-br from-indigo-600 to-blue-700 p-6 text-white shadow-lg shadow-indigo-600/20">
             <h2 className="text-xs font-bold uppercase tracking-wider text-indigo-200 mb-4 italic">Daily Inspiration</h2>
-            <p className="text-lg font-medium leading-relaxed mb-4">"{quote.text}"</p>
+            <p className="text-lg font-medium leading-relaxed mb-4">&quot;{quote.text}&quot;</p>
             <p className="text-xs font-semibold text-indigo-200">— {quote.author}</p>
           </div>
 

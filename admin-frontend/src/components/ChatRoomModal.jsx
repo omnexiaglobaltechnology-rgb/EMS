@@ -59,7 +59,7 @@ const ChatRoomModal = ({ onClose, onSave, room = null }) => {
       }
     };
     fetchData();
-  }, []);
+  }, [room?.departmentId, room?.participants]);
 
   // Update user filter when main department changes (in create mode)
   useEffect(() => {

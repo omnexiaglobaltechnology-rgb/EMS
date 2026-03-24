@@ -1,7 +1,6 @@
-import { useEffect, useMemo, useState } from "react";
-import { BellIcon } from "lucide-react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { BellIcon } from "lucide-react";
 import {
   getUserNotifications,
   markAllNotificationsAsRead,
@@ -21,20 +20,20 @@ const formatTimestamp = (timestamp) => {
 };
 
 const Topbar = () => {
-  const navigate = useNavigate();
   const role = useSelector((state) => state.auth?.role);
   const email = useSelector((state) => state.auth?.email);
 
   const [isOpen, setIsOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
 
-  const loadNotifications = () => {
+  const loadNotifications = useCallback(() => {
     // In admin-frontend, admins see 0 notifications since meetings/chats/announcements are disabled for them.
     setNotifications(getUserNotifications({ role, email, limit: 25 }));
-  };
+  }, [role, email]);
 
   useEffect(() => {
-    loadNotifications();
+    // Initial fetch
+    Promise.resolve().then(() => loadNotifications());
 
     const onStorage = (event) => {
       if (!event.key || WATCHED_STORAGE_KEYS.includes(event.key)) {
@@ -52,7 +51,7 @@ const Topbar = () => {
         loadNotifications,
       );
     };
-  }, [role, email]);
+  }, [loadNotifications]);
 
   const unreadCount = useMemo(
     () => notifications.filter((notification) => !notification.isRead).length,

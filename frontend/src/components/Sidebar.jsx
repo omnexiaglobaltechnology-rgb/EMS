@@ -16,9 +16,20 @@ const Sidebar = ({ isOpen, onClose }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { role, name, position, department_name } = useSelector(
+  const { role, name, position } = useSelector(
     (state) => state.auth,
   );
+
+  const [installPrompt, setInstallPrompt] = useState(null);
+
+  useEffect(() => {
+    const handler = (e) => {
+      e.preventDefault();
+      setInstallPrompt(e);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
 
   if (!role) return null;
 
@@ -37,17 +48,6 @@ const Sidebar = ({ isOpen, onClose }) => {
       navigate("/");
     }
   };
-
-  const [installPrompt, setInstallPrompt] = useState(null);
-
-  useEffect(() => {
-    const handler = (e) => {
-      e.preventDefault();
-      setInstallPrompt(e);
-    };
-    window.addEventListener("beforeinstallprompt", handler);
-    return () => window.removeEventListener("beforeinstallprompt", handler);
-  }, []);
 
   const handleInstall = async () => {
     if (!installPrompt) return;

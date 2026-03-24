@@ -45,8 +45,6 @@ import Manager_internReports from "./pages/manager_intern/Manager_internReports"
 import Manager_internSubmissionsReview from "./pages/manager_intern/Manager_internSubmissionsReview";
 import ProfileSettings from "./pages/ProfileSettings";
 
-
-
 /* CTO Pages */
 import CtoDashboard from "./pages/cto/CtoDashboard";
 import CtoOrganization from "./pages/cto/CtoOrganization";

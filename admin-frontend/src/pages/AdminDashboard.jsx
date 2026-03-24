@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Users,
   ShieldCheck,
@@ -51,13 +51,13 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+  }, [fetchDashboardData]);
 
   /**
    * Fetches tasks and submissions, processes them, and updates dashboard metrics.
    * Calculates unique users, active roles, and recent activity timeline.
    */
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -89,8 +89,8 @@ const AdminDashboard = () => {
           if (!taskId) continue;
           const taskSubmissions = await submissionsApi.getByTask(taskId);
           allSubmissions.push(...taskSubmissions);
-        } catch (err) {
-          console.warn(`Could not fetch submissions for task ${task.id}:`, err);
+        } catch {
+          console.warn(`Could not fetch submissions for task ${task.id}`);
         }
       }
 
@@ -141,7 +141,7 @@ const AdminDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [ACTIVE_ROLES.length, generateRecentActivity]);
 
   /**
    * Generates a combined list of recent activity from sorted tasks and submissions.
@@ -150,7 +150,7 @@ const AdminDashboard = () => {
    * @param {Array} submissions - List of all submissions
    * @returns {Array} Formatted activity objects containing text and time strings
    */
-  const generateRecentActivity = (tasks, submissions) => {
+  const generateRecentActivity = useCallback((tasks, submissions) => {
     const activities = [];
 
     // Add recent task activities
@@ -190,7 +190,7 @@ const AdminDashboard = () => {
     return activities.length > 0
       ? activities
       : [{ text: "No recent activity", time: "N/A" }];
-  };
+  }, [getTimeAgo]);
 
   /**
    * Helper to format a Date into a relative "time ago" string.
@@ -198,7 +198,7 @@ const AdminDashboard = () => {
    * @param {Date} date - The date to compare against the current time
    * @returns {string} Relative time string (e.g., "5m ago", "2d ago")
    */
-  const getTimeAgo = (date) => {
+  const getTimeAgo = useCallback((date) => {
     const seconds = Math.floor((new Date() - date) / 1000);
     let interval = seconds / 31536000;
 
@@ -222,7 +222,7 @@ const AdminDashboard = () => {
       return Math.floor(interval) + "m ago";
     }
     return Math.floor(seconds) + "s ago";
-  };
+  }, []);
 
   if (loading) {
     return (

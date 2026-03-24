@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { X, Loader, Activity } from "lucide-react";
+import { useState } from "react";
+import { X } from "lucide-react";
 
 /**
  * Simplified UserModal for Managers/Seniors to manage their subordinates.

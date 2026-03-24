@@ -58,7 +58,7 @@ const UserModal = ({ title, user, onClose, onSave }) => {
       }
     };
     fetchDepts();
-  }, [form.userType]);
+  }, [form.userType, form.departmentId]);
 
   // Fetch potential supervisors when role or department changes
   useEffect(() => {

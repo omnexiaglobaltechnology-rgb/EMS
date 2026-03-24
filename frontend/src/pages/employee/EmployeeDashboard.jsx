@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   CheckSquare,
   Folder,
@@ -14,7 +14,7 @@ import StatCard from "../../components/intern/StatCard";
 import RecentActivity from "../../components/intern/RecentActivity";
 
 import { Link } from "react-router-dom";
-import { tasksApi, submissionsApi } from "../../utils/api";
+import { tasksApi } from "../../utils/api";
 
 /**
  * Central dashboard for Employees.
@@ -35,9 +35,9 @@ const EmployeeDashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
-  }, []);
+  }, [fetchDashboardData]);
 
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -69,7 +69,7 @@ const EmployeeDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
 
   if (loading) {
     return (
@@ -89,7 +89,7 @@ const EmployeeDashboard = () => {
           Welcome back, {name || "Employee"}!
         </h1>
         <p className="mt-2 text-lg text-slate-500">
-          Here's your employee portal summary.
+          Here&apos;s your employee portal summary.
         </p>
       </div>
 

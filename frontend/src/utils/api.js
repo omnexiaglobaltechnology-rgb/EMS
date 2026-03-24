@@ -12,7 +12,7 @@ const getStoredToken = () => {
   try {
     const auth = JSON.parse(localStorage.getItem("auth") || "{}");
     return auth?.token || null;
-  } catch (error) {
+  } catch {
     return null;
   }
 };

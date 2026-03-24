@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import {
@@ -15,10 +15,11 @@ import {
   Loader2,
   RefreshCw,
   LayoutDashboard,
-  Bell
+  Bell,
+  AlertCircle
 } from "lucide-react";
 
-import { tasksApi, submissionsApi, usersApi, meetingsApi } from "../../utils/api";
+import { tasksApi, submissionsApi } from "../../utils/api";
 
 /**
  * Premium Team Lead Dashboard.
@@ -37,14 +38,7 @@ const TlDashboard = () => {
   const [recentActivity, setRecentActivity] = useState([]);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  /**
-   * Syncs real-time performance data from the management nodes.
-   */
-  const fetchDashboardData = async () => {
+  const fetchDashboardData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -83,7 +77,7 @@ const TlDashboard = () => {
                 });
             });
           }
-        } catch (e) { /* silent fail for individual nodes */ }
+        } catch { /* silent fail for individual nodes */ }
       }
 
       // Add task updates to log
@@ -114,7 +108,11 @@ const TlDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
   const statConfig = [
     { title: "Team Members", value: stats.totalInterns, icon: Users, color: "indigo", subtitle: "Managed Interns" },
@@ -166,6 +164,13 @@ const TlDashboard = () => {
            </button>
         </div>
       </div>
+
+      {error && (
+        <div className="flex items-center gap-3 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 animate-in shake duration-500">
+          <AlertCircle size={20} />
+          <p className="text-sm font-medium">{error}</p>
+        </div>
+      )}
 
       {/* STATISTICS MODULE */}
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-4 relative z-10">

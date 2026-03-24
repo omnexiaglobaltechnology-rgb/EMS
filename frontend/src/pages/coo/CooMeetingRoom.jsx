@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
-  Mic, MicOff, Video, VideoOff, MessageSquare, ScreenShare, UserPlus, Link, Flag, Circle, PhoneOff
+  Mic, MicOff, Video, VideoOff, MessageSquare, ScreenShare, UserPlus, Link, Circle, PhoneOff
 } from "lucide-react";
 import { meetingsApi } from "../../utils/api";
 
@@ -16,6 +16,7 @@ const CooMeetingRoom = () => {
   const [meeting, setMeeting] = useState(null);
   const [micOn, setMicOn] = useState(true);
   const [cameraOn, setCameraOn] = useState(true);
+  const [stream, setStream] = useState(null);
   const [recording, setRecording] = useState(false);
   const [mediaError, setMediaError] = useState("");
   const [isScreenSharing, setIsScreenSharing] = useState(false);
@@ -56,6 +57,7 @@ const CooMeetingRoom = () => {
 
       stopCurrentStream();
       streamRef.current = currentStream;
+      setStream(currentStream);
 
       setMicOn(currentStream.getAudioTracks().length > 0);
       setCameraOn(currentStream.getVideoTracks().length > 0);
@@ -96,12 +98,12 @@ const CooMeetingRoom = () => {
   // Sync video element with stream
   useEffect(() => {
     const el = videoRef.current;
-    if (!el || !streamRef.current) return;
-    const previewStream = new MediaStream(streamRef.current.getVideoTracks());
+    if (!el || !stream) return;
+    const previewStream = new MediaStream(stream.getVideoTracks());
     el.srcObject = previewStream;
     el.muted = true;
     el.volume = 0;
-  }, [streamRef.current, videoElMounted]);
+  }, [stream, videoElMounted]);
 
   // Initialize meeting and media — single useEffect
   useEffect(() => {
@@ -109,13 +111,13 @@ const CooMeetingRoom = () => {
       try {
         const data = await meetingsApi.getById(id);
         setMeeting(data);
-      } catch (err) {
-        console.error("Failed to fetch meeting", err);
+        await requestMedia({ audio: true, video: true });
+      } catch {
+        console.error("Failed to fetch meeting");
       }
     };
 
     init();
-    requestMedia({ audio: true, video: true });
 
     return () => {
       if (

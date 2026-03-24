@@ -7,7 +7,7 @@ const safeParse = (value, fallback) => {
   try {
     const parsed = JSON.parse(value);
     return parsed ?? fallback;
-  } catch (error) {
+  } catch {
     return fallback;
   }
 };
@@ -63,11 +63,11 @@ const getReadIds = ({ role, email }) => {
   return Array.isArray(value) ? value : [];
 };
 
-const isMeetingsEnabledForRole = (role) => {
+const isMeetingsEnabledForRole = (_role) => {
   return true;
 };
 
-const isChatEnabledForRole = (role) => {
+const isChatEnabledForRole = (_role) => {
   return true;
 };
 

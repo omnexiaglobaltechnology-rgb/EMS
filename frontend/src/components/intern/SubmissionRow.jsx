@@ -88,7 +88,7 @@ const SubmissionRow = ({ item }) => {
                   Your Note:
                 </span>
                 <p className="text-sm font-bold text-slate-400 italic">
-                  "{item.comment}"
+                  &quot;{item.comment}&quot;
                 </p>
               </div>
             </div>

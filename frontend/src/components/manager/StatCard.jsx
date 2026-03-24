@@ -1,13 +1,6 @@
-// eslint-disable-next-line no-unused-vars
-/**
- * A general status card component used within the manager dashboard to display simple statistics.
- *
- * @param {string} title - The stat title
- * @param {string|number} value - The numerical or descriptive value
- * @param {string} trend - An optional trend indicator
- * @param {React.ElementType} icon - The icon component to display
- */
-const StatCard = ({ title, value, trend, icon: Icon }) => {
+// Stat Card Component
+
+const StatCard = ({ title, value, trend, icon: IconComponent }) => {
   return (
     <div className="rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 flex justify-between shadow-xl transition-all duration-300 hover:bg-white/10 hover:border-white/20">
       <div>
@@ -23,7 +16,7 @@ const StatCard = ({ title, value, trend, icon: Icon }) => {
       </div>
 
       <div className="h-12 w-12 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shadow-inner">
-        <Icon size={24} strokeWidth={2.5} />
+        <IconComponent size={24} strokeWidth={2.5} />
       </div>
     </div>
   );

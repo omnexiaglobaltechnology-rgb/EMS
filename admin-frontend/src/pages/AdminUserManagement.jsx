@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import UserModal from "../components/UserModal";
 import { MoreVertical, Plus, AlertCircle, Loader, Key, Search, Users, GraduationCap } from "lucide-react";
 import { usersApi } from "../utils/api";
@@ -9,7 +9,6 @@ import { usersApi } from "../utils/api";
 const AdminUserManagement = () => {
   const [users, setUsers] = useState([]);
   const [showAdd, setShowAdd] = useState(false);
-  const [editUser, setEditUser] = useState(null);
   const [showPasswordModal, setShowPasswordModal] = useState(null);
   const [newPassword, setNewPassword] = useState("");
   const [openMenuId, setOpenMenuId] = useState(null);
@@ -20,9 +19,9 @@ const AdminUserManagement = () => {
 
   useEffect(() => {
     fetchUsers();
-  }, [activeTab]);
+  }, [fetchUsers]);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -37,7 +36,7 @@ const AdminUserManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeTab, searchTerm]);
 
   const handleSearch = (e) => {
     e.preventDefault();

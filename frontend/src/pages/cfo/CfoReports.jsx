@@ -1,6 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { FileText, Download, Plus, AlertCircle, Loader } from "lucide-react";
-import { tasksApi, submissionsApi } from "../../utils/api";
+import { tasksApi } from "../../utils/api";
 import { downloadReport, downloadAllReports } from "../../utils/downloadReport";
 
 /**
@@ -14,13 +14,13 @@ const CfoReports = () => {
 
   useEffect(() => {
     fetchReports();
-  }, []);
+  }, [fetchReports]);
 
   /**
    * Reaches out to the API to simulate report generation based on aggregate task completion logic.
    * Computes completion and populates a static list of foundational finance documentation.
    */
-  const fetchReports = async () => {
+  const fetchReports = useCallback(async () => {
     try {
       setLoading(true);
       const allTasks = await tasksApi.getAll();
@@ -76,7 +76,7 @@ const CfoReports = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   if (loading) {
     return (

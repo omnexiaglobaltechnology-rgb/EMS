@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSelector } from "react-redux";
 import TaskCard from "../../components/intern/TaskCard";
 import { tasksApi, submissionsApi } from "../../utils/api";
@@ -25,13 +25,13 @@ const InternMyTasks = () => {
   // Fetch tasks assigned to this intern
   useEffect(() => {
     if (currentUserId) fetchTasks();
-  }, [currentUserId]);
+  }, [currentUserId, fetchTasks]);
 
   /**
    * Retrieves all tasks and localizes the set to those assigned to this intern.
    * Maps API status strings to dashboard-friendly keys.
    */
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     try {
       setLoading(true);
       const allTasks = await tasksApi.getAll();
@@ -53,8 +53,8 @@ const InternMyTasks = () => {
              hasSubmissions = mySubs.length > 0;
              isApproved = mySubs.some(s => s.status === 'approved');
           }
-        } catch (e) {
-          console.warn(`Sync check failed for task ${taskId}`, e);
+        } catch (_e) {
+          console.warn(`Sync check failed for task ${taskId}`, _e);
         }
 
         if (!isAssigned && !hasSubmissions) return null;
@@ -84,7 +84,7 @@ const InternMyTasks = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUserId]);
 
   const handleStatusUpdate = async (taskId, newStatus) => {
     try {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { FileText, Download, Plus, Search, Loader2, CheckCircle2, AlertCircle } from "lucide-react";
-import { tasksApi, submissionsApi } from "../../utils/api";
+import { tasksApi } from "../../utils/api";
 import { downloadReport } from "../../utils/downloadReport";
 
 const Manager_internReports = () => {
@@ -25,7 +25,6 @@ const Manager_internReports = () => {
       
       // Filter or group data for reports
       const completedTasks = allTasks.filter(t => t.status === "completed");
-      const activeTasks = allTasks.filter(t => ["assigned", "delegated", "under_review"].includes(t.status));
       const submittedTasks = allTasks.filter(t => ["submitted", "under_review"].includes(t.status));
 
       // Synthesize reports based on current data
@@ -215,7 +214,7 @@ const Manager_internReports = () => {
               <FileText size={48} className="text-slate-700 opacity-30" />
             </div>
             <p className="text-slate-500 font-bold text-lg">No reports generated yet</p>
-            <p className="text-slate-600 text-sm mt-2">Click "Generate New Report" to analyze current data</p>
+            <p className="text-slate-600 text-sm mt-2">Click &quot;Generate New Report&quot; to analyze current data</p>
           </div>
         )}
       </div>

@@ -257,13 +257,15 @@ Join the meeting at: ${window.location.origin}/${auth.role}/meeting-room/${link}
           <h1 className="text-3xl font-black text-white tracking-tight drop-shadow-[0_0_20px_rgba(255,255,255,0.1)]">Meeting Management</h1>
           <p className="text-base text-slate-300 font-bold mt-2 leading-relaxed max-w-2xl opacity-80">Schedule, coordinate, and sync with your team effortlessly.</p>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 rounded-2xl bg-indigo-600 px-6 py-3 text-white hover:bg-indigo-500 transition-all shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_30px_rgba(79,70,229,0.5)] font-bold active:scale-95"
-        >
-          <Plus size={20} />
-          Schedule Meeting
-        </button>
+        {auth?.role !== "intern" && auth?.role !== "employee" && (
+          <button
+            onClick={() => setShowModal(true)}
+            className="flex items-center gap-2 rounded-2xl bg-indigo-600 px-6 py-3 text-white hover:bg-indigo-500 transition-all shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_30px_rgba(79,70,229,0.5)] font-bold active:scale-95"
+          >
+            <Plus size={20} />
+            Schedule Meeting
+          </button>
+        )}
       </div>
 
       {error && (
@@ -294,7 +296,9 @@ Join the meeting at: ${window.location.origin}/${auth.role}/meeting-room/${link}
             No meetings scheduled for now.
           </p>
           <p className="text-slate-600 text-sm mt-2">
-            Get started by creating a new meeting invitation.
+            {auth?.role !== "intern" && auth?.role !== "employee"
+              ? "Get started by creating a new meeting invitation."
+              : "Check back later for any upcoming meetings."}
           </p>
         </div>
       ) : (

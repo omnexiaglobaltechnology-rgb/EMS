@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Mail, Shield, Save, CheckCircle, AlertCircle, Loader2, Lock, KeyRound } from "lucide-react";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { authApi } from "../utils/api";
 
 /**

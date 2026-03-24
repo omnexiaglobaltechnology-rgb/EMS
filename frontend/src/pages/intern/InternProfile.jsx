@@ -1,4 +1,3 @@
-// Intern Profile Page Component
 import { Mail, Calendar, MapPin, Award, User, Briefcase, Shield, Search } from "lucide-react";
 import { useSelector } from "react-redux";
 
@@ -129,10 +128,10 @@ const InternProfile = () => {
                 </div>
                 
                 <div className="flex flex-wrap gap-2.5">
-                  {profile.skills.map((skill) => (
+                  {profile.skills.map((skill, index) => (
                     <div
                       key={skill}
-                      className="px-4 py-2 rounded-xl bg-[#0f172a] border border-white/10 text-slate-300 font-bold text-xs shadow-xl hover:bg-white/5 hover:border-indigo-500/50 hover:text-white transition-all transform hover:-translate-y-1 animate-in zoom-in-50 duration-500"
+                      className="px-4 py-2 rounded-xl bg-[#0f172a] border border-white/10 text-slate-300 font-bold text-xs shadow-xl hover:bg-white/5 hover:border-indigo-500/50 hover:text-white transition-all transform hover:-translate-y-1 animate-in zoom-in-50 duration-500 delay-[index*50ms]"
                     >
                       {skill}
                     </div>
@@ -147,11 +146,11 @@ const InternProfile = () => {
 };
 
 // Helper Components for clean layout
-const InfoBox = ({ label, value, icon: IconComponent }) => (
+const InfoBox = ({ label, value, icon: Icon }) => (
   <div className="group relative">
      <div className="flex items-start gap-3 p-4 rounded-2xl border border-white/5 bg-white/5 group-hover:bg-white/10 transition-all duration-500">
         <div className="mt-1 text-slate-600 group-hover:text-indigo-400 transition-colors">
-           <IconComponent size={16} />
+           <Icon size={16} />
         </div>
         <div>
            <p className="text-[9px] font-black uppercase tracking-widest text-slate-600 mb-0.5">{label}</p>

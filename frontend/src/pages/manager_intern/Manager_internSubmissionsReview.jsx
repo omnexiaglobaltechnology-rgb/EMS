@@ -197,13 +197,6 @@ const Manager_internSubmissionsReview = () => {
         </div>
       </div>
 
-      {error && (
-        <div className="flex items-center gap-3 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 animate-in shake duration-500">
-          <AlertCircle size={20} />
-          <p className="text-sm font-medium">{error}</p>
-        </div>
-      )}
-
       <div className="grid grid-cols-1 gap-6">
         {filteredData.length > 0 ? (
           filteredData.map((item) => (

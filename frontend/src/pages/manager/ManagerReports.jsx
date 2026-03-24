@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { FileText, Download, Plus, AlertCircle, Loader } from "lucide-react";
 import { tasksApi, submissionsApi } from "../../utils/api";
 import { downloadReport } from "../../utils/downloadReport";
@@ -14,12 +14,12 @@ const ManagerReports = () => {
 
   useEffect(() => {
     fetchReports();
-  }, [fetchReports]);
+  }, []);
 
   /**
    * Aggregates task and submission data to synthesize periodic reports.
    */
-  const fetchReports = useCallback(async () => {
+  const fetchReports = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -33,7 +33,7 @@ const ManagerReports = () => {
           if (!taskId) continue;
           const taskSubmissions = await submissionsApi.getByTask(taskId);
           allSubmissions.push(...taskSubmissions);
-        } catch {
+        } catch (err) {
           console.warn(`Could not fetch submissions for task ${task.id}`);
         }
       }
@@ -73,7 +73,7 @@ const ManagerReports = () => {
     } finally {
       setLoading(false);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  };
 
   if (loading) {
     return (

@@ -47,21 +47,25 @@ const CfoDashboard = () => {
           if (!taskId) continue;
           const taskSubmissions = await submissionsApi.getByTask(taskId);
           allSubmissions.push(...taskSubmissions);
-        } catch (_err) {
+        } catch (err) {
           console.warn(`Could not fetch submissions for task ${task.id}`);
         }
       }
 
       // Calculate financial metrics (mock data based on real metrics)
-      const revenueVal = (Math.random() * 20 + 5).toFixed(1);
-      const expensesVal = (Math.random() * 10 + 2).toFixed(1);
-      const profitVal = (parseFloat(revenueVal) - parseFloat(expensesVal)).toFixed(1);
+      const totalTasks = allTasks.length;
+      const completedTasks = allTasks.filter(
+        (t) => t.status === "completed",
+      ).length;
+      const revenue = (Math.random() * 20 + 5).toFixed(1);
+      const expenses = (Math.random() * 10 + 2).toFixed(1);
+      const profit = (revenue - expenses).toFixed(1);
 
       setStats({
-        revenue: `$${revenueVal}M`,
-        expenses: `$${expensesVal}M`,
-        profit: `$${profitVal}M`,
-        runway: "12 Months",
+        revenue: "$0",
+        expenses: "$0",
+        profit: "$0",
+        runway: "0 Months",
       });
 
       // Generate activities
@@ -154,7 +158,7 @@ const CfoDashboard = () => {
         {/* Motivational Sidebar */}
         <div className="rounded-xl bg-gradient-to-br from-emerald-600 to-teal-700 p-6 text-white shadow-lg shadow-emerald-500/20 flex flex-col justify-center">
             <h2 className="text-xs font-bold uppercase tracking-widest text-emerald-200 mb-4">Financial Strategy</h2>
-            <p className="text-xl font-medium leading-relaxed italic mb-4">&quot;{quote.text}&quot;</p>
+            <p className="text-xl font-medium leading-relaxed italic mb-4">"{quote.text}"</p>
             <p className="text-sm font-semibold text-emerald-200">— {quote.author}</p>
         </div>
       </div>

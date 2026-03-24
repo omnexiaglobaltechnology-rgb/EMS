@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import {
   CheckSquare,
   Folder,
@@ -11,30 +11,11 @@ import {
 } from "lucide-react";
 import { useSelector } from "react-redux";
 
+import StatCard from "../../components/intern/StatCard";
 import RecentActivity from "../../components/intern/RecentActivity";
 
 import { Link } from "react-router-dom";
 import { tasksApi, submissionsApi, meetingsApi, trackingApi } from "../../utils/api";
-
-// Local StatCard to match Manager Dashboard Glass Theme exactly
-const GlassCard = ({ title, value, icon: IconComponent, trend }) => (
-  <div className="rounded-[24px] border border-white/10 bg-white/5 backdrop-blur-2xl p-6 flex justify-between shadow-2xl transition-all duration-500 hover:bg-white/10 hover:-translate-y-1">
-    <div>
-      <p className="text-slate-400 font-bold text-[10px] tracking-[0.2em] uppercase">{title}</p>
-      <p className="text-3xl font-bold mt-2 text-white tabular-nums drop-shadow-md">{value}</p>
-      {trend && (
-        <p className="text-emerald-400 text-[10px] font-bold mt-3 uppercase tracking-[0.15em] flex items-center gap-1">
-           <span className="inline-block px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 shadow-lg">
-             {trend}
-           </span>
-        </p>
-      )}
-    </div>
-    <div className="h-12 w-12 rounded-xl bg-indigo-500/10 border-2 border-indigo-500/20 flex items-center justify-center text-indigo-400 shadow-inner shrink-0">
-      <IconComponent size={24} strokeWidth={2.5} />
-    </div>
-  </div>
-);
 
 /**
  * Central dashboard for interns.
@@ -57,13 +38,13 @@ const InternDashboard = () => {
 
   useEffect(() => {
     fetchDashboardData();
-  }, [fetchDashboardData]);
+  }, []);
 
   /**
    * Aggregates task and submission data to populate dashboard statistics.
    * Calculates active tasks and pending reviews for the current intern.
    */
-  const fetchDashboardData = useCallback(async () => {
+  const fetchDashboardData = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -159,7 +140,7 @@ const InternDashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, [internId]);
+  };
 
   const formatDuration = (ms) => {
     const hours = Math.floor(ms / (1000 * 60 * 60));
@@ -167,7 +148,18 @@ const InternDashboard = () => {
     return `${hours}h ${minutes}m`;
   };
 
-
+  /**
+   * Derives work duration based on task status and update timestamps.
+   * This is a simplified simulation of time tracking.
+   *
+   * @param {Array} tasks - List of intern tasks
+   * @param {string} period - Time range ('today' or 'week')
+   * @returns {string} Formatted time string (e.g., "6h 30m")
+   */
+  const calculateWorkHours = (tasks, period) => {
+    // This is now handled directly in fetchDashboardData using real logs
+    return "0h 0m";
+  };
 
   /**
    * Computes completion percentage relative to a target goal.
@@ -203,7 +195,25 @@ const InternDashboard = () => {
   const dailyProgress = calculateProgress(stats.workedToday, "8h");
   const weeklyProgress = calculateProgress(stats.workedThisWeek, "40h");
 
-
+  // Local StatCard to match Manager Dashboard Glass Theme exactly
+  const GlassCard = ({ title, value, icon: Icon, trend }) => (
+    <div className="rounded-[24px] border border-white/10 bg-white/5 backdrop-blur-2xl p-6 flex justify-between shadow-2xl transition-all duration-500 hover:bg-white/10 hover:-translate-y-1">
+      <div>
+        <p className="text-slate-400 font-bold text-[10px] tracking-[0.2em] uppercase">{title}</p>
+        <p className="text-3xl font-bold mt-2 text-white tabular-nums drop-shadow-md">{value}</p>
+        {trend && (
+          <p className="text-emerald-400 text-[10px] font-bold mt-3 uppercase tracking-[0.15em] flex items-center gap-1">
+             <span className="inline-block px-2 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 shadow-lg">
+               {trend}
+             </span>
+          </p>
+        )}
+      </div>
+      <div className="h-12 w-12 rounded-xl bg-indigo-500/10 border-2 border-indigo-500/20 flex items-center justify-center text-indigo-400 shadow-inner shrink-0">
+        <Icon size={24} strokeWidth={2.5} />
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-10 animate-in fade-in duration-700 min-h-screen bg-[#0f172a] text-white p-6 md:p-8 -m-4 md:-m-6 font-sans">
@@ -215,7 +225,7 @@ const InternDashboard = () => {
           </h1>
           <p className="text-slate-400 mt-1 text-xs font-semibold flex items-center gap-2">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" />
-            Welcome back, <span className="text-indigo-400">{name || "User"}</span>! Here&apos;s your live summary.
+            Welcome back, <span className="text-indigo-400">{name || "User"}</span>! Here's your live summary.
           </p>
         </div>
         <div className="flex flex-col md:flex-row items-center gap-3">

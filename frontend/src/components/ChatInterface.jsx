@@ -8,6 +8,7 @@ import {
   MessageSquare,
   MoreVertical,
   Clock,
+  User as UserIcon,
   AlertCircle,
   Image as ImageIcon,
   Loader2,
@@ -99,7 +100,7 @@ const ChatInterface = ({ type = "chat" }) => {
       }
       setInput("");
       scrollToBottom();
-    } catch {
+    } catch (err) {
       setError("Failed to send message");
     } finally {
       setSending(false);
@@ -132,7 +133,7 @@ const ChatInterface = ({ type = "chat" }) => {
         setMessages(data);
       }
       scrollToBottom();
-    } catch {
+    } catch (err) {
       setError("Failed to upload image");
     } finally {
       setSending(false);

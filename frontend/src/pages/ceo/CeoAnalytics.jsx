@@ -20,7 +20,7 @@ import {
   AlertCircle,
   Loader,
 } from "lucide-react";
-import { tasksApi } from "../../utils/api";
+import { tasksApi, submissionsApi } from "../../utils/api";
 
 const METRIC_CARDS = [
   {
@@ -51,6 +51,27 @@ const METRIC_CARDS = [
     iconBg: "bg-green-100",
     iconColor: "text-green-600",
   },
+];
+
+const taskCompletionData = [
+  { month: "Jan", value: 25 },
+  { month: "Feb", value: 45 },
+  { month: "Mar", value: 50 },
+  { month: "Apr", value: 72 },
+  { month: "May", value: 85 },
+  { month: "Jun", value: 92 },
+];
+
+const meetingData = [
+  { name: "Attended", value: 85 },
+  { name: "Missed", value: 15 },
+];
+
+const departmentData = [
+  { name: "Engineering", value: 95 },
+  { name: "Marketing", value: 82 },
+  { name: "Sales", value: 88 },
+  { name: "Operations", value: 80 },
 ];
 
 const COLORS = ["#4f46e5", "#e5e7eb"];

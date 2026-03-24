@@ -65,8 +65,8 @@ const CtoDashboard = () => {
         },
       ];
       setActivities(generatedActivities);
-    } catch (_err) {
-      console.error("Error fetching dashboard data:", _err);
+    } catch (err) {
+      console.error("Error fetching dashboard data:", err);
       setError("Failed to load dashboard data");
     } finally {
       setLoading(false);
@@ -148,7 +148,7 @@ const CtoDashboard = () => {
         {/* Motivational Sidebar */}
         <div className="rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 p-6 text-white shadow-lg shadow-blue-500/20 flex flex-col justify-center">
             <h2 className="text-xs font-bold uppercase tracking-widest text-blue-200 mb-4">Engineering Vision</h2>
-            <p className="text-xl font-medium leading-relaxed italic mb-4">&quot;{quote.text}&quot;</p>
+            <p className="text-xl font-medium leading-relaxed italic mb-4">"{quote.text}"</p>
             <p className="text-sm font-semibold text-blue-200">— {quote.author}</p>
         </div>
       </div>

@@ -8,7 +8,7 @@ import { Plus, User, Edit, Trash2, Mail, ExternalLink, Activity, History, Loader
  * Specialized Employee Management interface for Managers and Senior Staff.
  */
 const EmployeeManagement = () => {
-    const { id: currentUserId } = useSelector(state => state.auth);
+    const { id: currentUserId, role: currentUserRole } = useSelector(state => state.auth);
     const [members, setMembers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);

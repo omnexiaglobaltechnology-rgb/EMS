@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import {
   Mic, MicOff, Video, VideoOff, MessageSquare, ScreenShare, UserPlus, Link, Flag, PhoneOff
@@ -40,7 +40,7 @@ const TlMeetingRoom = () => {
    * @param {object} constraints - Requested media types
    * @returns {Promise<MediaStream|null>} The acquired stream or null
    */
-  const requestMedia = useCallback(async ({ audio = true, video = true } = {}) => {
+  const requestMedia = async ({ audio = true, video = true } = {}) => {
     if (!navigator.mediaDevices?.getUserMedia) {
       setMediaError("Media devices are not supported in this browser.");
       setMicOn(false);
@@ -68,7 +68,7 @@ const TlMeetingRoom = () => {
       setCameraOn(stream.getVideoTracks().length > 0);
       setMediaError("");
       return stream;
-    } catch (_error) {
+    } catch (error) {
       setMediaError(
         "Camera/Microphone permission is blocked. Please allow access in browser site settings.",
       );
@@ -76,7 +76,7 @@ const TlMeetingRoom = () => {
       setCameraOn(false);
       return null;
     }
-  }, []);
+  };
 
   /**
    * Toggles the hardware microphone status.
@@ -160,7 +160,7 @@ const TlMeetingRoom = () => {
 
       setIsScreenSharing(true);
       setMediaError("");
-    } catch (_error) {
+    } catch (error) {
       setMediaError("Screen sharing was cancelled or blocked.");
     }
   };
@@ -193,13 +193,9 @@ const TlMeetingRoom = () => {
       }
     };
 
-    const handle = setTimeout(() => {
-      init();
-      requestMedia({ audio: true, video: true });
-    }, 0);
+    init();
 
     return () => {
-      clearTimeout(handle);
       if (
         mediaRecorderRef.current &&
         mediaRecorderRef.current.state !== "inactive"
@@ -208,7 +204,7 @@ const TlMeetingRoom = () => {
       }
       stopCurrentStream();
     };
-  }, [id, requestMedia]);
+  }, []);
 
   // Start Recording
   /**
@@ -372,16 +368,6 @@ const TlMeetingRoom = () => {
 
         <button onClick={toggleScreenShare}>
           <ScreenShare className={isScreenSharing ? "text-green-400" : ""} />
-        </button>
-
-        <button 
-          onClick={recording ? stopRecording : startRecording}
-          className={`${recording ? "text-red-500 animate-pulse" : "text-white"}`}
-        >
-          <div className="flex items-center gap-1">
-             <div className={`h-3 w-3 rounded-full ${recording ? "bg-red-500" : "bg-gray-500"}`} />
-             <span className="text-[10px] font-bold">REC</span>
-          </div>
         </button>
       </div>
     </div>

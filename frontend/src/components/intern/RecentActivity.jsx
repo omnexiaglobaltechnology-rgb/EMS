@@ -1,5 +1,5 @@
-import { useEffect, useState, useCallback } from "react";
-import { CheckSquare, FileText, Loader2, Clock, MousePointer2 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { CheckSquare, Calendar, FileText, Loader2, Clock, MousePointer2 } from "lucide-react";
 import { useSelector } from "react-redux";
 import { tasksApi, trackingApi } from "../../utils/api";
 
@@ -10,9 +10,9 @@ const RecentActivity = () => {
 
   useEffect(() => {
     if (internId) fetchActivities();
-  }, [internId, fetchActivities]);
+  }, [internId]);
 
-  const fetchActivities = useCallback(async () => {
+  const fetchActivities = async () => {
     try {
       setLoading(true);
       
@@ -54,8 +54,8 @@ const RecentActivity = () => {
              });
           });
         }
-      } catch {
-        console.warn("Tracking fetch failed");
+      } catch (err) {
+        console.warn("Tracking fetch failed", err);
       }
 
       // Sort by recency
@@ -67,7 +67,7 @@ const RecentActivity = () => {
     } finally {
       setLoading(false);
     }
-  }, [internId]);
+  };
 
   const formatRelativeTime = (date) => {
     const now = new Date();

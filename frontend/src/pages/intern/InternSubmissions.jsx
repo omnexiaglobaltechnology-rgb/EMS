@@ -1,7 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 
-import { Plus, FileText, Loader2, AlertCircle, Search, RefreshCw } from "lucide-react";
+import { Plus, FileText, Loader2, AlertCircle, Search, Clock, RefreshCw } from "lucide-react";
 
 import NewSubmissionModal from "../../components/intern/NewSubmissionModal";
 
@@ -24,12 +24,12 @@ const InternSubmissions = () => {
   // Fetch submissions and tasks on mount
   useEffect(() => {
     fetchData();
-  }, [fetchData]);
+  }, []);
 
   /**
    * Fetches tasks and their associated submissions to populate the history table.
    */
-  const fetchData = useCallback(async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -87,8 +87,8 @@ const InternSubmissions = () => {
               }));
             allSubmissions = [...allSubmissions, ...mapped];
           }
-        } catch (_e) {
-          console.warn(`[Submissions] Partial sync failure for task ${task.id}:`, _e.message);
+        } catch (e) {
+          console.warn(`[Submissions] Partial sync failure for task ${task.id}:`, e.message);
         }
       }));
 
@@ -102,7 +102,7 @@ const InternSubmissions = () => {
     } finally {
       setLoading(false);
     }
-  }, [internId]);
+  };
 
   const total = submissions.length;
   const approved = submissions.filter((s) => s.status === "approved").length;

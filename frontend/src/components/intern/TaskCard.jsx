@@ -1,6 +1,6 @@
 import StatusPill from "./StatusPill";
 
-import { Calendar, CheckSquare, Play, Loader2 } from "lucide-react";
+import { Calendar, Clock, CheckSquare, Play, Loader2 } from "lucide-react";
 import { useState } from "react";
 
 /**

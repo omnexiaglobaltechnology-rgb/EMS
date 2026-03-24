@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { 
   Github, 
@@ -6,6 +6,8 @@ import {
   CheckCircle, 
   XCircle, 
   Search, 
+  Clock, 
+  User, 
   ExternalLink,
   Loader2,
   AlertCircle,
@@ -32,19 +34,19 @@ const TlSubmissionsReview = () => {
   // Fetch submissions on mount
   useEffect(() => {
     fetchSubmissions();
-  }, [fetchSubmissions]);
+  }, []);
 
   // Set first submission as active when submissions load
   useEffect(() => {
     if (submissions.length > 0 && !active) {
       setActive(submissions[0]);
     }
-  }, [submissions, active]);
+  }, [submissions]);
 
   /**
    * Fetches all tasks and their associated submissions to build a comprehensive review list.
    */
-  const fetchSubmissions = useCallback(async () => {
+  const fetchSubmissions = async () => {
     try {
       setLoading(true);
       const tasks = await tasksApi.getAll();
@@ -78,8 +80,8 @@ const TlSubmissionsReview = () => {
             }));
             allSubmissions = [...allSubmissions, ...mapped];
           }
-        } catch (_e) {
-          console.warn(`Could not fetch submissions for task ${task.id}`, _e);
+        } catch (e) {
+          console.warn(`Could not fetch submissions for task ${task.id}`, e);
         }
       }
 
@@ -93,7 +95,7 @@ const TlSubmissionsReview = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   /**
    * Submits a formal review for a specific submission via API.
@@ -187,13 +189,6 @@ const TlSubmissionsReview = () => {
           />
         </div>
       </div>
-
-      {error && (
-        <div className="flex items-center gap-3 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 animate-in shake duration-500">
-          <AlertCircle size={20} />
-          <p className="text-sm font-medium">{error}</p>
-        </div>
-      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-full min-h-[600px]">
         {/* PANEL: LIST */}

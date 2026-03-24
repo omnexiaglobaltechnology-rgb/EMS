@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Plus,
@@ -7,11 +7,15 @@ import {
   X,
   Search,
   Clock,
+  ChevronRight,
   CheckCircle2,
   AlertCircle,
   Trash2,
+  MapPin,
   Loader2,
   ChevronDown,
+  Filter,
+  Link,
   Copy,
   Check,
   Video,
@@ -57,12 +61,21 @@ const MeetingManagement = () => {
     "manager_intern",
   ].includes(auth?.role);
 
-  const fetchMeetings = useCallback(async () => {
+  useEffect(() => {
+    fetchMeetings();
+    fetchDepts();
+    if (isRestrictedRole && auth?.departmentId) {
+      setSelectedDept(auth.departmentId);
+    }
+  }, [auth]);
+
+  const fetchMeetings = async () => {
     setLoading(true);
     try {
       const data = await meetingsApi.getAll();
       const userId = auth?.id;
       
+      // Filter meetings to only show those where the user is a participant or organizer
       const filtered = data.filter(m => {
         const organizerId = m.creatorId?._id || m.creatorId?.id || m.creatorId || m.organizerId;
         const isOrganizer = organizerId === userId;
@@ -72,14 +85,23 @@ const MeetingManagement = () => {
       });
 
       setMeetings(filtered);
-    } catch {
+    } catch (err) {
       setError("Failed to load meetings");
     } finally {
       setLoading(false);
     }
-  }, [auth]);
+  };
 
-  const handleSearchInvitees = useCallback(async () => {
+  const fetchDepts = async () => {
+    try {
+      const data = await departmentsApi.getAll();
+      setDepts(data);
+    } catch (err) {
+      console.error("Failed to load departments", err);
+    }
+  };
+
+  const handleSearchInvitees = async () => {
     if (!searchQuery && !selectedDept && !selectedRole) {
       setSearchResults([]);
       return;
@@ -97,31 +119,15 @@ const MeetingManagement = () => {
     } finally {
       setSearching(false);
     }
-  }, [searchQuery, selectedDept, selectedRole]);
+  };
 
-  const fetchDepts = useCallback(async () => {
-    try {
-      const data = await departmentsApi.getAll();
-      setDepts(data);
-    } catch (err) {
-      console.error("Failed to load departments", err);
-    }
-  }, []);
-
-  useEffect(() => {
-    fetchMeetings();
-    fetchDepts();
-    if (isRestrictedRole && auth?.departmentId) {
-      setSelectedDept(auth.departmentId);
-    }
-  }, [auth, fetchMeetings, fetchDepts, isRestrictedRole]);
-
+  // Debounced search effect
   useEffect(() => {
     const timer = setTimeout(() => {
       handleSearchInvitees();
     }, 400);
     return () => clearTimeout(timer);
-  }, [handleSearchInvitees]);
+  }, [searchQuery, selectedDept, selectedRole]);
 
   const addInvitee = (user) => {
     if (form.invitees.some((i) => i.id === (user.id || user._id))) return;
@@ -194,7 +200,7 @@ const MeetingManagement = () => {
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to cancel this meeting?")) return;
     try {
-      await meetingsApi.delete(id);
+      const response = await meetingsApi.delete(id);
       fetchMeetings();
     } catch (err) {
       console.error("Delete failed:", err);
@@ -370,7 +376,7 @@ Join the meeting at: ${window.location.origin}/${auth.role}/meeting-room/${link}
 
                 {m.description && (
                   <p className="mt-6 text-xs text-slate-500 line-clamp-3 italic font-semibold px-2 leading-relaxed">
-                    &quot;{m.description}&quot;
+                    "{m.description}"
                   </p>
                 )}
               </div>

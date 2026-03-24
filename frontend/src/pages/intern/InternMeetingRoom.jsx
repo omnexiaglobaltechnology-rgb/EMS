@@ -3,9 +3,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import { io } from "socket.io-client";
 import Peer from "simple-peer/simplepeer.min.js";
 import {
-  Video, PhoneOff, MessageSquare, ScreenShare, Mic, MicOff, VideoOff, Send, X
+  Loader2, Link, Copy, Check, Video, PhoneOff, UserPlus, MessageSquare, ScreenShare, Mic, MicOff, VideoOff, Send, X
 } from "lucide-react";
-import { meetingsApi, authApi, SOCKET_URL } from "../../utils/api";
+import { meetingsApi, authApi, usersApi, SOCKET_URL } from "../../utils/api";
 
 // Socket URL is now imported from ../../utils/api
 
@@ -32,31 +32,6 @@ const InternMeetingRoom = () => {
   const userVideoRef = useRef();
   const peersRef = useRef([]);
   const streamRef = useRef();
-
-  const requestMedia = async (audio, video) => {
-    try {
-      const currentStream = await navigator.mediaDevices.getUserMedia({ 
-        video, 
-        audio: typeof audio === 'boolean' ? (audio ? {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true
-        } : false) : audio
-      });
-      setStream(currentStream);
-      streamRef.current = currentStream;
-      if (userVideoRef.current) {
-        const previewStream = new MediaStream(currentStream.getVideoTracks());
-        userVideoRef.current.srcObject = previewStream;
-        userVideoRef.current.muted = true;
-        userVideoRef.current.defaultMuted = true;
-      }
-      return currentStream;
-    } catch (err) {
-      console.error("Media error", err);
-      return null;
-    }
-  };
 
   useEffect(() => {
     const init = async () => {
@@ -91,6 +66,31 @@ const InternMeetingRoom = () => {
       }
     };
   }, [roomId]);
+
+  const requestMedia = async (audio, video) => {
+    try {
+      const currentStream = await navigator.mediaDevices.getUserMedia({ 
+        video, 
+        audio: typeof audio === 'boolean' ? (audio ? {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        } : false) : audio
+      });
+      setStream(currentStream);
+      streamRef.current = currentStream;
+      if (userVideoRef.current) {
+        const previewStream = new MediaStream(currentStream.getVideoTracks());
+        userVideoRef.current.srcObject = previewStream;
+        userVideoRef.current.muted = true;
+        userVideoRef.current.defaultMuted = true;
+      }
+      return currentStream;
+    } catch (err) {
+      console.error("Media error", err);
+      return null;
+    }
+  };
 
   const toggleMic = () => {
     if (stream) {
@@ -286,7 +286,7 @@ const InternMeetingRoom = () => {
                   <div key={i} className="w-8 h-8 rounded-full border-2 border-slate-950 bg-slate-800" />
                 ))}
               </div>
-              <span className="text-sm">Join to see who&apos;s here</span>
+              <span className="text-sm">Join to see who's here</span>
             </div>
           </div>
         </div>

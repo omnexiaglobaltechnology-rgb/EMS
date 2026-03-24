@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import {
   Users,
   BarChart3,
@@ -29,7 +29,15 @@ const ManagerDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const fetchDashboardData = useCallback(async () => {
+  useEffect(() => {
+    fetchDashboardData();
+  }, []);
+
+  /**
+   * Orchestrates data fetching for the dashboard.
+   * Combines task metrics with submission counts for a comprehensive status overview.
+   */
+  const fetchDashboardData = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -99,11 +107,7 @@ const ManagerDashboard = () => {
     } finally {
       setLoading(false);
     }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
-
-  useEffect(() => {
-    fetchDashboardData();
-  }, [fetchDashboardData]);
+  };
 
   /**
    * Segments task completion rates by priority levels.
@@ -153,7 +157,7 @@ const ManagerDashboard = () => {
       )
       .slice(0, 3);
 
-    return recentTasks.map((task) => {
+    return recentTasks.map((task, index) => {
       const daysAgo = Math.floor(
         (Date.now() - new Date(task.updatedAt || task.createdAt)) /
           (1000 * 60 * 60 * 24),

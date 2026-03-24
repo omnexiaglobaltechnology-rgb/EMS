@@ -5,7 +5,7 @@ import { useState } from "react";
 import { login } from "../redux/authSlice";
 import { authApi } from "../utils/api";
 
-import { Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff, ArrowRight } from "lucide-react";
 
 /**
  * Primary authentication entry point for the application.
@@ -66,7 +66,7 @@ const Login = () => {
                
                <div className="mt-8 md:mt-12 space-y-4 px-4 md:px-6">
                  <p className="text-lg md:text-xl lg:text-2xl font-light text-slate-500 leading-relaxed italic">
-                   &quot;{quote.text}&quot;
+                   "{quote.text}"
                  </p>
                  <p className="text-xs md:text-sm font-bold text-[#00AEEF] tracking-widest uppercase">
                    — {quote.author}

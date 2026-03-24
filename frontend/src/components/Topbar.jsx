@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
@@ -39,18 +39,14 @@ const Topbar = ({ onToggleSidebar }) => {
   const { theme, toggleTheme } = useTheme();
 
   const [isOpen, setIsOpen] = useState(false);
-  const [notifications, setNotifications] = useState(() => 
-    getUserNotifications({ role, email, limit: 25 })
-  );
+  const [notifications, setNotifications] = useState([]);
 
-  const loadNotifications = useCallback(() => {
+  const loadNotifications = () => {
     setNotifications(getUserNotifications({ role, email, limit: 25 }));
-  }, [role, email]);
+  };
 
   useEffect(() => {
-    const handle = setTimeout(() => {
-      loadNotifications();
-    }, 0);
+    loadNotifications();
 
     const onStorage = (event) => {
       if (!event.key || WATCHED_STORAGE_KEYS.includes(event.key)) {
@@ -62,11 +58,10 @@ const Topbar = ({ onToggleSidebar }) => {
     window.addEventListener("ems:notifications:updated", loadNotifications);
 
     return () => {
-      clearTimeout(handle);
       window.removeEventListener("storage", onStorage);
       window.removeEventListener("ems:notifications:updated", loadNotifications);
     };
-  }, [loadNotifications]);
+  }, [role, email]);
 
   const unreadCount = useMemo(
     () => notifications.filter((notification) => !notification.isRead).length,

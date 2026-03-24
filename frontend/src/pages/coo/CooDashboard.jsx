@@ -1,8 +1,11 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
+  Building2,
   Users2,
   ClipboardCheck,
+  TrendingUp,
   Truck,
+  ShieldAlert,
   Activity,
   AlertCircle,
   Loader,
@@ -90,8 +93,8 @@ const CooDashboard = () => {
         },
       ];
       setActivities(generatedActivities);
-    } catch (_err) {
-      console.error("Error fetching dashboard data:", _err);
+    } catch (err) {
+      console.error("Error fetching dashboard data:", err);
       setError("Failed to load dashboard data");
     } finally {
       setLoading(false);
@@ -212,7 +215,7 @@ const CooDashboard = () => {
         {/* Motivational Section */}
         <div className="rounded-xl bg-gradient-to-br from-indigo-700 to-indigo-900 p-6 text-white shadow-lg shadow-indigo-700/20 flex flex-col justify-center">
             <h2 className="text-xs font-bold uppercase tracking-widest text-indigo-300 mb-4">Operational Excellence</h2>
-            <p className="text-xl font-medium leading-relaxed italic mb-4">&quot;{quote.text}&quot;</p>
+            <p className="text-xl font-medium leading-relaxed italic mb-4">"{quote.text}"</p>
             <p className="text-sm font-semibold text-indigo-300">— {quote.author}</p>
         </div>
       </div>

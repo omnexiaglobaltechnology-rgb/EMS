@@ -24,7 +24,6 @@ const MENU = {
   team_lead: [
     "dashboard",
     "tasks",
-    "employee-management",
     "reviews",
     "meetings",
     "chat",
@@ -41,7 +40,6 @@ const MENU = {
   manager: [
     "dashboard",
     "analytics",
-    "employee-management",
     "reports",
     "meetings",
     "chat",

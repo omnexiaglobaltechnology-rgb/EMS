@@ -141,8 +141,13 @@ const ManagerAnalytics = () => {
     <div className="space-y-8">
       {/* HEADER */}
       <div>
-        <h1 className="text-3xl font-bold text-slate-900">Analytics</h1>
-        <p className="text-slate-500 mt-1">Department performance metrics</p>
+        <h1 className="text-3xl font-black text-white uppercase tracking-tight leading-tight">Analytics</h1>
+        <div className="flex items-center gap-3 mt-2">
+           <div className="h-0.5 w-10 bg-[#00d4ff] rounded-full blue-glow"></div>
+           <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">
+             Department performance metrics
+           </p>
+        </div>
       </div>
 
       {/* Error Message */}
@@ -183,17 +188,17 @@ const ManagerAnalytics = () => {
       </div>
 
       {/* PERFORMANCE OVERVIEW */}
-      <div className="rounded-xl border border-gray-300 bg-white p-6">
-        <div className="rounded-xl border border-gray-300 bg-white p-6 space-y-8">
-          <h2 className="text-xl font-semibold">Performance Overview</h2>
+      <div className="rounded-[2.5rem] border border-white/10 bg-white/5 backdrop-blur-xl p-8 shadow-2xl relative overflow-hidden group">
+        <div className="rounded-xl space-y-8">
+          <h2 className="text-xl font-black text-white uppercase tracking-tight">Performance Overview</h2>
 
           {/* ================= TOP SECTION ================= */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* LINE CHART - Task Completion Trend */}
-            <div className="rounded-lg border border-gray-200 p-4">
-              <div className="flex justify-between mb-4">
-                <h3 className="font-semibold">Team Task Completion Trend</h3>
-                <span className="text-sm text-green-600">↑ Improving</span>
+            <div className="rounded-[1.5rem] border border-white/5 bg-white/5 p-6 shadow-inner transition-all hover:bg-white/[0.07]">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xs font-black text-white uppercase tracking-[0.2em]">Team Task Completion Trend</h3>
+                <span className="text-[9px] font-black text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20 uppercase tracking-widest">IMPROVING</span>
               </div>
 
               <ResponsiveContainer width="100%" height={250}>
@@ -215,8 +220,8 @@ const ManagerAnalytics = () => {
             </div>
 
             {/* PIE CHART - Task Status */}
-            <div className="rounded-lg border border-gray-200 p-4">
-              <h3 className="font-semibold mb-4">Task Status Distribution</h3>
+            <div className="rounded-[1.5rem] border border-white/5 bg-white/5 p-6 shadow-inner transition-all hover:bg-white/[0.07]">
+              <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] mb-6">Task Status Distribution</h3>
 
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
@@ -243,8 +248,8 @@ const ManagerAnalytics = () => {
           {/* ================= BOTTOM SECTION ================= */}
 
           {/* BAR CHART - Member Productivity */}
-          <div className="rounded-lg border border-gray-200 p-4">
-            <h3 className="font-semibold mb-4">
+          <div className="rounded-[1.5rem] border border-white/5 bg-white/5 p-8 shadow-inner transition-all hover:bg-white/[0.07]">
+            <h3 className="text-xs font-black text-white uppercase tracking-[0.2em] mb-8 uppercase">
               Individual Team Member Performance
             </h3>
 

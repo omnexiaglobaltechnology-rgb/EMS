@@ -187,12 +187,15 @@ const ManagerDashboard = () => {
     <div className="space-y-8">
       {/* HEADER */}
       <div>
-        <h1 className="text-3xl font-bold text-slate-900">
-          Welcome back, Manager!
+        <h1 className="text-3xl font-black text-white uppercase tracking-tight leading-tight">
+          Welcome back, <span className="text-[#00d4ff] blue-glow">Manager!</span>
         </h1>
-        <p className="text-slate-500 mt-1">
-          Department overview and analytics.
-        </p>
+        <div className="flex items-center gap-3 mt-2">
+          <div className="h-0.5 w-10 bg-[#00d4ff] rounded-full shadow-[0_0_10px_rgba(0,212,255,0.5)]"></div>
+          <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">
+            Department overview and analytics
+          </p>
+        </div>
       </div>
 
       {/* Error Message */}
@@ -230,8 +233,12 @@ const ManagerDashboard = () => {
       {/* LOWER SECTION */}
       <div className="grid gap-6 lg:grid-cols-2">
         {/* TEAM PERFORMANCE */}
-        <div className="rounded-xl border border-gray-300 bg-white p-6">
-          <h2 className="text-lg font-semibold mb-6">Team Performance</h2>
+        <div className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-xl p-8 shadow-2xl relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-[#00d4ff]/5 blur-[60px] rounded-full pointer-events-none"></div>
+          <h2 className="text-lg font-black text-white uppercase tracking-tight mb-8 flex items-center gap-3">
+            <span className="h-2 w-2 rounded-full bg-[#00d4ff] blue-glow"></span>
+            Team Performance
+          </h2>
 
           {teamPerformance.length > 0 ? (
             teamPerformance.map((team, idx) => (
@@ -247,8 +254,12 @@ const ManagerDashboard = () => {
         </div>
 
         {/* RECENT REPORTS */}
-        <div className="rounded-xl border border-gray-300 bg-white p-6">
-          <h2 className="text-lg font-semibold mb-6">Recent Reports</h2>
+        <div className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-xl p-8 shadow-2xl relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-[60px] rounded-full pointer-events-none"></div>
+          <h2 className="text-lg font-black text-white uppercase tracking-tight mb-8 flex items-center gap-3">
+            <span className="h-2 w-2 rounded-full bg-indigo-500 shadow-[0_0_10px_rgba(99,102,241,0.5)]"></span>
+            Recent Reports
+          </h2>
 
           {recentReports.length > 0 ? (
             recentReports.map((report, idx) => (

@@ -11,7 +11,7 @@ const RecentReportItem = ({ title, time }) => {
         <span className="font-semibold text-slate-100 group-hover:text-white transition-colors">
           {title}
         </span>
-        <span className="text-xs text-slate-500 mt-1 uppercase tracking-tighter">Report Type: Performance</span>
+        <span className="text-[10px] text-white/40 font-black uppercase tracking-widest mt-1">Report Type: Performance</span>
       </div>
       <span className="text-[10px] bg-slate-800 text-slate-400 px-2 py-1 rounded font-medium border border-slate-700 shadow-sm">
         {time}

@@ -90,11 +90,14 @@ const ManagerReports = () => {
       {/* HEADER */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900">Reports</h1>
-          <p className="text-slate-500 mt-1">Generate and manage reports</p>
+          <h1 className="text-3xl font-black text-white uppercase tracking-tight leading-tight">Reports</h1>
+          <div className="flex items-center gap-3 mt-2">
+            <div className="h-0.5 w-10 bg-indigo-500 rounded-full shadow-[0_0_10px_rgba(99,102,241,0.5)]"></div>
+            <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">Generate and manage reports</p>
+          </div>
         </div>
 
-        <button className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">
+        <button className="flex items-center gap-2 rounded-2xl bg-indigo-600 px-6 py-4 text-[10px] font-black uppercase tracking-widest text-white hover:bg-indigo-700 transition-all active:scale-95 shadow-lg shadow-indigo-500/20">
           <Plus size={16} />
           Generate Report
         </button>
@@ -112,16 +115,16 @@ const ManagerReports = () => {
           reports.map((report) => (
             <div
               key={report.id}
-              className="flex items-center justify-between rounded-xl border border-gray-300 bg-white p-6"
+              className="flex items-center justify-between rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-xl p-8 shadow-2xl relative overflow-hidden group hover:bg-white/[0.08] transition-all"
             >
               <div className="flex items-center gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
-                  <FileText size={22} />
+                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-[#00d4ff]/10 text-[#00d4ff] border border-[#00d4ff]/20 blue-glow shadow-inner">
+                  <FileText size={24} />
                 </div>
 
                 <div>
-                  <p className="font-medium text-lg">{report.title}</p>
-                  <p className="text-slate-500 text-sm">
+                  <p className="font-black text-white uppercase tracking-tight text-lg">{report.title}</p>
+                  <p className="text-white/40 text-[10px] font-black uppercase tracking-widest mt-1">
                     {report.category} • {report.date}
                   </p>
                 </div>
@@ -130,16 +133,16 @@ const ManagerReports = () => {
               {/* BLUE DOWNLOAD BUTTON */}
               <button
                 onClick={() => downloadReport(report)}
-                className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700"
+                className="flex items-center gap-3 rounded-2xl bg-white/5 border border-white/10 px-6 py-4 text-[10px] font-black uppercase tracking-widest text-white hover:bg-white/10 hover:border-white/20 transition-all active:scale-95"
               >
-                <Download size={16} />
+                <Download size={16} className="text-[#00d4ff]" />
                 Download
               </button>
             </div>
           ))
         ) : (
-          <div className="rounded-xl border border-gray-300 bg-white p-6 text-center text-gray-500">
-            No reports available
+          <div className="rounded-[2rem] border border-white/10 bg-white/5 backdrop-blur-xl p-12 text-center">
+            <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em]">No reports available</p>
           </div>
         )}
       </div>

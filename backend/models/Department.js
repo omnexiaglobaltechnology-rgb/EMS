@@ -15,6 +15,11 @@ const departmentSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  parentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Department',
+    default: null,
+  },
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',

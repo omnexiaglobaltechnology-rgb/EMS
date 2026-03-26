@@ -1,6 +1,6 @@
 {
-  "short_name": "OMNEXIA EMS",
-  "name": "OMNEXIA Enterprise Management System",
+  "short_name": "EMS Admin",
+  "name": "OMNEXIA EMS Admin Panel",
   "icons": [
     {
       "src": "/assets/logo.png",

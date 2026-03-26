@@ -29,8 +29,9 @@ exports.getUsers = async (req, res) => {
     }
 
     const users = await User.find(filter)
-      .select('_id name email username role userType departmentId reportsTo managerId teamLeadId')
+      .select('_id name email username role userType departmentId subDepartmentId reportsTo managerId teamLeadId')
       .populate('departmentId', 'name type')
+      .populate('subDepartmentId', 'name type')
       .populate('reportsTo', 'name email username role')
       .populate('managerId', 'name email username role')
       .populate('teamLeadId', 'name email username role')
@@ -45,6 +46,9 @@ exports.getUsers = async (req, res) => {
       userType: u.userType || (u.role === 'intern' ? 'intern' : 'employee'),
       department: u.departmentId
         ? { id: u.departmentId._id.toString(), name: u.departmentId.name, type: u.departmentId.type }
+        : null,
+      subDepartment: u.subDepartmentId
+        ? { id: u.subDepartmentId._id.toString(), name: u.subDepartmentId.name, type: u.subDepartmentId.type }
         : null,
       reportsTo: u.reportsTo
         ? { id: u.reportsTo._id.toString(), name: u.reportsTo.name, role: u.reportsTo.role }
@@ -67,8 +71,9 @@ exports.getUsers = async (req, res) => {
 exports.getUserById = async (req, res) => {
   try {
     const user = await User.findById(req.params.id)
-      .select('_id name email username role userType departmentId')
+      .select('_id name email username role userType departmentId subDepartmentId')
       .populate('departmentId', 'name type')
+      .populate('subDepartmentId', 'name type')
       .lean();
 
     if (!user) return res.status(404).json({ error: 'User not found' });
@@ -82,6 +87,9 @@ exports.getUserById = async (req, res) => {
       userType: user.userType || (user.role === 'intern' ? 'intern' : 'employee'),
       department: user.departmentId
         ? { id: user.departmentId._id.toString(), name: user.departmentId.name, type: user.departmentId.type }
+        : null,
+      subDepartment: user.subDepartmentId
+        ? { id: user.subDepartmentId._id.toString(), name: user.subDepartmentId.name, type: user.subDepartmentId.type }
         : null,
     };
 

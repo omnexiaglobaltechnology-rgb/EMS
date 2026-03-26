@@ -52,17 +52,19 @@ const AdminDepartments = () => {
     }
     try {
       setError(null);
+      const payload = {
+        name: form.name,
+        description: form.description,
+        parentId: form.parentId || null,
+      };
       if (editDept) {
-        await departmentsApi.update(editDept._id || editDept.id, {
-          name: form.name,
-          description: form.description,
-        });
+        await departmentsApi.update(editDept._id || editDept.id, payload);
       } else {
-        await departmentsApi.create(form);
+        await departmentsApi.create({ ...payload, type: form.type });
       }
       setShowModal(false);
       setEditDept(null);
-      setForm({ name: "", type: activeTab, description: "" });
+      setForm({ name: "", type: activeTab, description: "", parentId: "" });
       await fetchDepartments();
     } catch (err) {
       setError(err.message || "Failed to save department");
@@ -87,17 +89,20 @@ const AdminDepartments = () => {
       name: dept.name,
       type: dept.type,
       description: dept.description || "",
+      parentId: dept.parentId?._id || dept.parentId?.id || "",
     });
     setShowModal(true);
   };
 
   const openAdd = () => {
     setEditDept(null);
-    setForm({ name: "", type: activeTab, description: "" });
+    setForm({ name: "", type: activeTab, description: "", parentId: "" });
     setShowModal(true);
   };
 
   const filtered = departments.filter((d) => d.type === activeTab);
+  // Only allow top-level departments (no parent) of same type as potential parents
+  const parentOptions = filtered.filter(d => !d.parentId && (!editDept || (d._id !== editDept._id && d.id !== editDept.id)));
 
   if (loading) {
     return (
@@ -116,10 +121,10 @@ const AdminDepartments = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Building2 size={24} /> Department Management
+            <Building2 size={24} /> Department / Subdomain Management
           </h1>
           <p className="text-slate-500">
-            Create and manage departments for employees and interns
+            Create and manage domains (Technical, Non-Tech) and subdomains (MERN, Sales)
           </p>
         </div>
         <button
@@ -151,7 +156,7 @@ const AdminDepartments = () => {
                 : "text-slate-500 hover:text-slate-700"
             }`}
           >
-            {tab} Departments
+            {tab} Domains
           </button>
         ))}
       </div>
@@ -161,16 +166,33 @@ const AdminDepartments = () => {
         {filtered.map((dept) => (
           <div
             key={dept._id || dept.id}
-            className="rounded-xl border border-gray-200 bg-white p-5 space-y-3 hover:shadow-md transition-shadow"
+            className={`rounded-xl border ${dept.parentId ? 'border-indigo-100 bg-indigo-50/30' : 'border-gray-200 bg-white'} p-5 space-y-3 hover:shadow-md transition-shadow`}
           >
             <div className="flex justify-between items-start">
               <div>
-                <h3 className="font-semibold text-lg text-slate-800">
-                  {dept.name}
-                </h3>
-                <span className="text-xs font-medium text-slate-400 uppercase">
-                  {dept.type}
-                </span>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-semibold text-lg text-slate-800">
+                    {dept.name}
+                  </h3>
+                  {dept.parentId && (
+                    <span className="text-[10px] bg-indigo-100 text-indigo-700 px-1.5 py-0.5 rounded-md font-bold uppercase">
+                      Sub
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center gap-2 mt-0.5">
+                  <span className="text-xs font-medium text-slate-400 uppercase">
+                    {dept.type}
+                  </span>
+                  {dept.parentId && (
+                    <>
+                      <span className="text-slate-300">•</span>
+                      <span className="text-xs text-indigo-500 font-medium">
+                        Part of {dept.parentId.name}
+                      </span>
+                    </>
+                  )}
+                </div>
               </div>
               <div className="flex gap-1">
                 <button
@@ -188,7 +210,7 @@ const AdminDepartments = () => {
               </div>
             </div>
             {dept.description && (
-              <p className="text-sm text-slate-500">{dept.description}</p>
+              <p className="text-sm text-slate-500 line-clamp-2">{dept.description}</p>
             )}
             <div className="flex items-center gap-1 text-xs text-slate-400">
               <Users size={12} />
@@ -202,34 +224,34 @@ const AdminDepartments = () => {
         {filtered.length === 0 && (
           <div className="col-span-full text-center py-12 text-slate-400">
             <Building2 className="mx-auto mb-2 h-12 w-12 opacity-20" />
-            <p>No {activeTab} departments yet.</p>
+            <p>No {activeTab} domains yet.</p>
           </div>
         )}
       </div>
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
-          <div className="w-full max-w-md rounded-xl bg-white p-6 space-y-4">
-            <h2 className="text-lg font-semibold">
-              {editDept ? "Edit Department" : "Create Department"}
+        <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 space-y-4 shadow-2xl animate-in zoom-in-95 duration-200">
+            <h2 className="text-lg font-bold text-slate-900">
+              {editDept ? "Edit Department / Subdomain" : "Create Department / Subdomain"}
             </h2>
 
             <div className="space-y-1">
-              <label className="text-sm font-medium">Department Name</label>
+              <label className="text-sm font-medium text-slate-700">Name</label>
               <input
-                className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
                 value={form.name}
                 onChange={(e) => setForm({ ...form, name: e.target.value })}
-                placeholder="e.g. Technical, Finance, Operations"
+                placeholder="e.g. Technical, MERN Stack, Sales"
               />
             </div>
 
             {!editDept && (
               <div className="space-y-1">
-                <label className="text-sm font-medium">Track</label>
+                <label className="text-sm font-medium text-slate-700">Track</label>
                 <select
-                  className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+                  className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value })}
                 >
@@ -238,6 +260,25 @@ const AdminDepartments = () => {
                 </select>
               </div>
             )}
+
+            <div className="space-y-1">
+              <label className="text-sm font-medium text-slate-700">Parent Domain (Optional)</label>
+              <select
+                className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500"
+                value={form.parentId}
+                onChange={(e) => setForm({ ...form, parentId: e.target.value })}
+              >
+                <option value="">None (Top Level)</option>
+                {parentOptions.map((p) => (
+                  <option key={p._id || p.id} value={p._id || p.id}>
+                    {p.name}
+                  </option>
+                ))}
+              </select>
+              <p className="text-[10px] text-slate-400">
+                Choose a parent if this is a sub-department or special stack.
+              </p>
+            </div>
 
             <div className="space-y-1">
               <label className="text-sm font-medium">Description</label>

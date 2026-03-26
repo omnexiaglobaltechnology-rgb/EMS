@@ -22,6 +22,7 @@ const toPublicUser = (user) => ({
   role: user.role || 'intern',
   userType: user.userType || 'employee',
   departmentId: user.departmentId,
+  subDepartmentId: user.subDepartmentId,
   reportsTo: user.reportsTo,
   managerId: user.managerId,
   teamLeadId: user.teamLeadId,
@@ -53,7 +54,10 @@ const login = async (payload, ipAddress, userAgent) => {
     ]
   })
     .populate('departmentId', 'name type')
-    .populate('reportsTo', 'name email username role');
+    .populate('subDepartmentId', 'name type')
+    .populate('reportsTo', 'name email username role')
+    .populate('managerId', 'name email username role')
+    .populate('teamLeadId', 'name email username role');
 
   if (!user) {
     console.warn(`[auth-service] User not found for email: ${email}`);
@@ -135,6 +139,7 @@ const adminCreateUser = async (payload) => {
     userData.reportsTo = null;
   } else {
     if (payload.departmentId) userData.departmentId = payload.departmentId;
+    if (payload.subDepartmentId) userData.subDepartmentId = payload.subDepartmentId;
     if (payload.reportsTo) userData.reportsTo = payload.reportsTo;
     if (payload.managerId) userData.managerId = payload.managerId;
     if (payload.teamLeadId) userData.teamLeadId = payload.teamLeadId;
@@ -186,6 +191,7 @@ const adminDeleteUser = async (userId) => {
 const getMe = async (userId) => {
   const user = await User.findById(userId)
     .populate('departmentId', 'name type')
+    .populate('subDepartmentId', 'name type')
     .populate('reportsTo', 'name email username role');
 
   if (!user) throw new Error('User not found');

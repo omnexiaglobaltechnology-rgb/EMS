@@ -5,7 +5,7 @@ const User = require('../../models/User');
  * Create a new department.
  */
 const createDepartment = async (data, creatorId) => {
-  const { name, type, description } = data;
+  const { name, type, description, parentId } = data;
 
   if (!name || !type) {
     throw new Error('Department name and type are required');
@@ -14,15 +14,16 @@ const createDepartment = async (data, creatorId) => {
     throw new Error('Department type must be "employee" or "intern"');
   }
 
-  const existing = await Department.findOne({ name, type });
+  const existing = await Department.findOne({ name, type, parentId: parentId || null });
   if (existing) {
-    throw new Error(`A ${type} department named "${name}" already exists`);
+    throw new Error(`A ${type} department named "${name}" already exists in this context`);
   }
 
   const department = await Department.create({
     name,
     type,
     description: description || '',
+    parentId: parentId || null,
     createdBy: creatorId,
   });
 
@@ -37,6 +38,7 @@ const getDepartments = async (filters = {}) => {
   if (filters.type) query.type = filters.type;
 
   const departments = await Department.find(query)
+    .populate('parentId', 'name type')
     .populate('createdBy', 'name email')
     .sort({ name: 1 });
 

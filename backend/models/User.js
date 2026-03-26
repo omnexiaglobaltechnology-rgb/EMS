@@ -70,6 +70,11 @@ const userSchema = new mongoose.Schema({
     ref: 'Department',
     default: null,
   },
+  subDepartmentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Department',
+    default: null,
+  },
   // Hierarchy: who does this user report to?
   reportsTo: {
     type: mongoose.Schema.Types.ObjectId,

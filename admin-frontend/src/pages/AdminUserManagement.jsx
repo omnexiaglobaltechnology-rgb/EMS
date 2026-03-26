@@ -182,9 +182,16 @@ const AdminUserManagement = () => {
                     </td>
                     <td className="p-4">
                       {u.department ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
-                          {u.department.name}
-                        </span>
+                        <div className="space-y-1">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
+                            {u.department.name}
+                          </span>
+                          {u.subDepartment && (
+                            <div className="text-[10px] text-slate-400 font-medium px-1 uppercase tracking-tight">
+                              ↳ {u.subDepartment.name}
+                            </div>
+                          )}
+                        </div>
                       ) : (
                         <span className="text-slate-400">Not Assigned</span>
                       )}

@@ -34,23 +34,23 @@ const UserModal = ({ title, user, onClose, onSave }) => {
   });
 
   const [departments, setDepartments] = useState([]);
+  const [subDepartments, setSubDepartments] = useState([]);
   const [reportsToOptions, setReportsToOptions] = useState([]);
   const [loadingDepts, setLoadingDepts] = useState(false);
   const [loadingReportsTo, setLoadingReportsTo] = useState(false);
 
   const isNewUser = !user.id;
 
-  // Fetch departments when userType changes
+  // Fetch all departments for the current userType
   useEffect(() => {
     const fetchDepts = async () => {
       setLoadingDepts(true);
       try {
         const data = await departmentsApi.getAll(form.userType);
         setDepartments(data);
-        // Clear department if it doesn't match new type
-        if (!data.find(d => d.id === form.departmentId || d._id === form.departmentId)) {
-          setForm(prev => ({ ...prev, departmentId: "" }));
-        }
+        
+        // If editing a user, we might already have departmentId and subDepartmentId
+        // The subDepartments list will be computed in the next useEffect
       } catch (err) {
         console.error("Failed to fetch departments:", err);
       } finally {
@@ -60,9 +60,26 @@ const UserModal = ({ title, user, onClose, onSave }) => {
     fetchDepts();
   }, [form.userType]);
 
+  // Compute sub-departments when departmentId changes or departments are loaded
+  useEffect(() => {
+    if (form.departmentId) {
+      const subs = departments.filter(d => (d.parentId?._id || d.parentId?.id || d.parentId) === form.departmentId);
+      setSubDepartments(subs);
+      
+      // Clear sub-department if it doesn't belong to the new department
+      if (form.subDepartmentId && !subs.find(s => s.id === form.subDepartmentId || s._id === form.subDepartmentId)) {
+        setForm(prev => ({ ...prev, subDepartmentId: "" }));
+      }
+    } else {
+      setSubDepartments([]);
+      setForm(prev => ({ ...prev, subDepartmentId: "" }));
+    }
+  }, [form.departmentId, departments]);
+
   // Fetch potential supervisors when role or department changes
   useEffect(() => {
     const fetchSupervisors = async () => {
+      // Supervisor logic remains same, but we use the main departmentId
       if (!form.departmentId) {
         setReportsToOptions([]);
         return;
@@ -109,7 +126,7 @@ const UserModal = ({ title, user, onClose, onSave }) => {
 
   return (
     <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4">
-      <div className="w-full max-w-lg rounded-xl bg-white p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div className="w-full max-w-lg rounded-xl bg-white p-6 space-y-4 max-h-[90vh] overflow-y-auto shadow-2xl animate-in zoom-in-95 duration-200">
         <h2 className="text-xl font-bold text-slate-900">{title}</h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -197,7 +214,7 @@ const UserModal = ({ title, user, onClose, onSave }) => {
           {/* Department */}
           <div className="space-y-1">
             <label className="text-sm font-medium text-slate-700">
-              Department {loadingDepts && "(Loading...)"}
+              Primary Domain {loadingDepts && "(Loading...)"}
             </label>
             <select
               className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 disabled:bg-slate-50 disabled:text-slate-500"
@@ -205,8 +222,8 @@ const UserModal = ({ title, user, onClose, onSave }) => {
               onChange={(e) => setForm({ ...form, departmentId: e.target.value })}
               disabled={loadingDepts || form.role === 'ceo'}
             >
-              <option value="">{form.role === 'ceo' ? "No Department Assigned" : "Select Department"}</option>
-              {departments.map((d) => (
+              <option value="">{form.role === 'ceo' ? "No Department Assigned" : "Select Domain"}</option>
+              {departments.filter(d => !d.parentId).map((d) => (
                 <option key={d.id || d._id} value={d.id || d._id}>
                   {d.name}
                 </option>
@@ -214,6 +231,28 @@ const UserModal = ({ title, user, onClose, onSave }) => {
             </select>
           </div>
 
+          {/* Sub-department */}
+          <div className="space-y-1">
+            <label className="text-sm font-medium text-slate-700">
+              Subdomain / Team
+            </label>
+            <select
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 disabled:bg-slate-50 disabled:text-slate-500"
+              value={form.subDepartmentId}
+              onChange={(e) => setForm({ ...form, subDepartmentId: e.target.value })}
+              disabled={!form.departmentId || subDepartments.length === 0}
+            >
+              <option value="">{form.departmentId && subDepartments.length === 0 ? "No Subdomains Available" : "Select Subdomain"}</option>
+              {subDepartments.map((d) => (
+                <option key={d.id || d._id} value={d.id || d._id}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Reports To */}
           <div className="space-y-1">
             <label className="text-sm font-medium text-slate-700">

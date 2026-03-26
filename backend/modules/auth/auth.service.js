@@ -14,26 +14,31 @@ const VERIFICATION_TOKEN_TTL_MINUTES = Number(
   process.env.EMAIL_VERIFICATION_TOKEN_TTL_MINUTES || 30
 );
 
-const toPublicUser = (user) => ({
-  id: user.id || user._id?.toString(),
-  email: user.email,
-  name: user.name,
-  username: user.username || null,
-  role: user.role || 'intern',
-  userType: user.userType || 'employee',
-  departmentId: user.departmentId,
-  subDepartmentId: user.subDepartmentId,
-  reportsTo: user.reportsTo,
-  managerId: user.managerId,
-  teamLeadId: user.teamLeadId,
-  isEmailVerified: Boolean(user.isEmailVerified),
-  needsPasswordChange: Boolean(user.needsPasswordChange),
-  createdAt: user.createdAt,
-  updatedAt: user.updatedAt,
-});
+const toPublicUser = async (user) => {
+  const isSupervisor = await User.exists({ reportsTo: user._id });
+  
+  return {
+    id: user.id || user._id?.toString(),
+    email: user.email,
+    name: user.name,
+    username: user.username || null,
+    role: user.role || 'intern',
+    userType: user.userType || 'employee',
+    departmentId: user.departmentId,
+    subDepartmentId: user.subDepartmentId,
+    reportsTo: user.reportsTo,
+    isSupervisor: ['admin', 'ceo'].includes(user.role) || !!isSupervisor,
+    managerId: user.managerId,
+    teamLeadId: user.teamLeadId,
+    isEmailVerified: Boolean(user.isEmailVerified),
+    needsPasswordChange: Boolean(user.needsPasswordChange),
+    createdAt: user.createdAt,
+    updatedAt: user.updatedAt,
+  };
+};
 
-const buildAuthResponse = (user) => {
-  const safeUser = toPublicUser(user);
+const buildAuthResponse = async (user) => {
+  const safeUser = await toPublicUser(user);
   const token = signAccessToken({
     id: safeUser.id,
     email: safeUser.email,
@@ -162,7 +167,7 @@ const adminCreateUser = async (payload) => {
 
   return {
     message: 'User created successfully',
-    user: toPublicUser(user),
+    user: await toPublicUser(user),
   };
 };
 
@@ -195,7 +200,22 @@ const getMe = async (userId) => {
     .populate('reportsTo', 'name email username role');
 
   if (!user) throw new Error('User not found');
-  return toPublicUser(user);
+  
+  const safeUser = await toPublicUser(user);
+  
+  // If no supervisor, default to CEO for everyone except CEO/Admin
+  if (!safeUser.reportsTo && !['admin', 'ceo'].includes(safeUser.role)) {
+    const ceo = await User.findOne({ role: 'ceo' }).select('name email role').lean();
+    if (ceo) {
+      safeUser.reportsTo = {
+        id: ceo._id.toString(),
+        name: ceo.name,
+        role: ceo.role
+      };
+    }
+  }
+  
+  return safeUser;
 };
 
 const changePassword = async (userId, currentPassword, newPassword) => {

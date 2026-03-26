@@ -16,7 +16,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
 
   // Pull relevant user information from global Redux auth state
-  const { role, name, position, department_name } = useSelector(
+  const { role, name, position, department_name, isSupervisor } = useSelector(
     (state) => state.auth,
   );
 
@@ -78,21 +78,30 @@ const Sidebar = ({ isOpen, onClose }) => {
 
       {/* ---------------- NAVIGATION LINKS ---------------- */}
       <div className="flex-1 px-3 overflow-y-auto">
-        {MENU[role]?.map((item) => (
-          <NavLink
-            key={item}
-            to={`/${role}/${item}`}
-            onClick={() => { if(window.innerWidth < 768) onClose(); }}
-            className={({ isActive }) =>
-              `block px-3 ps-5 py-2 my-2 font-semibold rounded-lg capitalize transition-colors duration-150 ${
-                isActive ? "bg-[#10192D] text-blue-500" : "hover:bg-[#10192D]"
-              }`
+        {MENU[role]
+          ?.filter((item) => {
+            if (item === "employee-management") {
+              return isSupervisor || ["admin", "ceo", "cto", "cfo", "coo"].includes(role);
             }
-            end
-          >
-            {item.replace("-", " ")}
-          </NavLink>
-        ))}
+            return true;
+          })
+          .map((item) => (
+            <NavLink
+              key={item}
+              to={`/${role}/${item}`}
+              onClick={() => {
+                if (window.innerWidth < 768) onClose();
+              }}
+              className={({ isActive }) =>
+                `block px-3 ps-5 py-2 my-2 font-semibold rounded-lg capitalize transition-colors duration-150 ${
+                  isActive ? "bg-[#10192D] text-blue-500" : "hover:bg-[#10192D]"
+                }`
+              }
+              end
+            >
+              {item.replace("-", " ")}
+            </NavLink>
+          ))}
 
         {/* ---------------- PWA INSTALL BUTTON ---------------- */}
         {installPrompt && (

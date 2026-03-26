@@ -64,8 +64,12 @@ const EmployeeManagement = () => {
         <div className="space-y-8 animate-in fade-in duration-500">
             <div className="flex justify-between items-center bg-white p-8 rounded-[32px] border border-slate-100 shadow-sm shadow-slate-100/50">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900 tracking-tight">Team Management</h1>
-                    <p className="text-slate-500 text-sm mt-1">Manage your direct reports and department members</p>
+                    <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
+                        {currentUserRole === 'ceo' ? "Organization Directory" : "Team Management"}
+                    </h1>
+                    <p className="text-slate-500 text-sm mt-1">
+                        {currentUserRole === 'ceo' ? "Complete overview of all employees and interns" : "Manage your direct reports and department members"}
+                    </p>
                 </div>
                 <button 
                     onClick={() => { setSelectedUser(null); setShowModal(true); }}

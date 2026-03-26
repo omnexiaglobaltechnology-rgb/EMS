@@ -10,8 +10,18 @@ exports.getUsers = async (req, res) => {
     const filter = {};
 
     if (role) filter.role = role;
-    if (departmentId && role !== 'ceo') filter.departmentId = departmentId;
-    if (reportsTo) filter.reportsTo = reportsTo;
+    if (departmentId && req.user.role !== 'ceo' && req.user.role !== 'admin') {
+      filter.departmentId = departmentId;
+    }
+    
+    // Enforcement: Restriction by reportsTo
+    // CEO and Admin can see everyone
+    if (req.user.role !== 'ceo' && req.user.role !== 'admin') {
+      filter.reportsTo = req.user.id;
+    } else if (reportsTo) {
+      // Admin/CEO can optionally filter by reportsTo
+      filter.reportsTo = reportsTo;
+    }
     
     // Support searching for users with null userType or specific userType
     if (userType) {

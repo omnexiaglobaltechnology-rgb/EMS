@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const User = require('../../models/User');
 
 /**
@@ -14,12 +15,28 @@ exports.getUsers = async (req, res) => {
       filter.departmentId = departmentId;
     }
     
-    // Enforcement: Restriction by reportsTo
-    // CEO and Admin can see everyone
+    // Enforcement: Hierarchical Restriction
+    // CEO and Admin can see everyone (no filter applied).
+    // Others can only see their subtree (subordinates, sub-subordinates, etc.)
     if (req.user.role !== 'ceo' && req.user.role !== 'admin') {
-      filter.reportsTo = req.user.id;
+      const hierarchy = await User.aggregate([
+        { $match: { _id: new mongoose.Types.ObjectId(req.user.id) } },
+        {
+          $graphLookup: {
+            from: 'users', // The collection name in Mongo
+            startWith: '$_id',
+            connectFromField: '_id',
+            connectToField: 'reportsTo',
+            as: 'subordinates'
+          }
+        },
+        { $project: { _id: 0, 'subordinates._id': 1 } }
+      ]);
+      
+      const subordinateIds = hierarchy[0]?.subordinates.map(s => s._id) || [];
+      filter._id = { $in: subordinateIds };
     } else if (reportsTo) {
-      // Admin/CEO can optionally filter by reportsTo
+      // Admin/CEO can optionally filter by direct reports
       filter.reportsTo = reportsTo;
     }
     
@@ -165,25 +182,51 @@ exports.setupAdmin = async (req, res) => {
  */
 exports.fixUserData = async (req, res) => {
   try {
-    const result = await User.updateMany(
-      {},
-      {
-        $set: {
-          userType: { $ifNull: ["$userType", "employee"] },
-          departmentId: { $ifNull: ["$departmentId", null] },
-          managerId: { $ifNull: ["$managerId", null] },
-          teamLeadId: { $ifNull: ["$teamLeadId", null] },
-          reportsTo: { $ifNull: ["$reportsTo", null] }
+    const ceo = await User.findOne({ role: 'ceo' }).lean();
+    if (!ceo) {
+      return res.status(404).json({ error: 'CEO not found' });
+    }
+
+    const users = await User.find({}).lean();
+    let modifiedCount = 0;
+
+    for (const u of users) {
+      if (u.role === 'ceo' || u.role === 'admin') continue;
+
+      const updates = {};
+      let reportsTo = u.reportsTo;
+
+      // Rule: Default to CEO if no supervisor
+      if (!reportsTo) {
+        reportsTo = ceo._id;
+        updates.reportsTo = reportsTo;
+      }
+
+      // Hierarchy Resolution (redundant but good for backward compatibility)
+      const supervisor = await User.findById(reportsTo).lean();
+      if (supervisor) {
+        if (['manager', 'manager_intern', 'cto', 'cfo', 'coo', 'ceo', 'admin'].includes(supervisor.role)) {
+          updates.managerId = supervisor._id;
+          updates.teamLeadId = null;
+        } else if (['team_lead', 'team_lead_intern'].includes(supervisor.role)) {
+          updates.teamLeadId = supervisor._id;
+          updates.managerId = supervisor.reportsTo || ceo._id;
         }
       }
-    );
+
+      if (Object.keys(updates).length > 0) {
+        await User.findByIdAndUpdate(u._id, { $set: updates });
+        modifiedCount++;
+      }
+    }
 
     return res.json({
       success: true,
-      message: `Updated documents with default fields if missing`,
-      modifiedCount: result.modifiedCount
+      message: `Hierarchies resolved and default CEO assigned where missing`,
+      modifiedCount
     });
   } catch (error) {
+    console.error('[fixUserData] Error:', error.message);
     return res.status(500).json({ error: error.message });
   }
 };

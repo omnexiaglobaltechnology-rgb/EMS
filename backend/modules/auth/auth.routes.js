@@ -14,23 +14,25 @@ router.get('/me', authenticate, authController.me);
 router.patch('/profile', authenticate, usersController.updateProfile);
 router.post('/change-password', authenticate, authController.changePassword);
 
-// Admin-only user management
+// Admin \u0026 Manager user management
+const privilegedRoles = ['admin', 'ceo', 'cto', 'cfo', 'coo', 'manager', 'manager_intern'];
+
 router.post(
   '/admin/users',
   authenticate,
-  authorizeRoles('admin'),
+  authorizeRoles(...privilegedRoles),
   authController.adminCreateUser
 );
 router.patch(
   '/admin/users/:id/password',
   authenticate,
-  authorizeRoles('admin'),
+  authorizeRoles(...privilegedRoles),
   authController.adminUpdatePassword
 );
 router.delete(
   '/admin/users/:id',
   authenticate,
-  authorizeRoles('admin'),
+  authorizeRoles(...privilegedRoles),
   authController.adminDeleteUser
 );
 

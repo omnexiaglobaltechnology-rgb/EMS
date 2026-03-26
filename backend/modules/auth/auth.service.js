@@ -15,7 +15,13 @@ const VERIFICATION_TOKEN_TTL_MINUTES = Number(
 );
 
 const toPublicUser = async (user) => {
-  const isSupervisor = await User.exists({ reportsTo: user._id });
+  const isSupervisor = await User.exists({ 
+    $or: [
+      { reportsTo: user._id },
+      { managerId: user._id },
+      { teamLeadId: user._id }
+    ]
+  });
   
   return {
     id: user.id || user._id?.toString(),
@@ -106,6 +112,24 @@ const login = async (payload, ipAddress, userAgent) => {
   return buildAuthResponse(user);
 };
 
+const resolveHierarchy = async (reportsToId) => {
+  if (!reportsToId) return { managerId: null, teamLeadId: null };
+  const supervisor = await User.findById(reportsToId).lean();
+  if (!supervisor) return { managerId: null, teamLeadId: null };
+
+  let managerId = null;
+  let teamLeadId = null;
+
+  if (['manager', 'manager_intern', 'cto', 'cfo', 'coo', 'ceo', 'admin'].includes(supervisor.role)) {
+    managerId = supervisor._id;
+  } else if (['team_lead', 'team_lead_intern'].includes(supervisor.role)) {
+    teamLeadId = supervisor._id;
+    managerId = supervisor.reportsTo; // The TL's supervisor is usually the manager
+  }
+
+  return { managerId, teamLeadId };
+};
+
 const adminCreateUser = async (payload) => {
   const { email, password = 'password123', name, role } = validateRegisterInput({
     ...payload,
@@ -142,12 +166,26 @@ const adminCreateUser = async (payload) => {
   if (role === 'ceo') {
     userData.departmentId = null;
     userData.reportsTo = null;
+    userData.managerId = null;
+    userData.teamLeadId = null;
   } else {
     if (payload.departmentId) userData.departmentId = payload.departmentId;
     if (payload.subDepartmentId) userData.subDepartmentId = payload.subDepartmentId;
-    if (payload.reportsTo) userData.reportsTo = payload.reportsTo;
-    if (payload.managerId) userData.managerId = payload.managerId;
-    if (payload.teamLeadId) userData.teamLeadId = payload.teamLeadId;
+    const ceo = await User.findOne({ role: 'ceo' }).lean();
+    if (payload.reportsTo) {
+      userData.reportsTo = payload.reportsTo;
+      const { managerId, teamLeadId } = await resolveHierarchy(payload.reportsTo);
+      userData.managerId = managerId || payload.managerId || null;
+      userData.teamLeadId = teamLeadId || payload.teamLeadId || null;
+    } else if (ceo) {
+      userData.reportsTo = ceo._id;
+      userData.managerId = ceo._id;
+      userData.teamLeadId = null;
+    } else {
+      userData.reportsTo = null;
+      userData.managerId = payload.managerId || null;
+      userData.teamLeadId = payload.teamLeadId || null;
+    }
   }
 
   const user = await User.create(userData);

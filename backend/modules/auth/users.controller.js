@@ -15,15 +15,17 @@ exports.getUsers = async (req, res) => {
       filter.departmentId = departmentId;
     }
     
-    // Enforcement: Hierarchical Restriction
+    // Enforcement: Hierarchical \u0026 Departmental Restriction
     // CEO and Admin can see everyone (no filter applied).
-    // Others can only see their subtree (subordinates, sub-subordinates, etc.)
     if (req.user.role !== 'ceo' && req.user.role !== 'admin') {
+      const orConditions = [];
+      
+      // 1. Reporting Chain Visibility: Subtree via graphLookup
       const hierarchy = await User.aggregate([
         { $match: { _id: new mongoose.Types.ObjectId(req.user.id) } },
         {
           $graphLookup: {
-            from: 'users', // The collection name in Mongo
+            from: 'users',
             startWith: '$_id',
             connectFromField: '_id',
             connectToField: 'reportsTo',
@@ -32,9 +34,32 @@ exports.getUsers = async (req, res) => {
         },
         { $project: { _id: 0, 'subordinates._id': 1 } }
       ]);
-      
       const subordinateIds = hierarchy[0]?.subordinates.map(s => s._id) || [];
-      filter._id = { $in: subordinateIds };
+      if (subordinateIds.length > 0) {
+        orConditions.push({ _id: { $in: subordinateIds } });
+      }
+
+      // 2. Department-wide Visibility for C-level and Managers
+      const cLevelRoles = ['cto', 'cfo', 'coo', 'manager', 'manager_intern'];
+      if (cLevelRoles.includes(req.user.role) && req.user.departmentId) {
+        // Find all sub-departments of this user's department
+        const Department = mongoose.model('Department');
+        const subDepts = await Department.find({ 
+          $or: [
+            { _id: req.user.departmentId },
+            { parentId: req.user.departmentId }
+          ]
+        }).select('_id');
+        const deptIds = subDepts.map(d => d._id);
+        orConditions.push({ departmentId: { $in: deptIds } });
+      }
+
+      if (orConditions.length > 0) {
+        filter.$or = orConditions;
+      } else {
+        // If no subordinates and no department, they see nothing
+        filter._id = new mongoose.Types.ObjectId(); // Empty result
+      }
     } else if (reportsTo) {
       // Admin/CEO can optionally filter by direct reports
       filter.reportsTo = reportsTo;

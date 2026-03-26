@@ -78,6 +78,7 @@ const updateDepartment = async (id, data) => {
 
   if (data.name) department.name = data.name;
   if (data.description !== undefined) department.description = data.description;
+  if (data.parentId !== undefined) department.parentId = data.parentId || null;
 
   await department.save();
   return department;

@@ -94,9 +94,9 @@ const AdminDepartments = () => {
     setShowModal(true);
   };
 
-  const openAdd = () => {
+  const openAdd = (parentId = "") => {
     setEditDept(null);
-    setForm({ name: "", type: activeTab, description: "", parentId: "" });
+    setForm({ name: "", type: activeTab, description: "", parentId });
     setShowModal(true);
   };
 
@@ -195,6 +195,15 @@ const AdminDepartments = () => {
                 </div>
               </div>
               <div className="flex gap-1">
+                {!dept.parentId && (
+                  <button
+                    onClick={() => openAdd(dept._id || dept.id)}
+                    className="p-1.5 rounded hover:bg-indigo-50 text-indigo-400 group/sub"
+                    title="Add Sub-domain"
+                  >
+                    <Plus size={14} className="group-hover/sub:scale-110 transition-transform" />
+                  </button>
+                )}
                 <button
                   onClick={() => openEdit(dept)}
                   className="p-1.5 rounded hover:bg-slate-100 text-slate-400"

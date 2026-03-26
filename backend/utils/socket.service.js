@@ -2,6 +2,9 @@ const { Server } = require("socket.io");
 
 let io;
 
+// Track which rooms each socket has joined
+const socketRooms = new Map();
+
 const initSocket = (server) => {
   io = new Server(server, {
     cors: {
@@ -15,8 +18,17 @@ const initSocket = (server) => {
 
     socket.on("join-room", (roomId, userId) => {
       socket.join(roomId);
-      console.log(`User ${userId} joined room ${roomId}`);
-      
+      console.log(`User ${userId} (socket: ${socket.id}) joined room ${roomId}`);
+
+      // Track rooms this socket has joined
+      if (!socketRooms.has(socket.id)) {
+        socketRooms.set(socket.id, new Set());
+      }
+      socketRooms.get(socket.id).add(roomId);
+
+      // Store userId on the socket for later use
+      socket.userId = userId;
+
       // Notify others in the room
       socket.to(roomId).emit("user-joined", userId, socket.id);
     });
@@ -57,7 +69,15 @@ const initSocket = (server) => {
 
     socket.on("disconnect", () => {
       console.log("Client disconnected:", socket.id);
-      io.emit("user-disconnected", socket.id);
+
+      // Only emit user-disconnected to rooms this socket was in
+      const rooms = socketRooms.get(socket.id);
+      if (rooms) {
+        rooms.forEach((roomId) => {
+          socket.to(roomId).emit("user-disconnected", socket.id);
+        });
+        socketRooms.delete(socket.id);
+      }
     });
   });
 
